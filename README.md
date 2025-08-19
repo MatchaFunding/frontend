@@ -29,3 +29,18 @@ Para ejecutar el código:
 ```bash
 npm run dev
 ```
+Asegurarse de que el tailwind.config.js esté así:
+```bash
+content: [
+  "./index.html",
+  "./src/**/*.{js,ts,jsx,tsx}",
+],
+```
+Y el src/index.css: 
+```bash
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+Todas esas cosas las hice yo pero no sé si estén en sus carpetas al clonar

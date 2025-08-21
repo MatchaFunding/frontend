@@ -1,0 +1,98 @@
+
+ .funding-card {
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.08);
+  padding: 1.2rem 1.2rem 1.2rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 14.7rem;
+  height: 25rem;
+  transition: box-shadow 0.2s;
+  gap: 0.3rem;
+  font-family: 'Roboto', sans-serif;
+}
+
+.funding-card:hover {
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10);
+}
+
+.funding-card__percent-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 0.1rem;
+}
+.funding-card__percent {
+  color:  #38a169;
+  font-weight: 600;
+  font-size: 2.4rem;
+  line-height: 0.9;
+}
+.funding-card__compat {
+  color:  #38a169;
+  font-size: 0.7rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  margin-top: 0.7rem;
+}
+.funding-card__title {
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin-bottom: 0.4rem;
+  color: #383838;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+.funding-card__description {
+  color: #5F5F5F;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+  font-weight: 400;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+.funding-card__topic {
+  color: #38a169;
+  background: #ecf6f0;
+  font-size: 0.8rem;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0.8rem;
+  border-radius: 1rem;
+  display: inline-block;
+}
+.funding-card__amount {
+  font-weight: 700;
+  font-size: 1.4rem;
+  margin-bottom: 0.3rem;
+  color: #383838;
+}
+.funding-card__button {
+  background: #f9fafb;
+  color: #383838;
+  padding: 0.25rem 1rem;
+  border: none;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  align-self: flex-end;
+  margin-top: auto;
+}
+.funding-card__button:hover {
+  background: #6aa05a;
+}

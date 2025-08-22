@@ -2,7 +2,7 @@ import React from 'react';
 
 const NavBar: React.FC = () => {
   return (
-    <header className="bg-[#a6b96b] flex items-center px-8 py-3">
+    <header className="bg-[#989F2B] flex items-center px-8 py-3">
       <span className="text-[#8b9b5a] text-sm mr-6">mainpage</span>
       <span className="text-white font-bold text-xl mr-8">MatchaFunding</span>
       <div className="flex-1 flex items-center">

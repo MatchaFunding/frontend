@@ -1,0 +1,97 @@
+
+.free-search-card {
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 14.7rem;
+  height: 25rem;
+  transition: box-shadow 0.2s;
+  gap: 0.3rem;
+  font-family: 'Roboto', sans-serif;
+  overflow: hidden;
+}
+
+.free-search-card__content {
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  gap: 0.3rem;
+}
+.free-search-card__image {
+  width: 100%;
+  aspect-ratio: 3 / 1;
+  object-fit: cover;
+  border-radius: 0.5rem 0.5rem 0 0;
+  margin-bottom: 0.7rem;
+}
+
+.free-search-card:hover {
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10);
+}
+
+.free-search-card__title {
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin-bottom: 0.4rem;
+  color: #383838;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+.free-search-card__description {
+  color: #5F5F5F;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+  font-weight: 400;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+.free-search-card__topic {
+  color: #989f2b;
+  background: #F8F9F1;
+  font-size: 0.8rem;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0.8rem;
+  border-radius: 1rem;
+  display: inline-block;
+}
+.free-search-card__amount {
+  font-weight: 700;
+  font-size: 1.4rem;
+  margin-bottom: 0.3rem;
+  color: #383838;
+}
+.free-search-card__button {
+  background: #f9fafb;
+  color: #383838;
+  padding: 0.25rem 1rem;
+  border: none;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  align-self: flex-end;
+  margin-top: auto;
+}
+.free-search-card__button:hover {
+  background: #6aa05a;
+}

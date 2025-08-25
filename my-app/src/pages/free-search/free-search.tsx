@@ -7,6 +7,9 @@ import type { OrderOption } from '../../components/filters-component/filters-com
 
 import { useState, useMemo } from 'react';
 
+import VerTodosLosInstrumentos from '../../api/VerTodosLosInstrumentos.tsx';
+import Instrumento from '../../models/Instrumento.tsx';
+
 function parseAmount(amount: string): number {
 	// Elimina puntos y convierte a número
 	return Number(amount.replace(/\./g, ''));
@@ -38,6 +41,9 @@ function FreeSearch() {
 	const [order, setOrder] = useState<OrderOption>('none');
 	const [page, setPage] = useState(1);
 	const CARDS_PER_PAGE = 14;
+
+	let instrumentos = VerTodosLosInstrumentos();
+	console.log(instrumentos);
 
 	const cards = useMemo(() => {
 		let arr = [...initialCards];

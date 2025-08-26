@@ -22,18 +22,17 @@ function FreeSearch() {
 
 	// Obtener instrumentos del backend
 	const instrumentos = VerTodosLosInstrumentos();
-	console.log('Instrumentos del backend:', instrumentos);
 
 	// Usar datos del backend si están disponibles, sino usar datos iniciales
 	const availableCards = useMemo(() => {
 		if (instrumentos && instrumentos.length > 0) {
 			// Convertir instrumentos del backend al formato de cards
 			return instrumentos.map((instrumento: any) => ({
-				title: instrumento.nombre || 'Instrumento sin nombre',
-				description: instrumento.descripcion || 'Sin descripción disponible',
-				topic: instrumento.categoria || 'General',
+				title: instrumento.Titulo,
+				description: instrumento.Descripcion,
+				topic: 'General',
 				benefit: instrumento.monto ? `${instrumento.monto},${instrumento.moneda || 'CLP'}` : 'Beneficio por consultar',
-				image: '/anid.jpg' // imagen por defecto
+				image: instrumento.EnlaceDeLaFoto
 			}));
 		}
 		return initialCards;

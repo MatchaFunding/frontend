@@ -10,7 +10,8 @@ import {
   sortCards
 } from './free-search';
 
-;
+// Importar funcionalidad del backend
+import VerTodosLosInstrumentos from '../../api/VerTodosLosInstrumentos.tsx';
 
 function FreeSearch() {
 	const [order, setOrder] = useState<OrderOption>('none');
@@ -19,10 +20,29 @@ function FreeSearch() {
 	const [filters, setFilters] = useState<FiltersValues>(initialFilters);
 	const CARDS_PER_PAGE = cardsPerPage;
 
+	// Obtener instrumentos del backend
+	const instrumentos = VerTodosLosInstrumentos();
+	console.log('Instrumentos del backend:', instrumentos);
+
+	// Usar datos del backend si están disponibles, sino usar datos iniciales
+	const availableCards = useMemo(() => {
+		if (instrumentos && instrumentos.length > 0) {
+			// Convertir instrumentos del backend al formato de cards
+			return instrumentos.map((instrumento: any) => ({
+				title: instrumento.nombre || 'Instrumento sin nombre',
+				description: instrumento.descripcion || 'Sin descripción disponible',
+				topic: instrumento.categoria || 'General',
+				benefit: instrumento.monto ? `${instrumento.monto},${instrumento.moneda || 'CLP'}` : 'Beneficio por consultar',
+				image: '/anid.jpg' // imagen por defecto
+			}));
+		}
+		return initialCards;
+	}, [instrumentos]);
+
 	const cards = useMemo(() => {
-		let filteredCards = filterCardsByAmount(initialCards, filters);
+		let filteredCards = filterCardsByAmount(availableCards, filters);
 		return sortCards(filteredCards, order);
-	}, [order, filters]);
+	}, [order, filters, availableCards]);
 
 	const totalPages = Math.ceil(cards.length / CARDS_PER_PAGE);
 	const paginatedCards = cards.slice((page - 1) * CARDS_PER_PAGE, page * CARDS_PER_PAGE);

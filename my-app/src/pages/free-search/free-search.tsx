@@ -1,79 +1,60 @@
 
-import NavBar from '../../components/NavBar/navbar.tsx';
+import { useState, useMemo, useEffect } from 'react';
 import FreeSearchCard from '../../components/free-search-card/free-search-card.tsx';
-import type { FreeSearchCard as FreeSearchCardType } from '../../components/free-search-card/free-search-card.ts';
 import FiltersComponent from '../../components/filters-component/filters-component.tsx';
-import type { OrderOption } from '../../components/filters-component/filters-component.tsx';
+import type { FiltersValues, OrderOption, CardsPerPageOption } from '../../components/filters-component/filters-component.ts';
+import {
+  initialFilters,
+  initialCards,
+  filterCardsByAmount,
+  sortCards
+} from './free-search';
 
-import { useState, useMemo } from 'react';
-
-function parseAmount(amount: string): number {
-	// Elimina puntos y convierte a número
-	return Number(amount.replace(/\./g, ''));
-}
-
-const initialCards: FreeSearchCardType[] = [
-	{ title: 'Fondo de Innovación Educativa', description: 'Financiamiento para proyectos que desarrollen soluciones innovadoras en el sector educativo.', topic: 'Educación', amount: '150.000.000', currency: 'CLP', image: '/prueba.png' },
-	{ title: 'Fondo de Innovación Educativa', description: 'Financiamiento para proyectos que desarrollen soluciones innovadoras en el sector educativo.', topic: 'Educación', amount: '150.000.000', currency: 'CLP', image: '/anid.jpg' },
-	{ title: 'Fondo de Innovación Educativa', description: 'Financiamiento para proyectos que desarrollen soluciones innovadoras en el sector educativo.', topic: 'Educación', amount: '150.000.000', currency: 'CLP', image: '/prueba.png' },
-	{ title: 'Fondo de Innovación Educativa', description: 'Financiamiento para proyectos que desarrollen soluciones innovadoras en el sector educativo.', topic: 'Educación', amount: '150.000.000', currency: 'CLP', image: '/anid.jpg' },
-	{ title: 'Fondo de Innovación Educativaaaaaaaaaaaaaaaaaaaaaa', description: 'Financiamiento para proyectos que desarrollen soluciones innovadoras en el sector educativoaaaaaaaaaaaaaaaaaaaaaaaa.', topic: 'Educación', amount: '150.000.000', currency: 'CLP', image: '/prueba.png' },
-	{ title: 'Fondo Verde Sustentable', description: 'Apoyo financiero para proyectos de energías renovables y sostenibilidad ambiental.', topic: 'Medio Ambiente', amount: '200.000.000', currency: 'CLP', image: '/anid.jpg' },
-	{ title: 'Fondo Mujer Emprende', description: 'Financiamiento para emprendimientos liderados por mujeres en cualquier rubro.', topic: 'Emprendimiento', amount: '100.000.000', currency: 'CLP', image: '/prueba.png' },
-	{ title: 'Fondo Salud Digital', description: 'Recursos para proyectos de innovación tecnológica en el área de la salud.', topic: 'Salud', amount: '180.000.000', currency: 'CLP', image: '/anid.jpg' },
-	{ title: 'Fondo Cultura Viva', description: 'Apoyo a iniciativas culturales y artísticas a nivel nacional.', topic: 'Cultura', amount: '120.000.000', currency: 'CLP', image: '/prueba.png' },
-	{ title: 'Fondo Ciencia Joven', description: 'Financiamiento para jóvenes investigadores y proyectos científicos emergentes.', topic: 'Ciencia', amount: '90.000.000', currency: 'CLP', image: '/anid.jpg' },
-	// 40 cards inventadas
-	...Array.from({ length: 40 }, (_, i) => ({
-		title: `Fondo Extra ${i + 1}`,
-		description: `Descripción inventada para el fondo número ${i + 1}.`,
-		topic: ['Educación', 'Salud', 'Cultura', 'Ciencia', 'Medio Ambiente', 'Emprendimiento'][i % 6],
-		amount: `${Math.floor(Math.random() * 200 + 50)}.000.000`,
-		currency: 'CLP',
-		image: i % 2 === 0 ? '/prueba.png' : '/anid.jpg',
-	})),
-];
+;
 
 function FreeSearch() {
 	const [order, setOrder] = useState<OrderOption>('none');
 	const [page, setPage] = useState(1);
-	const CARDS_PER_PAGE = 14;
+	const [cardsPerPage, setCardsPerPage] = useState<CardsPerPageOption>(8);
+	const [filters, setFilters] = useState<FiltersValues>(initialFilters);
+	const CARDS_PER_PAGE = cardsPerPage;
 
 	const cards = useMemo(() => {
-		let arr = [...initialCards];
-		if (order === 'title-asc') {
-			arr.sort((a, b) => a.title.localeCompare(b.title));
-		} else if (order === 'amount-desc') {
-			arr.sort((a, b) => parseAmount(b.amount) - parseAmount(a.amount));
-		} else if (order === 'amount-asc') {
-			arr.sort((a, b) => parseAmount(a.amount) - parseAmount(b.amount));
-		}
-		return arr;
-	}, [order]);
+		let filteredCards = filterCardsByAmount(initialCards, filters);
+		return sortCards(filteredCards, order);
+	}, [order, filters]);
 
 	const totalPages = Math.ceil(cards.length / CARDS_PER_PAGE);
 	const paginatedCards = cards.slice((page - 1) * CARDS_PER_PAGE, page * CARDS_PER_PAGE);
+	useEffect(() => {
+		setPage(1);
+	}, [cardsPerPage]);
 	return (
 		<div className="min-h-screen bg-[#f1ebe1] flex flex-col">
 			{/* Header */}
-			<NavBar />
 
-			{/* Searchbar */}
-			<div className="flex justify-center mt-8">
-				<div className="w-full max-w-xl flex items-center bg-white rounded-full shadow px-4 py-2">
-					<svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" /></svg>
+			{/* Searchbar y Filtros */}
+			<div className="flex justify-center items-center mt-8 gap-4 px-4">
+				{/* Barra de búsqueda */}
+				<div className="flex-1 max-w-xl flex items-center bg-white shadow px-4 py-2" style={{ borderRadius: '8px' }}>
+					<img src="/svgs/search.svg" alt="Search icon" className="w-5 h-5 text-gray-400 mr-2" style={{ filter: 'brightness(0) saturate(100%) invert(71%) sepia(6%) saturate(329%) hue-rotate(202deg) brightness(94%) contrast(87%)' }} />
 					<input
 						type="text"
 						placeholder="Busca tu fondo manualmente"
 						className="bg-transparent outline-none flex-1 text-gray-700 placeholder-[#bdbdbd] text-base"
 					/>
 				</div>
-			</div>
-
-			{/* Filtros */}
-			<div className="flex mt-2">
-				<div className="w-full max-w-xl">
-					<FiltersComponent order={order} setOrder={setOrder} />
+				
+				{/* Componente de filtros */}
+				<div className="flex-shrink-0">
+					<FiltersComponent
+						order={order}
+						setOrder={setOrder}
+						cardsPerPage={cardsPerPage}
+						setCardsPerPage={setCardsPerPage}
+						filters={filters}
+						onApplyFilters={setFilters}
+					/>
 				</div>
 			</div>
 
@@ -148,3 +129,4 @@ function FreeSearch() {
 }
 
 export default FreeSearch;
+export { FreeSearch };

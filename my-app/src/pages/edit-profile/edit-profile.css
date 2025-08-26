@@ -1,0 +1,54 @@
+.edit-profile-container {
+  min-height: 100vh;
+  background-color: #f1ebe1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.edit-profile-main {
+  max-width: 80rem;
+  width: 100%;
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 2rem;
+}
+
+.edit-profile-content {
+  display: flex;
+  gap: 2rem;
+}
+
+.edit-profile-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.btn-back {
+  color: #b2b2b2;
+  border-radius: 9999px;
+  padding: 0.5rem 2rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-save {
+  background-color: #44624a;
+  color: white;
+  border-radius: 8px;
+  padding: 0.5rem 2rem;
+  font-weight: 600;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-save:hover {
+  background-color: #69816E;
+}

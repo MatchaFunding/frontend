@@ -1,5 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Estructura de los datos que se muestran en la card
+
+/*
+Propongo expandir esta carta para incluir mas informacion respecto a los fondos
+*/
 export interface FreeSearchCard {
   title: string;
   description: string;

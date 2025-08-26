@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 export async function BorrarBeneficiarioAsync(id: number): Promise<Beneficiario[]> {
   try {
     const response = await fetch(`http://127.0.0.1:8000/borrarbeneficiario/${id}`, {
-      method: 'POST',
+      method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },

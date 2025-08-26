@@ -31,7 +31,7 @@ function FreeSearch() {
 				title: instrumento.Titulo,
 				description: instrumento.Descripcion,
 				topic: 'General',
-				benefit: instrumento.monto ? `${instrumento.monto},${instrumento.moneda || 'CLP'}` : 'Beneficio por consultar',
+				benefit: instrumento.MontoMaximo ? `${instrumento.MontoMaximo} CLP` : 'Beneficio por consultar',
 				image: instrumento.EnlaceDeLaFoto
 			}));
 		}

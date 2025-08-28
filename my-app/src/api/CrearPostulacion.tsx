@@ -1,9 +1,9 @@
 import Postulacion from '../models/Postulacion.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CrearPostulacionAsync(data: Postulacion): Promise<Postulacion[]> {
+export async function CrearPostulacionAsync(data: Postulacion): Promise<Postulacion> {
   try {
-    const response = await fetch('https://spring-park-flashing-ensures.trycloudflare.com/crearpostulacion/', {
+    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/crearpostulacion/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -24,22 +24,21 @@ export async function CrearPostulacionAsync(data: Postulacion): Promise<Postulac
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const result: Postulacion[] = await response.json();
+    const result: Postulacion = await response.json();
     return result;
   }
   catch (error) {
-    console.error('Error en CrearPostulacion:', error);
-    return [];
+    throw new Error('Error al obtener los datos');
   }
 }
 export function CrearPostulacion(data: Postulacion) {
-  const [Postulacion, setPostulacion] = useState<Postulacion[]>([]);
+  const [Postulacion, setPostulacion] = useState<Postulacion>();
 
   useEffect(() => {
       CrearPostulacionAsync(data).then((out) => {
       setPostulacion(out);
       });
-  }, []);
+  }, );
   return Postulacion;
 }
 export default CrearPostulacion;

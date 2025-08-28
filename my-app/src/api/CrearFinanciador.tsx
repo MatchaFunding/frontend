@@ -1,9 +1,9 @@
 import Financiador from '../models/Financiador.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CrearFinanciadorAsync(data: Financiador): Promise<Financiador[]> {
+export async function CrearFinanciadorAsync(data: Financiador): Promise<Financiador> {
   try {
-    const response = await fetch('https://spring-park-flashing-ensures.trycloudflare.com/crearfinanciador/', {
+    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/crearfinanciador/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -25,22 +25,21 @@ export async function CrearFinanciadorAsync(data: Financiador): Promise<Financia
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const result: Financiador[] = await response.json();
+    const result: Financiador = await response.json();
     return result;
   }
   catch (error) {
-    console.error('Error en CrearFinanciador:', error);
-    return [];
+    throw new Error('Error al obtener los datos');
   }
 }
 export function CrearFinanciador(data: Financiador) {
-  const [Financiador, setFinanciador] = useState<Financiador[]>([]);
+  const [Financiador, setFinanciador] = useState<Financiador>();
 
   useEffect(() => {
       CrearFinanciadorAsync(data).then((out) => {
       setFinanciador(out);
       });
-  }, []);
+  }, );
   return Financiador;
 }
 export default CrearFinanciador;

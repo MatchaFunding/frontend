@@ -1,9 +1,9 @@
 import Beneficiario from '../models/Beneficiario.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CrearBeneficiarioAsync(data: Beneficiario): Promise<Beneficiario[]> {
+export async function CrearBeneficiarioAsync(data: Beneficiario): Promise<Beneficiario> {
   try {
-    const response = await fetch('https://spring-park-flashing-ensures.trycloudflare.com/crearbeneficiario/', {
+    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/crearbeneficiario/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -25,22 +25,21 @@ export async function CrearBeneficiarioAsync(data: Beneficiario): Promise<Benefi
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const result: Beneficiario[] = await response.json();
+    const result: Beneficiario = await response.json();
     return result;
   }
   catch (error) {
-    console.error('Error en CrearBeneficiario:', error);
-    return [];
+    throw new Error('Error al obtener los datos');
   }
 }
 export function CrearBeneficiario(data: Beneficiario) {
-  const [Beneficiario, setBeneficiario] = useState<Beneficiario[]>([]);
+  const [Beneficiario, setBeneficiario] = useState<Beneficiario>();
 
   useEffect(() => {
       CrearBeneficiarioAsync(data).then((out) => {
       setBeneficiario(out);
       });
-  }, []);
+  }, );
   return Beneficiario;
 }
 export default CrearBeneficiario;

@@ -14,11 +14,11 @@ import {
   getPrevStep,
   getSelectedOption
 } from './sign-up';
-import { CrearPersonaAsync } from '../../api/CrearPersona';
-import { CrearUsuarioAsync } from '../../api/CrearUsuario';
-import { CambiarPersonaAsync } from '../../api/CambiarPersona';
-import { CrearBeneficiarioAsync } from '../../api/CrearBeneficiario';
-import { CrearMiembroAsync } from '../../api/CrearMiembro';
+import { CrearPersona } from '../../api/CrearPersona';
+import { CrearUsuario } from '../../api/CrearUsuario';
+import { CambiarPersona } from '../../api/CambiarPersona';
+import { CrearBeneficiario } from '../../api/CrearBeneficiario';
+import { CrearMiembro } from '../../api/CrearMiembro';
 import Persona from '../../models/Persona';
 import Usuario from '../../models/Usuario';
 import Beneficiario from '../../models/Beneficiario';
@@ -166,11 +166,12 @@ const SignUp: React.FC = () => {
 
       // Paso 1: Crear Persona con atributos básicos (nombre genérico temporal)
       console.log('Creando persona...');
-      const nuevaPersona = new Persona({
+      const nuevaPersona: Persona = new Persona({
         ID: 0, // El backend asignará el ID
         Nombre: 'Usuario Temporal', // Nombre genérico que se actualizará en el paso 1
         Sexo: 'NA', // Valor por defecto válido que se puede cambiar después
-        RUT: '00000000-0' // RUT temporal válido que se llenará en el formulario paso a paso
+        RUT: '00000000-0', // RUT temporal válido que se llenará en el formulario paso a paso
+        FechaDeNacimiento: '2000-01-01'
       });
 
       console.log('Datos de persona a enviar:', {
@@ -180,23 +181,26 @@ const SignUp: React.FC = () => {
         RUT: nuevaPersona.RUT
       });
 
-      const personaResponse = await CrearPersonaAsync(nuevaPersona);
+      const personaResponse = await CrearPersona(nuevaPersona);
       
       console.log('Respuesta completa de persona:', personaResponse);
       
       // El backend puede devolver un objeto directo o un array
-      let personaCreada;
-      if (Array.isArray(personaResponse) && personaResponse.length > 0) {
+      let personaCreada: Persona;
+
+      if (Array.isArray(personaResponse)) {
         personaCreada = personaResponse[0];
-      } else if (personaResponse && typeof personaResponse === 'object' && 'ID' in personaResponse) {
+      } 
+      else if (personaResponse && typeof personaResponse === 'object' && 'ID' in personaResponse) {
         personaCreada = personaResponse;
-      } else {
+      } 
+      else {
         throw new Error('Error: Respuesta inválida del servidor al crear la persona');
       }
       
-      const personaId = personaCreada.ID;
+      let personaId: number = personaCreada.ID;
       
-      if (!personaId) {
+      if (!personaId || personaId === null) {
         throw new Error('Error: El servidor no devolvió un ID válido para la persona');
       }
       
@@ -213,9 +217,9 @@ const SignUp: React.FC = () => {
         Correo: email
       });
 
-      const usuarioResponse = await CrearUsuarioAsync(nuevoUsuario);
+      const usuarioResponse = await CrearUsuario(nuevoUsuario);
       
-      if (!usuarioResponse || usuarioResponse.length === 0) {
+      if (!usuarioResponse) {
         throw new Error('Error al crear el usuario');
       }
 
@@ -270,7 +274,7 @@ const SignUp: React.FC = () => {
         console.log('Datos a actualizar:', personaActualizada);
         console.log('Sexo mapeado:', formData.gender, '->', mapearSexoParaBackend(formData.gender || ''));
 
-        const response = await CambiarPersonaAsync(createdPersonaId, personaActualizada);
+        const response = await CambiarPersona(createdPersonaId, personaActualizada);
         
         console.log('Respuesta de actualización:', response);
         
@@ -351,7 +355,7 @@ const SignUp: React.FC = () => {
           RUTdeRepresentante: nuevoBeneficiario.RUTdeRepresentante
         });
 
-        const beneficiarioResponse = await CrearBeneficiarioAsync(nuevoBeneficiario);
+        const beneficiarioResponse = await CrearBeneficiario(nuevoBeneficiario);
         
         console.log('Respuesta completa del beneficiario:', beneficiarioResponse);
         
@@ -384,9 +388,9 @@ const SignUp: React.FC = () => {
         console.log('Creando miembro...');
         console.log('Datos del miembro:', nuevoMiembro);
 
-        const miembroResponse = await CrearMiembroAsync(nuevoMiembro);
+        const miembroResponse = await CrearMiembro(nuevoMiembro);
         
-        if (!miembroResponse || miembroResponse.length === 0) {
+        if (!miembroResponse) {
           throw new Error('Error al crear el miembro');
         }
 

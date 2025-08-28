@@ -1,9 +1,9 @@
 import Colaborador from '../models/Colaborador.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CrearColaboradorAsync(data: Colaborador): Promise<Colaborador[]> {
+export async function CrearColaboradorAsync(data: Colaborador): Promise<Colaborador> {
   try {
-    const response = await fetch('https://spring-park-flashing-ensures.trycloudflare.com/crearcolaborador/', {
+    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/crearcolaborador/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -18,22 +18,21 @@ export async function CrearColaboradorAsync(data: Colaborador): Promise<Colabora
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const result: Colaborador[] = await response.json();
+    const result: Colaborador = await response.json();
     return result;
   }
   catch (error) {
-    console.error('Error en CrearColaborador:', error);
-    return [];
+    throw new Error('Error al obtener los datos');
   }
 }
 export function CrearColaborador(data: Colaborador) {
-  const [Colaborador, setColaborador] = useState<Colaborador[]>([]);
+  const [Colaborador, setColaborador] = useState<Colaborador>();
 
   useEffect(() => {
       CrearColaboradorAsync(data).then((out) => {
       setColaborador(out);
       });
-  }, []);
+  }, );
   return Colaborador;
 }
 export default CrearColaborador;

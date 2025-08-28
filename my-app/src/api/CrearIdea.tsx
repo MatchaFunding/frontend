@@ -1,9 +1,9 @@
 import Idea from '../models/Idea.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CrearIdeaAsync(data: Idea): Promise<Idea[]> {
+export async function CrearIdeaAsync(data: Idea): Promise<Idea> {
   try {
-    const response = await fetch('https://spring-park-flashing-ensures.trycloudflare.com/crearidea/', {
+    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/crearidea/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -21,22 +21,21 @@ export async function CrearIdeaAsync(data: Idea): Promise<Idea[]> {
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const result: Idea[] = await response.json();
+    const result: Idea = await response.json();
     return result;
   }
   catch (error) {
-    console.error('Error en CrearIdea:', error);
-    return [];
+    throw new Error('Error al obtener los datos');
   }
 }
 export function CrearIdea(data: Idea) {
-  const [Idea, setIdea] = useState<Idea[]>([]);
+  const [Idea, setIdea] = useState<Idea>();
 
   useEffect(() => {
       CrearIdeaAsync(data).then((out) => {
       setIdea(out);
       });
-  }, []);
+  }, );
   return Idea;
 }
 export default CrearIdea;

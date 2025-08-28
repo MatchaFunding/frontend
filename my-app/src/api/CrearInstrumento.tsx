@@ -1,9 +1,9 @@
 import Instrumento from '../models/Instrumento.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CrearInstrumentoAsync(data: Instrumento): Promise<Instrumento[]> {
+export async function CrearInstrumentoAsync(data: Instrumento): Promise<Instrumento> {
   try {
-    const response = await fetch('https://spring-park-flashing-ensures.trycloudflare.com/crearinstrumento/', {
+    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/crearinstrumento/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -32,22 +32,21 @@ export async function CrearInstrumentoAsync(data: Instrumento): Promise<Instrume
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const result: Instrumento[] = await response.json();
+    const result: Instrumento = await response.json();
     return result;
   }
   catch (error) {
-    console.error('Error en CrearInstrumento:', error);
-    return [];
+    throw new Error('Error al obtener los datos');
   }
 }
 export function CrearInstrumento(data: Instrumento) {
-  const [Instrumento, setInstrumento] = useState<Instrumento[]>([]);
+  const [Instrumento, setInstrumento] = useState<Instrumento>();
 
   useEffect(() => {
       CrearInstrumentoAsync(data).then((out) => {
       setInstrumento(out);
       });
-  }, []);
+  }, );
   return Instrumento;
 }
 export default CrearInstrumento;

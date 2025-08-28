@@ -50,7 +50,7 @@ const MatchaHomePage: React.FC = () => {
 </div>
 
 
-      <div className="bg-white p-6 rounded-2xl shadow-lg flex items-center gap-6 h-[39%] my-auto">
+      <div className="bg-white p-6 rounded-2xl shadow-lg flex items-center gap-6 h-[39%] my-auto cursor-pointer" onClick={() => navigate("/free-search")}>
          
         <div className="flex-1 p-4">
           <span className="text-gray-500 text-lg">Busca</span>

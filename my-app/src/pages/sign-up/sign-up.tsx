@@ -14,11 +14,24 @@ import {
   getPrevStep,
   getSelectedOption
 } from './sign-up';
+import { CrearPersonaAsync } from '../../api/CrearPersona';
+import { CrearUsuarioAsync } from '../../api/CrearUsuario';
+import { CambiarPersonaAsync } from '../../api/CambiarPersona';
+import { CrearBeneficiarioAsync } from '../../api/CrearBeneficiario';
+import { CrearMiembroAsync } from '../../api/CrearMiembro';
+import Persona from '../../models/Persona';
+import Usuario from '../../models/Usuario';
+import Beneficiario from '../../models/Beneficiario';
+import Miembro from '../../models/Miembro';
 
 const SignUp: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showStepForm, setShowStepForm] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUpdatingPersona, setIsUpdatingPersona] = useState(false);
+  const [isUpdatingBeneficiario, setIsUpdatingBeneficiario] = useState(false);
+  const [createdPersonaId, setCreatedPersonaId] = useState<number | null>(null);
 
   // Estados para los valores de los formularios
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -134,21 +147,310 @@ const SignUp: React.FC = () => {
     );
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowStepForm(true);
+    setIsLoading(true);
+
+    try {
+      // Obtener datos del formulario
+      const formDataElement = new FormData(e.target as HTMLFormElement);
+      const email = formDataElement.get('email') as string;
+      const password = formDataElement.get('password') as string;
+
+      // Validar que los campos no estén vacíos
+      if (!email || !password) {
+        alert('Por favor, completa todos los campos');
+        setIsLoading(false);
+        return;
+      }
+
+      // Paso 1: Crear Persona con atributos básicos (nombre genérico temporal)
+      console.log('Creando persona...');
+      const nuevaPersona = new Persona({
+        ID: 0, // El backend asignará el ID
+        Nombre: 'Usuario Temporal', // Nombre genérico que se actualizará en el paso 1
+        Sexo: 'NA', // Valor por defecto válido que se puede cambiar después
+        RUT: '00000000-0' // RUT temporal válido que se llenará en el formulario paso a paso
+      });
+
+      console.log('Datos de persona a enviar:', {
+        ID: nuevaPersona.ID,
+        Nombre: nuevaPersona.Nombre,
+        Sexo: nuevaPersona.Sexo,
+        RUT: nuevaPersona.RUT
+      });
+
+      const personaResponse = await CrearPersonaAsync(nuevaPersona);
+      
+      console.log('Respuesta completa de persona:', personaResponse);
+      
+      // El backend puede devolver un objeto directo o un array
+      let personaCreada;
+      if (Array.isArray(personaResponse) && personaResponse.length > 0) {
+        personaCreada = personaResponse[0];
+      } else if (personaResponse && typeof personaResponse === 'object' && 'ID' in personaResponse) {
+        personaCreada = personaResponse;
+      } else {
+        throw new Error('Error: Respuesta inválida del servidor al crear la persona');
+      }
+      
+      const personaId = personaCreada.ID;
+      
+      if (!personaId) {
+        throw new Error('Error: El servidor no devolvió un ID válido para la persona');
+      }
+      
+      console.log('Persona creada con ID:', personaId);
+      setCreatedPersonaId(personaId); // Guardar el ID para usarlo en el paso 1
+
+      // Paso 2: Crear Usuario vinculado a la Persona
+      console.log('Creando usuario...');
+      const nuevoUsuario = new Usuario({
+        ID: 0, // El backend asignará el ID
+        Persona: personaId,
+        NombreDeUsuario: email, // Usar email como nombre de usuario
+        Contrasena: password,
+        Correo: email
+      });
+
+      const usuarioResponse = await CrearUsuarioAsync(nuevoUsuario);
+      
+      if (!usuarioResponse || usuarioResponse.length === 0) {
+        throw new Error('Error al crear el usuario');
+      }
+
+      console.log('Usuario creado exitosamente');
+      
+      // Solo después de crear ambas entidades, continuar al formulario paso a paso
+      setShowStepForm(true);
+      
+    } catch (error) {
+      console.error('Error en el proceso de registro:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Un error inesperado ha ocurrido';
+      alert(`Error al crear la cuenta: ${errorMessage}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleNextStep = () => {
-    setCurrentStep(getNextStep(currentStep));
+  // Función para mapear valores del formulario a códigos del backend
+  const mapearSexoParaBackend = (sexoFormulario: string): string => {
+    const mapeo: { [key: string]: string } = {
+      'masculino': 'VAR',
+      'femenino': 'MUJ', 
+      'prefiero-no-decir': 'NA',
+      'otro': 'NA',
+      'hombre': 'VAR',
+      'mujer': 'MUJ',
+      'male': 'VAR',
+      'female': 'MUJ',
+      'other': 'NA',
+      '': 'NA' // Valor por defecto si está vacío
+    };
+    
+    const sexoLowerCase = sexoFormulario.toLowerCase();
+    return mapeo[sexoLowerCase] || 'NA'; // Si no encuentra coincidencia, usar 'NA' por defecto
+  };
+
+  const handleNextStep = async () => {
+    // Si estamos en el paso 1, actualizar la persona antes de avanzar
+    if (currentStep === 1 && createdPersonaId) {
+      setIsUpdatingPersona(true);
+      
+      try {
+        // Crear objeto Persona con los datos actualizados del formulario
+        const personaActualizada = new Persona({
+          ID: createdPersonaId,
+          Nombre: formData.fullName || '',
+          Sexo: mapearSexoParaBackend(formData.gender || ''),
+          RUT: formData.rut || '00000000-0'
+        });
+
+        console.log('Actualizando persona con ID:', createdPersonaId);
+        console.log('Datos a actualizar:', personaActualizada);
+        console.log('Sexo mapeado:', formData.gender, '->', mapearSexoParaBackend(formData.gender || ''));
+
+        const response = await CambiarPersonaAsync(createdPersonaId, personaActualizada);
+        
+        console.log('Respuesta de actualización:', response);
+        
+        // Verificar que la respuesta sea válida
+        if (!response) {
+          throw new Error('Error al actualizar la persona');
+        }
+
+        console.log('Persona actualizada exitosamente');
+        
+        // Solo después de actualizar exitosamente, avanzar al siguiente paso
+        setCurrentStep(getNextStep(currentStep));
+        
+      } catch (error) {
+        console.error('Error al actualizar persona:', error);
+        alert('Error al actualizar los datos. Por favor, inténtalo de nuevo.');
+      } finally {
+        setIsUpdatingPersona(false);
+      }
+    } else if (currentStep === 2 && createdPersonaId) {
+      // Si estamos en el paso 2, crear beneficiario y miembro
+      setIsUpdatingBeneficiario(true);
+      
+      try {
+        // Validación básica de campos requeridos
+        if (!formData.companyName?.trim()) {
+          throw new Error('El nombre de la empresa es requerido');
+        }
+        if (!formData.companyCreationRegion?.trim()) {
+          throw new Error('La región de creación es requerida');
+        }
+        if (!formData.companyRut?.trim()) {
+          throw new Error('El RUT de la empresa es requerido');
+        }
+        if (!formData.legalRepresentativeRut?.trim()) {
+          throw new Error('El RUT del representante legal es requerido');
+        }
+
+        // Validación básica de formato de RUT (debe tener al menos 8 caracteres)
+        if (formData.companyRut.length < 8) {
+          throw new Error('El RUT de la empresa debe tener un formato válido (ej: 12345678-9)');
+        }
+        if (formData.legalRepresentativeRut.length < 8) {
+          throw new Error('El RUT del representante debe tener un formato válido (ej: 12345678-9)');
+        }
+
+        console.log('Valores del formulario antes de crear beneficiario:');
+        console.log('Company Name:', formData.companyName);
+        console.log('Region:', formData.companyCreationRegion);
+        console.log('Company RUT:', formData.companyRut);
+        console.log('Rep RUT:', formData.legalRepresentativeRut);
+
+        // Crear Beneficiario con los datos del formulario y valores predeterminados
+        const nuevoBeneficiario = new Beneficiario({
+          ID: 0, // El backend asignará el ID
+          Nombre: formData.companyName?.trim() || 'Empresa Temporal',
+          FechaDeCreacion: new Date().toISOString().split('T')[0], // Fecha actual en formato YYYY-MM-DD
+          RegionDeCreacion: formData.companyCreationRegion?.trim() || 'RM', // Metropolitana
+          Direccion: 'Av. Ejemplo 123, Comuna, Ciudad', // Dirección más realista
+          TipoDePersona: 'JU', // Juridica (código del modelo Django)
+          TipoDeEmpresa: 'SPA', // Sociedad por Acciones (código del modelo Django)
+          Perfil: 'EMP', // Empresa (código del modelo Django)
+          RUTdeEmpresa: formData.companyRut?.trim() || '12345678-9',
+          RUTdeRepresentante: formData.legalRepresentativeRut?.trim() || '87654321-0'
+        });
+
+        console.log('Creando beneficiario...');
+        console.log('Datos del beneficiario a enviar:', {
+          ID: nuevoBeneficiario.ID,
+          Nombre: nuevoBeneficiario.Nombre,
+          FechaDeCreacion: nuevoBeneficiario.FechaDeCreacion,
+          RegionDeCreacion: nuevoBeneficiario.RegionDeCreacion,
+          Direccion: nuevoBeneficiario.Direccion,
+          TipoDePersona: nuevoBeneficiario.TipoDePersona,
+          TipoDeEmpresa: nuevoBeneficiario.TipoDeEmpresa,
+          Perfil: nuevoBeneficiario.Perfil,
+          RUTdeEmpresa: nuevoBeneficiario.RUTdeEmpresa,
+          RUTdeRepresentante: nuevoBeneficiario.RUTdeRepresentante
+        });
+
+        const beneficiarioResponse = await CrearBeneficiarioAsync(nuevoBeneficiario);
+        
+        console.log('Respuesta completa del beneficiario:', beneficiarioResponse);
+        
+        // El backend puede devolver un objeto directo o un array
+        let beneficiarioCreado;
+        if (Array.isArray(beneficiarioResponse) && beneficiarioResponse.length > 0) {
+          beneficiarioCreado = beneficiarioResponse[0];
+        } else if (beneficiarioResponse && typeof beneficiarioResponse === 'object' && 'ID' in beneficiarioResponse) {
+          beneficiarioCreado = beneficiarioResponse;
+        } else {
+          console.error('Respuesta del servidor para beneficiario:', beneficiarioResponse);
+          throw new Error('Error: Respuesta inválida del servidor al crear el beneficiario. Revisa los datos enviados.');
+        }
+        
+        const beneficiarioId = beneficiarioCreado.ID as number;
+        
+        if (!beneficiarioId) {
+          throw new Error('Error: El servidor no devolvió un ID válido para el beneficiario');
+        }
+        
+        console.log('Beneficiario creado con ID:', beneficiarioId);
+
+        // Crear Miembro vinculando la Persona con el Beneficiario
+        const nuevoMiembro = new Miembro({
+          ID: 0, // El backend asignará el ID
+          Persona: createdPersonaId,
+          Beneficiario: beneficiarioId
+        });
+
+        console.log('Creando miembro...');
+        console.log('Datos del miembro:', nuevoMiembro);
+
+        const miembroResponse = await CrearMiembroAsync(nuevoMiembro);
+        
+        if (!miembroResponse || miembroResponse.length === 0) {
+          throw new Error('Error al crear el miembro');
+        }
+
+        console.log('Miembro creado exitosamente');
+        
+        // Solo después de crear exitosamente, avanzar al siguiente paso
+        setCurrentStep(getNextStep(currentStep));
+        
+      } catch (error) {
+        console.error('Error al crear beneficiario o miembro:', error);
+        
+        // Extraer el mensaje de error más específico
+        let errorMessage = 'Un error inesperado ha ocurrido';
+        if (error instanceof Error) {
+          errorMessage = error.message;
+          // Si el error viene del servidor, mostrar más detalles
+          if (errorMessage.includes('Error 400')) {
+            errorMessage = 'Los datos enviados no son válidos. Por favor, revisa que todos los campos estén completos y en el formato correcto.';
+          } else if (errorMessage.includes('Error 500')) {
+            errorMessage = 'Error interno del servidor. Por favor, inténtalo de nuevo más tarde.';
+          }
+        }
+        
+        alert(`Error al crear la organización: ${errorMessage}`);
+      } finally {
+        setIsUpdatingBeneficiario(false);
+      }
+    } else {
+      // Para otros pasos, simplemente avanzar
+      setCurrentStep(getNextStep(currentStep));
+    }
   };
 
   const handlePrevStep = () => {
     setCurrentStep(getPrevStep(currentStep));
   };
+
+  const clearStep2Data = () => {
+    console.log('Limpiando datos del paso 2...');
+    setFormData(prev => ({
+      ...prev,
+      companyName: '',
+      companyCreationRegion: '',
+      companyRut: '',
+      legalRepresentativeRut: ''
+    }));
+    // También cerrar todos los dropdowns
+    setOpenDropdowns({});
+    console.log('Datos del paso 2 limpiados');
+  };
   return (
     <div className="signup-container">
-      {!showStepForm ? (
+      {isLoading ? (
+        // Vista de carga
+        <div className="loading-container">
+          <div className="loading-content">
+            <div className="loading-spinner"></div>
+            <h2 className="loading-title">Creando tu cuenta</h2>
+            <p className="loading-subtitle">
+              Estamos configurando tu perfil, esto tomará unos momentos...
+            </p>
+          </div>
+        </div>
+      ) : !showStepForm ? (
         // Formulario inicial
         <div className="initial-form-container">
           {/* Left Panel: Form */}
@@ -159,20 +461,6 @@ const SignUp: React.FC = () => {
             </p>
 
             <form className="signup-form" onSubmit={handleFormSubmit}>
-              <div className="form-group">
-                <label htmlFor="name" className="form-label">
-                  Nombre
-                </label>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  defaultValue=""
-                  className="form-input"
-                  placeholder="Introducir nombre"
-                />
-              </div>
-
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
                   Dirección de correo electrónico
@@ -246,8 +534,9 @@ const SignUp: React.FC = () => {
                 <button
                   type="submit"
                   className="submit-btn"
+                  disabled={isLoading}
                 >
-                  <span>Registrarse</span>
+                  <span>{isLoading ? 'Creando cuenta...' : 'Registrarse'}</span>
                   <img src="/svgs/guy-in.svg" alt="" width="15" height="15" className="submit-btn-icon" />
                 </button>
               </div>
@@ -392,7 +681,7 @@ const SignUp: React.FC = () => {
                 <div>
                   <h1 className="step-title">Háblanos de tu organización</h1>
                   <p className="subtitle">
-                    Cuanta más información tengamos, mejor podremos encontrar fondos para ti
+                    Información básica sobre tu empresa u organización
                   </p>
                   
                   <form className="signup-form" onSubmit={(e) => e.preventDefault()}>
@@ -407,22 +696,16 @@ const SignUp: React.FC = () => {
                         value={formData.companyName}
                         onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
                         className="form-input"
+                        placeholder="Ingresa el nombre de tu organización"
                       />
                     </div>
                     
-                    <div className="form-group">
-                      <label htmlFor="legalRepresentative" className="form-label">
-                        Nombre del representante legal
-                      </label>
-                      <input
-                        id="legalRepresentative"
-                        name="legalRepresentative"
-                        type="text"
-                        value={formData.legalRepresentative}
-                        onChange={(e) => setFormData(prev => ({ ...prev, legalRepresentative: e.target.value }))}
-                        className="form-input"
-                      />
-                    </div>
+                    <CustomDropdown
+                      field="companyCreationRegion"
+                      label="Región de creación"
+                      options={dropdownOptions.regions}
+                      value={formData.companyCreationRegion}
+                    />
                     
                     <div className="form-group">
                       <label htmlFor="companyRut" className="form-label">
@@ -434,24 +717,37 @@ const SignUp: React.FC = () => {
                         type="text"
                         value={formData.companyRut}
                         onChange={(e) => setFormData(prev => ({ ...prev, companyRut: e.target.value }))}
-                        placeholder="12.345.678-9"
+                        placeholder="Ej: 76.123.456-7"
                         className="form-input"
                       />
                     </div>
                     
-                    <CustomDropdown
-                      field="mainSector"
-                      label="Rubro principal"
-                      options={dropdownOptions.mainSector}
-                      value={formData.mainSector}
-                    />
+                    <div className="form-group">
+                      <label htmlFor="legalRepresentativeRut" className="form-label">
+                        RUT del representante legal
+                      </label>
+                      <input
+                        id="legalRepresentativeRut"
+                        name="legalRepresentativeRut"
+                        type="text"
+                        value={formData.legalRepresentativeRut}
+                        onChange={(e) => setFormData(prev => ({ ...prev, legalRepresentativeRut: e.target.value }))}
+                        placeholder="Ej: 12.345.678-9"
+                        className="form-input"
+                      />
+                    </div>
                     
-                    <CustomDropdown
-                      field="operatingRegion"
-                      label="Región donde opera"
-                      options={dropdownOptions.regions}
-                      value={formData.operatingRegion}
-                    />
+                    {/* Botón temporal para debug - limpiar datos */}
+                    <div className="form-group">
+                      <button
+                        type="button"
+                        onClick={clearStep2Data}
+                        className="nav-btn secondary"
+                        style={{ fontSize: '12px', padding: '8px' }}
+                      >
+                        Limpiar formulario (debug)
+                      </button>
+                    </div>
                   </form>
                 </div>
               )}
@@ -540,10 +836,15 @@ const SignUp: React.FC = () => {
                 
                 <button
                   onClick={handleNextStep}
+                  disabled={isUpdatingPersona || isUpdatingBeneficiario}
                   className="nav-btn primary"
                 >
-                  Siguiente
-                  <img src="/svgs/right-arrow.svg" alt="" width="7" height="7" style={{ marginLeft: '1rem', filter: 'brightness(0) invert(1)' }} />
+                  {isUpdatingPersona ? 'Guardando perfil...' : 
+                   isUpdatingBeneficiario ? 'Creando organización...' : 
+                   'Siguiente'}
+                  {!isUpdatingPersona && !isUpdatingBeneficiario && (
+                    <img src="/svgs/right-arrow.svg" alt="" width="7" height="7" style={{ marginLeft: '1rem', filter: 'brightness(0) invert(1)' }} />
+                  )}
                 </button>
               </div>
             </div>

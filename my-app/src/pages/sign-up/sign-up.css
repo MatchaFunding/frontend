@@ -1,4 +1,52 @@
 
+/* Estilos para la vista de carga */
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 42rem;
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 4rem 2rem;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 3px solid #E9DFD0;
+  border-top: 3px solid #44624a;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #44624a;
+  margin-bottom: 0.5rem;
+}
+
+.loading-subtitle {
+  font-size: 0.875rem;
+  color: #8BA888;
+  margin: 0;
+}
+
 .signup-container {
   display: flex;
   min-height: 100vh;
@@ -211,6 +259,17 @@
 .submit-btn:focus {
   outline: none;
   box-shadow: 0 0 0 2px #4c7500, 0 0 0 4px rgba(76, 117, 0, 0.2);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #8BA888;
+}
+
+.submit-btn:disabled:hover {
+  background: #8BA888;
+  background-position: 100% 0;
 }
 
 .bottom-text {

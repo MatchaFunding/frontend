@@ -7,12 +7,12 @@ export interface FormData {
   gender: string;
   yearsOfActivity: string;
   specialization: string;
-  // Paso 2
-  companyName: string;
-  legalRepresentative: string;
-  companyRut: string;
-  mainSector: string;
-  operatingRegion: string;
+  // Paso 2 - Beneficiario (campos editables por el usuario)
+  companyName: string; // Nombre
+  companyCreationRegion: string; // RegionDeCreacion
+  companyRut: string; // RUTdeEmpresa
+  legalRepresentativeRut: string; // RUTdeRepresentante
+  // Los campos Direccion, TipoDePersona, TipoDeEmpresa, Perfil se envían con valores predeterminados
   // Paso 3
   approximateAmount: string;
   benefitsOfInterest: string;
@@ -43,12 +43,11 @@ export const initialFormData: FormData = {
   gender: '',
   yearsOfActivity: '',
   specialization: '',
-  // Paso 2
+  // Paso 2 - Beneficiario (campos editables)
   companyName: '',
-  legalRepresentative: '',
+  companyCreationRegion: '',
   companyRut: '',
-  mainSector: '',
-  operatingRegion: '',
+  legalRepresentativeRut: '',
   // Paso 3
   approximateAmount: '',
   benefitsOfInterest: '',
@@ -65,6 +64,8 @@ export const dropdownOptions = {
     { value: 'femenino', label: 'Femenino' },
     { value: 'prefiero-no-decir', label: 'Prefiero no decir' }
   ],
+  // Opciones removidas temporalmente: personType, companyType, companyProfile
+  // Se usan valores predeterminados en el backend
   mainSector: [
     { value: '', label: 'Seleccionar rubro' },
     { value: 'rubro-1', label: 'Rubro 1' },
@@ -73,22 +74,22 @@ export const dropdownOptions = {
   ],
   regions: [
     { value: '', label: 'Seleccionar región' },
-    { value: 'arica-parinacota', label: 'Arica y Parinacota' },
-    { value: 'tarapaca', label: 'Tarapacá' },
-    { value: 'antofagasta', label: 'Antofagasta' },
-    { value: 'atacama', label: 'Atacama' },
-    { value: 'coquimbo', label: 'Coquimbo' },
-    { value: 'valparaiso', label: 'Valparaíso' },
-    { value: 'metropolitana', label: 'Metropolitana' },
-    { value: 'ohiggins', label: 'O\'Higgins' },
-    { value: 'maule', label: 'Maule' },
-    { value: 'nuble', label: 'Ñuble' },
-    { value: 'biobio', label: 'Biobío' },
-    { value: 'araucania', label: 'Araucanía' },
-    { value: 'los-rios', label: 'Los Ríos' },
-    { value: 'los-lagos', label: 'Los Lagos' },
-    { value: 'aysen', label: 'Aysén' },
-    { value: 'magallanes', label: 'Magallanes' }
+    { value: 'AP', label: 'Arica y Parinacota' },
+    { value: 'TA', label: 'Tarapacá' },
+    { value: 'AN', label: 'Antofagasta' },
+    { value: 'AT', label: 'Atacama' },
+    { value: 'CO', label: 'Coquimbo' },
+    { value: 'VA', label: 'Valparaíso' },
+    { value: 'RM', label: 'Metropolitana' },
+    { value: 'LI', label: 'O\'Higgins' },
+    { value: 'ML', label: 'Maule' },
+    { value: 'NB', label: 'Ñuble' },
+    { value: 'BI', label: 'Biobío' },
+    { value: 'AR', label: 'La Araucanía' },
+    { value: 'LR', label: 'Los Ríos' },
+    { value: 'LL', label: 'Los Lagos' },
+    { value: 'AI', label: 'Aysén' },
+    { value: 'MA', label: 'Magallanes' }
   ],
   benefits: [
     { value: '', label: 'Seleccionar beneficio' },

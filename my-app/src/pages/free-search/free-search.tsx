@@ -2,6 +2,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import FreeSearchCard from '../../components/free-search-card/free-search-card.tsx';
 import FiltersComponent from '../../components/filters-component/filters-component.tsx';
+import NavBar from '../../components/NavBar/navbar';
 import type { FiltersValues, OrderOption, CardsPerPageOption } from '../../components/filters-component/filters-component.ts';
 import {
   initialFilters,
@@ -49,99 +50,110 @@ function FreeSearch() {
 		setPage(1);
 	}, [cardsPerPage]);
 	return (
-		<div className="min-h-screen bg-[#f1ebe1] flex flex-col">
-			{/* Header */}
+		<div className="min-h-screen bg-[#f1f5f9] flex flex-col">
+			<NavBar />
+			{/* Contenedor principal con ancho máximo del 80% */}
+			<div className="max-w-[90%] mx-auto w-full flex-1">
+				{/* Header */}
 
-			{/* Searchbar y Filtros */}
-			<div className="flex justify-center items-center mt-8 gap-4 px-4">
-				{/* Barra de búsqueda */}
-				<div className="flex-1 max-w-xl flex items-center bg-white shadow px-4 py-2" style={{ borderRadius: '8px' }}>
-					<img src="/svgs/search.svg" alt="Search icon" className="w-5 h-5 text-gray-400 mr-2" style={{ filter: 'brightness(0) saturate(100%) invert(71%) sepia(6%) saturate(329%) hue-rotate(202deg) brightness(94%) contrast(87%)' }} />
-					<input
-						type="text"
-						placeholder="Busca tu fondo manualmente"
-						className="bg-transparent outline-none flex-1 text-gray-700 placeholder-[#bdbdbd] text-base"
-					/>
+				{/* Contenedor para searchbar y filtros - ocupa todo el ancho disponible */}
+				<div className="w-full px-4" style={{ marginTop: '120px' }}>
+					{/* Searchbar y Filtros */}
+					<div className="max-w-screen-2xl mx-auto flex justify-between items-center">
+						{/* Barra de búsqueda estirada hasta los filtros */}
+						<div className="flex items-center bg-white shadow px-4 py-2 flex-1 mr-4" style={{ borderRadius: '8px' }}>
+							<img src="/svgs/search.svg" alt="Search icon" className="w-5 h-5 text-gray-400 mr-2" style={{ filter: 'brightness(0) saturate(100%) invert(71%) sepia(6%) saturate(329%) hue-rotate(202deg) brightness(94%) contrast(87%)' }} />
+							<input
+								type="text"
+								placeholder="Busca tu fondo manualmente"
+								className="bg-transparent outline-none flex-1 text-gray-700 placeholder-[#bdbdbd] text-base"
+							/>
+						</div>
+						
+						{/* Componente de filtros alineado a la derecha */}
+						<div className="flex-shrink-0">
+							<FiltersComponent
+								order={order}
+								setOrder={setOrder}
+								cardsPerPage={cardsPerPage}
+								setCardsPerPage={setCardsPerPage}
+								filters={filters}
+								onApplyFilters={setFilters}
+							/>
+						</div>
+					</div>
 				</div>
-				
-				{/* Componente de filtros */}
-				<div className="flex-shrink-0">
-					<FiltersComponent
-						order={order}
-						setOrder={setOrder}
-						cardsPerPage={cardsPerPage}
-						setCardsPerPage={setCardsPerPage}
-						filters={filters}
-						onApplyFilters={setFilters}
-					/>
+
+				{/* Contenedor principal con ancho limitado para las cards */}
+				<div className="w-full px-4">
+
+				{/* Cards paginadas */}
+				<div className="flex justify-center gap-6 flex-wrap" style={{ marginTop: '80px' }}>
+					{paginatedCards.map((card, idx) => (
+						<FreeSearchCard key={idx + (page - 1) * CARDS_PER_PAGE} {...card} />
+					))}
 				</div>
-			</div>
 
-			{/* Cards paginadas */}
-			<div className="flex justify-center mt-8 gap-6 flex-wrap">
-				{paginatedCards.map((card, idx) => (
-					<FreeSearchCard key={idx + (page - 1) * CARDS_PER_PAGE} {...card} />
-				))}
-			</div>
-
-			{/* Paginación debajo de las cards */}
-			<div className="flex justify-center py-4 gap-2">
-				{/* Flecha izquierda */}
-				<button
-					className={`px-3 py-2 rounded-full font-semibold border ${page === 1 ? 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-[#989F2B] border-[#989F2B]'}`}
-					onClick={() => page > 1 && setPage(page - 1)}
-					disabled={page === 1}
-					aria-label="Anterior"
-				>
-					&#8592;
-				</button>
-						{/* Página actual */}
-						<button
-							className={`px-4 py-2 rounded-full font-semibold border bg-[#989F2B] text-white`}
-							disabled
-						>
-							{page}
-						</button>
-						{/* Página siguiente */}
-						{page + 1 <= totalPages && (
+				{/* Paginación debajo de las cards */}
+				<div className="flex justify-center py-4 gap-2" style={{ marginTop: '60px' }}>
+					{/* Flecha izquierda */}
+					<button
+						className={`px-3 py-2 rounded-full font-semibold border ${page === 1 ? 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-[#989F2B] border-[#989F2B]'}`}
+						onClick={() => page > 1 && setPage(page - 1)}
+						disabled={page === 1}
+						aria-label="Anterior"
+					>
+						&#8592;
+					</button>
+							{/* Página actual */}
 							<button
-								className={`px-4 py-2 rounded-full font-semibold border bg-white text-[#989F2B] border-[#989F2B]`}
-								onClick={() => setPage(page + 1)}
+								className={`px-4 py-2 rounded-full font-semibold border bg-[#989F2B] text-white`}
+								disabled
 							>
-								{page + 1}
+								{page}
 							</button>
-						)}
-						{/* Página siguiente +1 */}
-						{page + 2 <= totalPages && (
-							<button
-								className={`px-4 py-2 rounded-full font-semibold border bg-white text-[#989F2B] border-[#989F2B]`}
-								onClick={() => setPage(page + 2)}
-							>
-								{page + 2}
-							</button>
-						)}
-						{/* ... si hay más páginas entre medio */}
-						{page + 3 < totalPages && (
-							<span className="px-2">...</span>
-						)}
-						{/* Última página si no es visible como subsiguiente */}
-						{totalPages > 1 && page !== totalPages && (page + 2 < totalPages) && (
-							<button
-								className={`px-4 py-2 rounded-full font-semibold border ${page === totalPages ? 'bg-[#989F2B] text-white' : 'bg-white text-[#989F2B] border-[#989F2B]'}`}
-								onClick={() => setPage(totalPages)}
-							>
-								{totalPages}
-							</button>
-						)}
-				{/* Flecha derecha */}
-				<button
-					className={`px-3 py-2 rounded-full font-semibold border ${page === totalPages ? 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-[#989F2B] border-[#989F2B]'}`}
-					onClick={() => page < totalPages && setPage(page + 1)}
-					disabled={page === totalPages}
-					aria-label="Siguiente"
-				>
-					&#8594;
-				</button>
+							{/* Página siguiente */}
+							{page + 1 <= totalPages && (
+								<button
+									className={`px-4 py-2 rounded-full font-semibold border bg-white text-[#989F2B] border-[#989F2B]`}
+									onClick={() => setPage(page + 1)}
+								>
+									{page + 1}
+								</button>
+							)}
+							{/* Página siguiente +1 */}
+							{page + 2 <= totalPages && (
+								<button
+									className={`px-4 py-2 rounded-full font-semibold border bg-white text-[#989F2B] border-[#989F2B]`}
+									onClick={() => setPage(page + 2)}
+								>
+									{page + 2}
+								</button>
+							)}
+							{/* ... si hay más páginas entre medio */}
+							{page + 3 < totalPages && (
+								<span className="px-2">...</span>
+							)}
+							{/* Última página si no es visible como subsiguiente */}
+							{totalPages > 1 && page !== totalPages && (page + 2 < totalPages) && (
+								<button
+									className={`px-4 py-2 rounded-full font-semibold border ${page === totalPages ? 'bg-[#989F2B] text-white' : 'bg-white text-[#989F2B] border-[#989F2B]'}`}
+									onClick={() => setPage(totalPages)}
+								>
+									{totalPages}
+								</button>
+							)}
+					{/* Flecha derecha */}
+					<button
+						className={`px-3 py-2 rounded-full font-semibold border ${page === totalPages ? 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-[#989F2B] border-[#989F2B]'}`}
+						onClick={() => page < totalPages && setPage(page + 1)}
+						disabled={page === totalPages}
+						aria-label="Siguiente"
+					>
+						&#8594;
+					</button>
+				</div>
+				</div>
 			</div>
 		</div>
 	);

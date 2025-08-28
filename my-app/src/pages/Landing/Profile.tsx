@@ -2,6 +2,7 @@ import React from 'react';
 import NavBar from '../../components/NavBar/navbar';
 import { Edit, Mail, Phone, User, Briefcase,  ShieldCheck } from 'lucide-react';
 import { Card } from '../../components/UI/cards';
+import { useNavigate } from 'react-router-dom';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -34,7 +35,7 @@ const ProfileI: React.FC = () => {
     occupation: 'PhD en Biotecnología',
     communityMember: 'Sí',
   };
-
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: colorPalette.lightGray }}>
       <NavBar />
@@ -44,7 +45,7 @@ const ProfileI: React.FC = () => {
             <div>
              
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 text-sm md:text-base font-semibold text-white rounded-xl shadow-md transition-transform hover:scale-105" style={{ backgroundColor: colorPalette.softGreen }}>
+            <button className="flex items-center gap-2 px-4 py-2 text-sm md:text-base font-semibold text-white rounded-xl shadow-md transition-transform hover:scale-105" style={{ backgroundColor: colorPalette.softGreen }} onClick={() => navigate("/edit-profile")}>
               <Edit className="w-5 h-5" />
               Editar Perfil
             </button>

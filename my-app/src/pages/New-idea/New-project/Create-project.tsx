@@ -168,7 +168,7 @@ const NuevoProyecto: React.FC = () => {
  
 
 
-
+  /*
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (step < 3) {
@@ -178,6 +178,7 @@ const NuevoProyecto: React.FC = () => {
       navigate("/Home-i"); // 👈 redirige al finalizar
     }
   };
+   */
 
   return (
     <div className="min-h-screen bg-slate-50">

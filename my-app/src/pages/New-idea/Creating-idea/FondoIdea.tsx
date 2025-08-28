@@ -65,9 +65,11 @@ const GraduationCapIcon: React.FC = () => ( <svg xmlns="http://www.w3.org/2000/s
 const FondoCard: React.FC<{ fondo: Fondo }> = ({ fondo }) => {
   const navigate = useNavigate(); 
   
+  /*
   const handleViewDetails = () => {
     navigate(`/Matcha/fondos/${fondo.id}`, { state: { fondo } });
   };
+  */
 
   return (
     <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80">

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function BorrarUsuarioAsync(id: number): Promise<Usuario[]> {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/borrarusuario/${id}`, {
+    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/borrarusuario/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

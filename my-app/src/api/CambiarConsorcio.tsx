@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CambiarConsorcioAsync(id: number, data: Consorcio): Promise<Consorcio[]> {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/cambiarconsorcio/${id}`, {
+    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/cambiarconsorcio/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

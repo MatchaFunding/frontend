@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function BorrarIdeaAsync(id: number): Promise<Idea[]> {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/borraridea/${id}`, {
+    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/borraridea/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

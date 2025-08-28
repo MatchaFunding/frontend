@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CrearFinanciadorAsync(data: Financiador): Promise<Financiador[]> {
   try {
-    const response = await fetch('http://127.0.0.1:8000/crearfinanciador/', {
+    const response = await fetch('https://spring-park-flashing-ensures.trycloudflare.com/crearfinanciador/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

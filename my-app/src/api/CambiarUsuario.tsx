@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CambiarUsuarioAsync(id: number, data: Usuario): Promise<Usuario[]> {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/cambiarusuario/${id}`, {
+    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/cambiarusuario/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

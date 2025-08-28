@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function BorrarInstrumentoAsync(id: number): Promise<Instrumento[]> {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/borrarinstrumento/${id}`, {
+    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/borrarinstrumento/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

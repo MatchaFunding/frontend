@@ -5,6 +5,7 @@ import { Button } from "../../../components/UI/buttons";
 import { Card, CardContent } from "../../../components/UI/cards";
 import { Input } from "../../../components/UI/input";
 import { Textarea } from "../../../components/UI/textarea";
+import { StepIndicator } from "../../../components/Shared/StepIndicator";
 
 interface Proyecto {
   ID: number;
@@ -15,6 +16,7 @@ interface Proyecto {
   DuracionEnMesesMaximo: number;
   Alcance: string;
   Area: string;
+  Miembros: string[];
 }
 interface Idea {
   id: number;
@@ -37,62 +39,11 @@ const colorPalette = {
 };
 
 
-
-
-
-const StepIndicator: React.FC<{ currentStep: number; totalSteps: number }> = ({
-  currentStep,
-  totalSteps,
-}) => (
-  <div className="mb-8 w-full max-w-md mx-auto">
-    <div className="flex items-center">
-      {Array.from({ length: totalSteps }).map((_, index) => {
-        const stepNumber = index + 1;
-        const isDone = stepNumber < currentStep;
-        const isActive = stepNumber === currentStep;
-        return (
-          <React.Fragment key={stepNumber}>
-            <div className="flex flex-col items-center">
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${
-                  isDone
-                    ? "bg-emerald-600 text-white"
-                    : isActive
-                    ? "bg-emerald-800 text-white scale-110"
-                    : "bg-slate-300 text-slate-600"
-                }`}
-              >
-                {isDone ? "✓" : stepNumber}
-              </div>
-              <p
-                className={`mt-2 text-xs text-center ${
-                  isActive ? "font-bold text-emerald-800" : "text-slate-500"
-                }`}
-              >
-                {stepNumber === 1
-                  ? "Básicos"
-                  : stepNumber === 2
-                  ? "Detalles"
-                  : "Vista previa"}
-              </p>
-            </div>
-            {stepNumber < totalSteps && (
-              <div className={`flex-1 h-1 mx-2 ${isDone ? "bg-emerald-600" : "bg-slate-300"}`} />
-            )}
-          </React.Fragment>
-        );
-      })}
-    </div>
-  </div>
-);
-
-
 const CrearProyectoMatch: React.FC = () => {
   const [step, setStep] = useState(1);
   const [activeTab, setActiveTab] = useState<"presentacion" | "publico">("presentacion");
   const navigate = useNavigate();
   const location = useLocation();
-
 
   const { idea, fondo } =
     (location.state as { idea: Idea; fondo: Fondo }) || {
@@ -119,8 +70,9 @@ const CrearProyectoMatch: React.FC = () => {
     DuracionEnMesesMaximo: 12,
     Alcance: "Nacional",
     Area: "",
+    Miembros: [],
   });
-
+  const [nuevoMiembro, setNuevoMiembro] = useState("");
 
   useEffect(() => {
     setFormData((prevData) => ({
@@ -144,7 +96,7 @@ const CrearProyectoMatch: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (step < 3) {
+    if (step < 4) {
       nextStep();
     } else {
       console.log("Proyecto para Match enviado 🚀", formData);
@@ -157,33 +109,26 @@ const CrearProyectoMatch: React.FC = () => {
     <div className="min-h-screen bg-slate-50">
       <NavBar />
       <main className="flex flex-col items-center justify-center px-4 py-10 mt-[5%]">
-        <StepIndicator currentStep={step} totalSteps={3} />
+        <StepIndicator currentStep={step} totalSteps={4} />
         <Card className="w-full max-w-3xl px-9 py-8">
           <form onSubmit={handleSubmit}>
-   
+            {/* PASO 1 */}
             {step === 1 && (
               <CardContent className="space-y-6">
                 <h2 className="text-2xl font-semibold text-center text-slate-800">
                   Información Básica (Sugerida)
                 </h2>
                 <div>
-                  <label
-                    htmlFor="Titulo"
-                    className="block text-sm font-medium text-slate-700 mb-1"
-                  >
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
                     Título del Proyecto
                   </label>
-                  <Input id="Titulo" name="Titulo" value={formData.Titulo} onChange={handleChange} />
+                  <Input name="Titulo" value={formData.Titulo} onChange={handleChange} />
                 </div>
                 <div>
-                  <label
-                    htmlFor="Descripcion"
-                    className="block text-sm font-medium text-slate-700 mb-1"
-                  >
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
                     Descripción
                   </label>
                   <Textarea
-                    id="Descripcion"
                     name="Descripcion"
                     rows={6}
                     value={formData.Descripcion}
@@ -193,21 +138,17 @@ const CrearProyectoMatch: React.FC = () => {
               </CardContent>
             )}
 
-  
+            {/* PASO 2 */}
             {step === 2 && (
               <CardContent className="space-y-6">
                 <h2 className="text-2xl font-semibold text-center text-slate-800">
                   Completa los Detalles
                 </h2>
                 <div>
-                  <label
-                    htmlFor="DuracionEnMesesMinimo"
-                    className="block text-sm font-medium text-slate-700 mb-1"
-                  >
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
                     Duración mínima (meses)
                   </label>
                   <Input
-                    id="DuracionEnMesesMinimo"
                     name="DuracionEnMesesMinimo"
                     type="number"
                     value={formData.DuracionEnMesesMinimo}
@@ -215,14 +156,10 @@ const CrearProyectoMatch: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label
-                    htmlFor="DuracionEnMesesMaximo"
-                    className="block text-sm font-medium text-slate-700 mb-1"
-                  >
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
                     Duración máxima (meses)
                   </label>
                   <Input
-                    id="DuracionEnMesesMaximo"
                     name="DuracionEnMesesMaximo"
                     type="number"
                     value={formData.DuracionEnMesesMaximo}
@@ -230,32 +167,119 @@ const CrearProyectoMatch: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label
-                    htmlFor="Alcance"
-                    className="block text-sm font-medium text-slate-700 mb-1"
-                  >
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
                     Alcance
                   </label>
-                  <Input id="Alcance" name="Alcance" value={formData.Alcance} onChange={handleChange} />
+                  <Input name="Alcance" value={formData.Alcance} onChange={handleChange} />
                 </div>
                 <div>
-                  <label
-                    htmlFor="Area"
-                    className="block text-sm font-medium text-slate-700 mb-1"
-                  >
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
                     Área (Sugerida)
                   </label>
-                  <Input id="Area" name="Area" value={formData.Area} onChange={handleChange} />
+                  <Input name="Area" value={formData.Area} onChange={handleChange} />
                 </div>
               </CardContent>
             )}
 
+            {/* PASO 3: MIEMBROS */}
             {step === 3 && (
-              <CardContent>
-                <h2
-                  className="text-2xl font-semibold text-center mb-6"
-                  style={{ color: colorPalette.darkGreen }}
+              <CardContent className="space-y-6">
+                <h2 className="text-2xl font-semibold text-center" style={{ color: colorPalette.oliveGray }}>
+                  Añadir Miembros
+                </h2>
+
+                <div className="flex flex-wrap gap-3 mb-6">
+                  {["Max Bardi", "Maiki Soto", "Miranda Alvear", "Oscar Barahona"].map((mock) => (
+                    <span
+                      key={mock}
+                      draggable
+                      onDragStart={(e) => e.dataTransfer.setData("text/plain", mock)}
+                      className="px-4 py-2 rounded-full cursor-grab shadow-sm hover:shadow-md transition"
+                      style={{
+                        backgroundColor: colorPalette.lightGray,
+                        color: colorPalette.darkGreen,
+                        border: `1px solid ${colorPalette.softGreen}`,
+                      }}
+                    >
+                      {mock}
+                    </span>
+                  ))}
+                </div>
+
+                <div
+                  className="min-h-[120px] rounded-2xl flex flex-wrap items-center gap-3 p-4 shadow-inner"
+                  style={{
+                    border: `2px dashed ${colorPalette.softGreen}`,
+                    backgroundColor: colorPalette.lightGray,
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const dropped = e.dataTransfer.getData("text/plain");
+                    if (dropped && !formData.Miembros.includes(dropped)) {
+                      setFormData({ ...formData, Miembros: [...formData.Miembros, dropped] });
+                    }
+                  }}
                 >
+                  {formData.Miembros.length === 0 ? (
+                    <p className="text-sm italic" style={{ color: colorPalette.oliveGray }}>
+                      Arrastra aquí los miembros para agregarlos
+                    </p>
+                  ) : (
+                    formData.Miembros.map((m, i) => (
+                      <span
+                        key={i}
+                        className="flex items-center gap-2 px-4 py-2 rounded-full shadow-sm"
+                        style={{
+                          backgroundColor: colorPalette.softGreen,
+                          color: colorPalette.lightGray,
+                          border: `1px solid ${colorPalette.oliveGray}`,
+                        }}
+                      >
+                        {m}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFormData({
+                              ...formData,
+                              Miembros: formData.Miembros.filter((mi) => mi !== m),
+                            })
+                          }
+                          className="w-5 h-5 flex items-center justify-center rounded-full hover:scale-110 transition"
+                          style={{ backgroundColor: colorPalette.darkGreen }}
+                        >
+                          <span className="text-xs text-white">×</span>
+                        </button>
+                      </span>
+                    ))
+                  )}
+                </div>
+
+                <div className="flex gap-2 mt-4">
+                  <Input
+                    placeholder="Escribe un nombre"
+                    value={nuevoMiembro}
+                    onChange={(e) => setNuevoMiembro(e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      if (nuevoMiembro.trim() && !formData.Miembros.includes(nuevoMiembro)) {
+                        setFormData({ ...formData, Miembros: [...formData.Miembros, nuevoMiembro] });
+                        setNuevoMiembro("");
+                      }
+                    }}
+                  >
+                    Agregar
+                  </Button>
+                </div>
+              </CardContent>
+            )}
+
+            {/* PASO 4: VISTA PREVIA */}
+            {step === 4 && (
+              <CardContent>
+                <h2 className="text-2xl font-semibold text-center mb-6" style={{ color: colorPalette.darkGreen }}>
                   Vista Previa del Proyecto
                 </h2>
                 <div className="flex justify-center space-x-2 mb-6">
@@ -264,12 +288,8 @@ const CrearProyectoMatch: React.FC = () => {
                     onClick={() => setActiveTab("presentacion")}
                     className="px-6 py-2 border rounded-md font-semibold transition-colors duration-200"
                     style={{
-                      color:
-                        activeTab === "presentacion"
-                          ? colorPalette.darkGreen
-                          : colorPalette.softGreen,
-                      borderColor:
-                        activeTab === "presentacion" ? colorPalette.softGreen : "#e2e8f0",
+                      color: activeTab === "presentacion" ? colorPalette.darkGreen : colorPalette.softGreen,
+                      borderColor: activeTab === "presentacion" ? colorPalette.softGreen : "#e2e8f0",
                       borderWidth: "2px",
                     }}
                   >
@@ -280,12 +300,8 @@ const CrearProyectoMatch: React.FC = () => {
                     onClick={() => setActiveTab("publico")}
                     className="px-6 py-2 border rounded-md font-semibold transition-colors duration-200"
                     style={{
-                      color:
-                        activeTab === "publico"
-                          ? colorPalette.darkGreen
-                          : colorPalette.softGreen,
-                      borderColor:
-                        activeTab === "publico" ? colorPalette.softGreen : "#e2e8f0",
+                      color: activeTab === "publico" ? colorPalette.darkGreen : colorPalette.softGreen,
+                      borderColor: activeTab === "publico" ? colorPalette.softGreen : "#e2e8f0",
                       borderWidth: "2px",
                     }}
                   >
@@ -296,16 +312,10 @@ const CrearProyectoMatch: React.FC = () => {
                 {activeTab === "presentacion" && (
                   <Card>
                     <div className="p-6 md:p-8">
-                      <h3
-                        className="text-xl font-semibold mb-4"
-                        style={{ color: colorPalette.darkGreen }}
-                      >
+                      <h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>
                         Presentación
                       </h3>
-                      <div
-                        className="space-y-4 leading-relaxed"
-                        style={{ color: colorPalette.oliveGray }}
-                      >
+                      <div className="space-y-4 leading-relaxed" style={{ color: colorPalette.oliveGray }}>
                         <p>
                           <strong>Título:</strong> {formData.Titulo}
                         </p>
@@ -313,8 +323,11 @@ const CrearProyectoMatch: React.FC = () => {
                           <strong>Descripción:</strong> {formData.Descripcion}
                         </p>
                         <p>
-                          <strong>Duración:</strong> {formData.DuracionEnMesesMinimo} -{" "}
-                          {formData.DuracionEnMesesMaximo} meses
+                          <strong>Duración:</strong> {formData.DuracionEnMesesMinimo} - {formData.DuracionEnMesesMaximo}{" "}
+                          meses
+                        </p>
+                        <p>
+                          <strong>Miembros:</strong> {formData.Miembros.join(", ") || "Sin miembros"}
                         </p>
                       </div>
                     </div>
@@ -324,16 +337,10 @@ const CrearProyectoMatch: React.FC = () => {
                 {activeTab === "publico" && (
                   <Card>
                     <div className="p-6 md:p-8">
-                      <h3
-                        className="text-xl font-semibold mb-4"
-                        style={{ color: colorPalette.darkGreen }}
-                      >
+                      <h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>
                         Detalle
                       </h3>
-                      <div
-                        className="space-y-4 leading-relaxed"
-                        style={{ color: colorPalette.oliveGray }}
-                      >
+                      <div className="space-y-4 leading-relaxed" style={{ color: colorPalette.oliveGray }}>
                         <p>
                           <strong>Alcance:</strong> {formData.Alcance}
                         </p>
@@ -354,7 +361,7 @@ const CrearProyectoMatch: React.FC = () => {
               <Button type="button" onClick={prevStep} disabled={step === 1} variant="outline">
                 Anterior
               </Button>
-              <Button   onClick={step < 3 ? undefined : () => navigate("/Home-i")} type="submit">{step < 3 ? "Siguiente" : "Crear Proyecto"}</Button>
+              <Button type="submit">{step < 4 ? "Siguiente" : "Crear Proyecto"}</Button>
             </div>
           </form>
         </Card>

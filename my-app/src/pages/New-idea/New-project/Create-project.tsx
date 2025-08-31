@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import NavBar from "../../../components/NavBar/navbar";
 import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "../../../components/UI/cards";
+import { Input } from "../../../components/UI/input";
+import { Button } from "../../../components/UI/buttons";
+import { Textarea } from "../../../components/UI/textarea";
+import { StepIndicator } from "../../../components/Shared/StepIndicator";
 
 interface Proyecto {
   ID: number;
@@ -11,6 +16,7 @@ interface Proyecto {
   DuracionEnMesesMaximo: number;
   Alcance: string;
   Area: string;
+  Miembros: string[];
 }
 
 // ---- PALETA ---- //
@@ -21,115 +27,8 @@ const colorPalette = {
   lightGray: "#f1f5f9",
 };
 
-// ---- COMPONENTES ---- //
-const Button: React.FC<
-  React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "solid" | "outline" }
-> = ({ children, className = "", variant = "solid", ...props }) => (
-  <button
-    className={`px-4 py-2 rounded-lg font-semibold shadow-sm transition-all duration-200
-                ${
-                  variant === "outline"
-                    ? "border border-slate-300 text-slate-700 bg-white hover:bg-slate-100"
-                    : "bg-emerald-600 text-white hover:bg-emerald-700"
-                }
-                disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
-    {...props}
-  >
-    {children}
-  </button>
-);
 
-const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({
-  children,
-  className = "",
-}) => (
-  <div
-    className={`bg-white rounded-3xl shadow-lg border border-slate-200/80 ${className}`}
-  >
-    {children}
-  </div>
-);
 
-const CardContent: React.FC<{ children: React.ReactNode; className?: string }> = ({
-  children,
-  className = "",
-}) => <div className={`p-6 md:p-8 ${className}`}>{children}</div>;
-
-const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({
-  className = "",
-  ...props
-}) => (
-  <input
-    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 
-                outline-none border-slate-300 ${className}`}
-    {...props}
-  />
-);
-
-const Textarea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement>> = ({
-  className = "",
-  ...props
-}) => (
-  <textarea
-    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 
-                outline-none border-slate-300 ${className}`}
-    {...props}
-  />
-);
-
-// ---- STEP INDICATOR ---- //
-const StepIndicator: React.FC<{ currentStep: number; totalSteps: number }> = ({
-  currentStep,
-  totalSteps,
-}) => (
-  <div className="mb-8 w-full max-w-md mx-auto">
-    <div className="flex items-center">
-      {Array.from({ length: totalSteps }).map((_, index) => {
-        const stepNumber = index + 1;
-        const isDone = stepNumber < currentStep;
-        const isActive = stepNumber === currentStep;
-        return (
-          <React.Fragment key={stepNumber}>
-            <div className="flex flex-col items-center">
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300
-                  ${
-                    isDone
-                      ? "bg-emerald-600 text-white"
-                      : isActive
-                      ? "bg-emerald-800 text-white scale-110"
-                      : "bg-slate-300 text-slate-600"
-                  }`}
-              >
-                {isDone ? "✓" : stepNumber}
-              </div>
-              <p
-                className={`mt-2 text-xs text-center ${
-                  isActive ? "font-bold text-emerald-800" : "text-slate-500"
-                }`}
-              >
-                {stepNumber === 1
-                  ? "Básicos"
-                  : stepNumber === 2
-                  ? "Detalles"
-                  : "Vista previa"}
-              </p>
-            </div>
-            {stepNumber < totalSteps && (
-              <div
-                className={`flex-1 h-1 mx-2 ${
-                  isDone ? "bg-emerald-600" : "bg-slate-300"
-                }`}
-              />
-            )}
-          </React.Fragment>
-        );
-      })}
-    </div>
-  </div>
-);
-
-// ---- FORMULARIO WIZARD ---- //
 const NuevoProyecto: React.FC = () => {
   const [step, setStep] = useState(1);
   const [activeTab, setActiveTab] = useState<"presentacion" | "publico">("presentacion");
@@ -142,7 +41,9 @@ const NuevoProyecto: React.FC = () => {
     DuracionEnMesesMaximo: 0,
     Alcance: "",
     Area: "",
+    Miembros: [],
   });
+  const [nuevoMiembro, setNuevoMiembro] = useState("");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -159,38 +60,29 @@ const NuevoProyecto: React.FC = () => {
     });
   };
 
+  const agregarMiembro = () => {
+    if (nuevoMiembro.trim()) {
+      setFormData({ ...formData, Miembros: [...formData.Miembros, nuevoMiembro] });
+      setNuevoMiembro("");
+    }
+  };
+
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 
-  const labelClasses = "block text-sm font-medium text-slate-700 mb-1";
-  const navigate = useNavigate(); // 👈 inicializa el hook
-
- 
-
-
-  /*
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (step < 3) {
-      nextStep();
-    } else {
-      console.log("Proyecto enviado 🚀", formData);
-      navigate("/Home-i"); // 👈 redirige al finalizar
-    }
-  };
-   */
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-slate-50">
       <NavBar />
       <main className="flex flex-col items-center justify-center px-4 py-10 mt-[5%]">
-        <StepIndicator currentStep={step} totalSteps={3} />
+        <StepIndicator currentStep={step} totalSteps={4} />
 
         <Card className="w-full max-w-3xl px-9 py-8">
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              step < 3 ? nextStep() : alert("Proyecto enviado 🚀");
+              step < 4 ? nextStep() : navigate("/Home-i");
             }}
           >
             {/* --- PASO 1 --- */}
@@ -200,22 +92,20 @@ const NuevoProyecto: React.FC = () => {
                   Información Básica
                 </h2>
                 <div>
-                  <label htmlFor="Titulo" className={labelClasses}>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
                     Título del Proyecto
                   </label>
                   <Input
-                    id="Titulo"
                     name="Titulo"
                     value={formData.Titulo}
                     onChange={handleChange}
                   />
                 </div>
                 <div>
-                  <label htmlFor="Descripcion" className={labelClasses}>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
                     Descripción
                   </label>
                   <Textarea
-                    id="Descripcion"
                     name="Descripcion"
                     rows={5}
                     value={formData.Descripcion}
@@ -232,11 +122,10 @@ const NuevoProyecto: React.FC = () => {
                   Detalles y Alcance
                 </h2>
                 <div>
-                  <label htmlFor="DuracionEnMesesMinimo" className={labelClasses}>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
                     Duración mínima (meses)
                   </label>
                   <Input
-                    id="DuracionEnMesesMinimo"
                     name="DuracionEnMesesMinimo"
                     type="number"
                     value={formData.DuracionEnMesesMinimo}
@@ -244,11 +133,10 @@ const NuevoProyecto: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="DuracionEnMesesMaximo" className={labelClasses}>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
                     Duración máxima (meses)
                   </label>
                   <Input
-                    id="DuracionEnMesesMaximo"
                     name="DuracionEnMesesMaximo"
                     type="number"
                     value={formData.DuracionEnMesesMaximo}
@@ -256,22 +144,20 @@ const NuevoProyecto: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="Alcance" className={labelClasses}>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
                     Alcance
                   </label>
                   <Input
-                    id="Alcance"
                     name="Alcance"
                     value={formData.Alcance}
                     onChange={handleChange}
                   />
                 </div>
                 <div>
-                  <label htmlFor="Area" className={labelClasses}>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
                     Área
                   </label>
                   <Input
-                    id="Area"
                     name="Area"
                     value={formData.Area}
                     onChange={handleChange}
@@ -280,118 +166,239 @@ const NuevoProyecto: React.FC = () => {
               </CardContent>
             )}
 
-            {/* --- PASO 3: VISTA PREVIA ESTILO "DETALLEFONDO" --- */}
-            {step === 3 && (
-              <CardContent>
-                <h2
-                  className="text-2xl font-semibold text-center mb-6"
-                  style={{ color: colorPalette.darkGreen }}
-                >
-                  Vista Previa del Proyecto
-                </h2>
+            {/* --- PASO 3: MIEMBROS --- */}
+{step === 3 && (
+  <CardContent className="space-y-6">
+    <h2 className="text-2xl font-semibold text-center" style={{ color: colorPalette.oliveGray }}>
+      Añadir Miembros
+    </h2>
 
-                {/* Tabs */}
-                <div className="flex justify-center space-x-2 mb-6">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("presentacion")}
-                    className="px-6 py-2 border rounded-md font-semibold transition-colors duration-200"
-                    style={{
-                      color:
-                        activeTab === "presentacion"
-                          ? colorPalette.darkGreen
-                          : colorPalette.softGreen,
-                      borderColor:
-                        activeTab === "presentacion"
-                          ? colorPalette.softGreen
-                          : "#e2e8f0",
-                      borderWidth: "2px",
-                    }}
-                  >
-                    PRESENTACIÓN
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("publico")}
-                    className="px-6 py-2 border rounded-md font-semibold transition-colors duration-200"
-                    style={{
-                      color:
-                        activeTab === "publico"
-                          ? colorPalette.darkGreen
-                          : colorPalette.softGreen,
-                      borderColor:
-                        activeTab === "publico"
-                          ? colorPalette.softGreen
-                          : "#e2e8f0",
-                      borderWidth: "2px",
-                    }}
-                  >
-                    DETALLE
-                  </button>
-                </div>
+    {/* Globitos arrastrables de ejemplo */}
+    <div className="flex flex-wrap gap-3 mb-6">
+      {["Max Bardi", "Maiki Soto", "Miranda Alvear", "Oscar Barahona", "Alvaro Feria", "Javiera Osorio"].map((mock) => (
+        <span
+          key={mock}
+          draggable
+          onDragStart={(e) => e.dataTransfer.setData("text/plain", mock)}
+          className="px-4 py-2 rounded-full cursor-grab shadow-sm hover:shadow-md transition"
+          style={{
+            backgroundColor: colorPalette.lightGray,
+            color: colorPalette.darkGreen,
+            border: `1px solid ${colorPalette.softGreen}`,
+          }}
+        >
+          {mock}
+        </span>
+      ))}
+    </div>
 
-                {/* Contenido de tabs */}
-                {activeTab === "presentacion" && (
-                  <Card>
-                    <div className="p-6 md:p-8">
-                      <h3
-                        className="text-xl font-semibold mb-4"
-                        style={{ color: colorPalette.darkGreen }}
-                      >
-                        Presentación
-                      </h3>
-                      <div
-                        className="space-y-4 leading-relaxed"
-                        style={{ color: colorPalette.oliveGray }}
-                      >
-                        <p><strong>Título:</strong> {formData.Titulo}</p>
-                        <p><strong>Descripción:</strong> {formData.Descripcion}</p>
-                        <p>
-                          <strong>Duración:</strong>{" "}
-                          {formData.DuracionEnMesesMinimo} - {formData.DuracionEnMesesMaximo} meses
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
-                )}
 
-                {activeTab === "publico" && (
-                  <Card>
-                    <div className="p-6 md:p-8">
-                      <h3
-                        className="text-xl font-semibold mb-4"
-                        style={{ color: colorPalette.darkGreen }}
-                      >
-                        Detalle
-                      </h3>
-                      <div
-                        className="space-y-4 leading-relaxed"
-                        style={{ color: colorPalette.oliveGray }}
-                      >
-                        <p><strong>Alcance:</strong> {formData.Alcance}</p>
-                        <p><strong>Área:</strong> {formData.Area}</p>
-                        <p><strong>Beneficiario ID:</strong> {formData.Beneficiario}</p>
-                      </div>
-                    </div>
-                  </Card>
-                )}
-              </CardContent>
+    <div
+      className="min-h-[140px] rounded-2xl flex flex-wrap items-center gap-3 p-4 shadow-inner"
+      style={{
+        border: `2px dashed ${colorPalette.softGreen}`,
+        backgroundColor: colorPalette.lightGray,
+      }}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault();
+        const droppedName = e.dataTransfer.getData("text/plain");
+        if (droppedName && !formData.Miembros.includes(droppedName)) {
+          setFormData({
+            ...formData,
+            Miembros: [...formData.Miembros, droppedName],
+          });
+        }
+      }}
+    >
+      {formData.Miembros.length === 0 ? (
+        <p className="text-sm italic" style={{ color: colorPalette.oliveGray }}>
+          Arrastra aquí los miembros para agregarlos al proyecto
+        </p>
+      ) : (
+        formData.Miembros.map((m, i) => (
+          <span
+            key={i}
+            className="flex items-center gap-2 px-4 py-2 rounded-full shadow-sm"
+            style={{
+              backgroundColor: colorPalette.softGreen,
+              color: colorPalette.lightGray,
+              border: `1px solid ${colorPalette.oliveGray}`,
+            }}
+          >
+            {m}
+            <button
+              type="button"
+              onClick={() =>
+                setFormData({
+                  ...formData,
+                  Miembros: formData.Miembros.filter((mi) => mi !== m),
+                })
+              }
+              className="w-5 h-5 flex items-center justify-center rounded-full hover:scale-110 transition"
+              style={{ backgroundColor: colorPalette.darkGreen }}
+            >
+              <span className="text-xs text-white">×</span>
+            </button>
+          </span>
+        ))
+      )}
+    </div>
+
+
+    <div className="flex gap-2 mt-4">
+      <Input
+        placeholder="Escribe un nombre"
+        value={nuevoMiembro}
+        onChange={(e) => setNuevoMiembro(e.target.value)}
+      />
+      <Button
+        type="button"
+        onClick={() => {
+          if (nuevoMiembro.trim() && !formData.Miembros.includes(nuevoMiembro)) {
+            setFormData({
+              ...formData,
+              Miembros: [...formData.Miembros, nuevoMiembro],
+            });
+            setNuevoMiembro("");
+          }
+        }}
+      >
+        Agregar
+      </Button>
+    </div>
+  </CardContent>
+)}
+
+
+            {step === 4 && (
+  <CardContent>
+    <h2
+      className="text-2xl font-semibold text-center mb-6"
+      style={{ color: colorPalette.darkGreen }}
+    >
+      Vista Previa del Proyecto
+    </h2>
+    <div className="flex justify-center space-x-2 mb-6">
+      <button
+        type="button"
+        onClick={() => setActiveTab("presentacion")}
+        className="px-6 py-2 border rounded-md font-semibold transition-colors duration-200"
+        style={{
+          color:
+            activeTab === "presentacion"
+              ? colorPalette.darkGreen
+              : colorPalette.softGreen,
+          borderColor:
+            activeTab === "presentacion" ? colorPalette.softGreen : "#e2e8f0",
+          borderWidth: "2px",
+        }}
+      >
+        PRESENTACIÓN
+      </button>
+      <button
+        type="button"
+        onClick={() => setActiveTab("publico")}
+        className="px-6 py-2 border rounded-md font-semibold transition-colors duration-200"
+        style={{
+          color:
+            activeTab === "publico"
+              ? colorPalette.darkGreen
+              : colorPalette.softGreen,
+          borderColor:
+            activeTab === "publico" ? colorPalette.softGreen : "#e2e8f0",
+          borderWidth: "2px",
+        }}
+      >
+        DETALLE
+      </button>
+    </div>
+
+    {activeTab === "presentacion" && (
+      <Card>
+        <div className="p-6 md:p-8">
+          <h3
+            className="text-xl font-semibold mb-4"
+            style={{ color: colorPalette.darkGreen }}
+          >
+            Presentación
+          </h3>
+          <div
+            className="space-y-4 leading-relaxed"
+            style={{ color: colorPalette.oliveGray }}
+          >
+            {formData.Titulo && (
+              <p>
+                <strong>Título:</strong> {formData.Titulo}
+              </p>
             )}
+            {formData.Descripcion && (
+              <p>
+                <strong>Descripción:</strong> {formData.Descripcion}
+              </p>
+            )}
+            {(formData.DuracionEnMesesMinimo > 0 ||
+              formData.DuracionEnMesesMaximo > 0) && (
+              <p>
+                <strong>Duración:</strong>{" "}
+                {formData.DuracionEnMesesMinimo > 0
+                  ? formData.DuracionEnMesesMinimo
+                  : "?"}{" "}
+                -{" "}
+                {formData.DuracionEnMesesMaximo > 0
+                  ? formData.DuracionEnMesesMaximo
+                  : "?"}{" "}
+                meses
+              </p>
+            )}
+          </div>
+        </div>
+      </Card>
+    )}
+
+    {/* --- DETALLE --- */}
+    {activeTab === "publico" && (
+      <Card>
+        <div className="p-6 md:p-8">
+          <h3
+            className="text-xl font-semibold mb-4"
+            style={{ color: colorPalette.darkGreen }}
+          >
+            Detalle
+          </h3>
+          <div
+            className="space-y-4 leading-relaxed"
+            style={{ color: colorPalette.oliveGray }}
+          >
+            {formData.Alcance && (
+              <p>
+                <strong>Alcance:</strong> {formData.Alcance}
+              </p>
+            )}
+            {formData.Area && (
+              <p>
+                <strong>Área:</strong> {formData.Area}
+              </p>
+            )}
+            {formData.Miembros.length > 0 && (
+              <p>
+                <strong>Miembros:</strong> {formData.Miembros.join(", ")}
+              </p>
+            )}
+          </div>
+        </div>
+      </Card>
+    )}
+  </CardContent>
+)}
+
 
             <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-200">
-              <Button
-                type="button"
-                onClick={prevStep}
-                disabled={step === 1}
-                variant="outline"
-              >
+              <Button type="button" onClick={prevStep} disabled={step === 1} variant="outline">
                 Anterior
               </Button>
-              <Button
-                type="submit"
-                onClick={step < 3 ? undefined : () => navigate("/Home-i")}
-              >
-                {step < 3 ? "Siguiente" : "Crear Proyecto"}
+              <Button type="submit">
+                {step < 4 ? "Siguiente" : "Crear Proyecto"}
               </Button>
             </div>
           </form>

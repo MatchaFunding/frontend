@@ -3,14 +3,13 @@ import { useEffect, useState } from 'react';
 
 export async function CrearConsorcioAsync(data: Consorcio): Promise<Consorcio> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/crearconsorcio/`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearconsorcio/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'accept': 'application/json',
       },
       body: JSON.stringify({
-        'ID':data.ID,
         'PrimerBeneficiario':data.PrimerBeneficiario,
         'SegundoBeneficiario':data.SegundoBeneficiario,
       }),

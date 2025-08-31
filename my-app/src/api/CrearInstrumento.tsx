@@ -3,14 +3,13 @@ import { useEffect, useState } from 'react';
 
 export async function CrearInstrumentoAsync(data: Instrumento): Promise<Instrumento> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/crearinstrumento/`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearinstrumento/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'accept': 'application/json',
       },
       body: JSON.stringify({
-        'ID':data.ID,
         'Titulo':data.Titulo,
         'Financiador':data.Financiador,
         'Alcance':data.Alcance,

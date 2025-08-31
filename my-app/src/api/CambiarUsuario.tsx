@@ -1,9 +1,9 @@
 import Usuario from '../models/Usuario.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CambiarUsuarioAsync(id: number, data: Usuario): Promise<Usuario[]> {
+export async function CambiarUsuarioAsync(id: number, data: Usuario): Promise<Usuario> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/cambiarusuario/${id}`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/cambiarusuario/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -20,22 +20,21 @@ export async function CambiarUsuarioAsync(id: number, data: Usuario): Promise<Us
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const result: Usuario[] = await response.json();
+    const result: Usuario = await response.json();
     return result;
   }
   catch (error) {
     console.error('Error en CambiarUsuario:', error);
-    return [];
   }
 }
 export function CambiarUsuario(id: number, data: Usuario) {
-  const [Usuario, setUsuario] = useState<Usuario[]>([]);
+  const [Usuario, setUsuario] = useState<Usuario>();
 
   useEffect(() => {
       CambiarUsuarioAsync(id, data).then((out) => {
       setUsuario(out);
       });
-  }, []);
+  }, );
   return Usuario;
 }
 export default CambiarUsuario;

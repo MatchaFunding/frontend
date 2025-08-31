@@ -3,14 +3,13 @@ import { useEffect, useState } from 'react';
 
 export async function CrearPersonaAsync(data: Persona): Promise<Persona> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/crearpersona/`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearpersona/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'accept': 'application/json',
       },
       body: JSON.stringify({
-        'ID':data.ID,
         'Nombre':data.Nombre,
         'Sexo':data.Sexo,
         'RUT':data.RUT,

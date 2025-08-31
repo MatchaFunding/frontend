@@ -1,9 +1,9 @@
 import Consorcio from '../models/Consorcio.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarConsorcioAsync(id: number): Promise<Consorcio[]> {
+export async function BorrarConsorcioAsync(id: number): Promise<Consorcio> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/borrarconsorcio/${id}`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borrarconsorcio/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -12,22 +12,21 @@ export async function BorrarConsorcioAsync(id: number): Promise<Consorcio[]> {
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const data: Consorcio[] = await response.json();
+    const data: Consorcio = await response.json();
     return data;
   }
   catch (error) {
     console.error('Error en BorrarConsorcio:', error);
-    return [];
   }
 }
 export function BorrarConsorcio(id: number) {
-  const [Consorcio, setConsorcio] = useState<Consorcio[]>([]);
+  const [Consorcio, setConsorcio] = useState<Consorcio>();
 
   useEffect(() => {
       BorrarConsorcioAsync(id).then((data) => {
       setConsorcio(data);
       });
-  }, []);
+  }, );
   return Consorcio;
 }
 export default BorrarConsorcio;

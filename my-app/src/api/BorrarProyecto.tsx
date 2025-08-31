@@ -1,9 +1,9 @@
 import Proyecto from '../models/Proyecto.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarProyectoAsync(id: number): Promise<Proyecto[]> {
+export async function BorrarProyectoAsync(id: number): Promise<Proyecto> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/borrarproyecto/${id}`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borrarproyecto/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -12,22 +12,21 @@ export async function BorrarProyectoAsync(id: number): Promise<Proyecto[]> {
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const data: Proyecto[] = await response.json();
+    const data: Proyecto = await response.json();
     return data;
   }
   catch (error) {
     console.error('Error en BorrarProyecto:', error);
-    return [];
   }
 }
 export function BorrarProyecto(id: number) {
-  const [Proyecto, setProyecto] = useState<Proyecto[]>([]);
+  const [Proyecto, setProyecto] = useState<Proyecto>();
 
   useEffect(() => {
       BorrarProyectoAsync(id).then((data) => {
       setProyecto(data);
       });
-  }, []);
+  }, );
   return Proyecto;
 }
 export default BorrarProyecto;

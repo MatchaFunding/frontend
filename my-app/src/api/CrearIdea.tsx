@@ -27,14 +27,8 @@ export async function CrearIdeaAsync(data: Idea): Promise<Idea> {
     throw new Error('Error al obtener los datos');
   }
 }
-export function CrearIdea(data: Idea) {
-  const [Idea, setIdea] = useState<Idea>();
-
-  useEffect(() => {
-      CrearIdeaAsync(data).then((out) => {
-      setIdea(out);
-      });
-  }, );
-  return Idea;
+export async function CrearIdea(data: Idea): Promise<Idea> {
+  return await CrearIdeaAsync(data); // fetch/axios hacia tu API
 }
+
 export default CrearIdea;

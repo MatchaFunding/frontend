@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/NavBar/navbar";
-
+import Idea from "../../../models/Idea.tsx";
+import { CrearIdeaAsync , CrearIdea } from "../../../api/CrearIdea.tsx";
 const colorPalette = {
   primary: "#4c7500",
   secondary: "#a3ae3e",
@@ -53,24 +54,31 @@ const CreateIdea: React.FC = () => {
     }
   };
 
-  const handleSaveIdea = (finalAnswers: string[]) => {
-    try {
-      const existingIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
-      const newIdea = {
-        id: Date.now(),
-        field: finalAnswers[0],
-        problem: finalAnswers[1],
-        audience: finalAnswers[2],
-        uniqueness: finalAnswers[3],
-        createdAt: new Date().toISOString(),
-      };
-      localStorage.setItem("userIdeas", JSON.stringify([...existingIdeas, newIdea]));
-      setIsCompleted(true);
-    } catch (error) {
-      console.error("Error al guardar la idea en localStorage:", error);
-      alert("Hubo un error al guardar tu idea.");
-    }
-  };
+ const handleSaveIdea = async (finalAnswers: string[]) => {
+  try {
+    const existingIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
+
+    const datos_idea: Idea = {
+      ID: 2,
+      Usuario: 1,
+      Campo: finalAnswers[0],
+      Problema: finalAnswers[1],
+      Publico: finalAnswers[2],
+      Innovacion: finalAnswers[3],
+    };
+
+    // Guardar en backend
+    const savedIdea = CrearIdea(datos_idea);
+
+    // Guardar en localStorage
+    localStorage.setItem("userIdeas", JSON.stringify([...existingIdeas, savedIdea]));
+
+    // setIsCompleted(true);
+  } catch (error) {
+    console.error("Error al guardar la idea en localStorage:", error);
+    alert("Hubo un error al guardar tu idea.");
+  }
+};
 
   const handleCreateAnother = () => {
     setStep(0);

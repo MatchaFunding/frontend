@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import NavBar from '../../../components/NavBar/navbar';
 import { Link, useNavigate } from 'react-router-dom';
+import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -46,7 +47,6 @@ const GraduationCapIcon: React.FC = () => (
 );
 const FondoCard: React.FC<Fondo> = ({ nombre, descripcion, compatibilidad, presupuesto, categoria, imagenUrl }) => {
   const navigate = useNavigate(); 
-
   return (
     <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80">
       <div className="relative h-52">
@@ -115,10 +115,12 @@ const FondosconPorcentaje: React.FC = () => {
     });
     return fondos;
   }, [searchTerm, categoriaFilter, sortBy]);
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
 
   return (
     <div className="min-h-screen bg-[#f1f5f9]">
       <NavBar />
+       {showDisclaimer && <DisclaimerModal onClose={() => setShowDisclaimer(false)} />}
       <main className="flex-grow p-6 md:p-10 max-w-screen-2xl mx-auto mt-[5%]">
         <div className="text-center mb-10">
           {selectedProject ? (

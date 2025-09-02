@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import NavBar from '../../../components/NavBar/navbar';
 import { useNavigate } from 'react-router-dom';
+import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -107,6 +108,7 @@ const FondosIdea: React.FC = () => {
   const [categoriaFilter, setCategoriaFilter] = useState('Todas');
   const [sortBy, setSortBy] = useState<'compatibilidad' | 'alfabetico' | 'presupuesto'>('compatibilidad');
   const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
 
   useEffect(() => {
 
@@ -163,10 +165,12 @@ const FondosIdea: React.FC = () => {
       </div>
     );
   }
+  
 
   return (
     <div className="min-h-screen bg-[#f1f5f9]">
       <NavBar />
+      {showDisclaimer && <DisclaimerModal onClose={() => setShowDisclaimer(false)} />}
       <main className="flex-grow p-6 md:p-10 max-w-screen-2xl mx-auto mt-[5%]">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-[#505143]">Fondos Recomendados para tu Idea</h1>

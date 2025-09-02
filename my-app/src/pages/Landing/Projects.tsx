@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import NavBar from '../../components/NavBar/navbar';
+// He eliminado 'import Proyecto from ...' y lo defino aquí mismo para que el código sea autocontenido.
+// Si tienes el archivo del modelo, puedes volver a importarlo.
 
+// --- INTERFACES ---
 interface PostulacionData {
   name: string;
   value: number;
   color: string;
 }
+
 interface Idea {
   id: number;
   field: string;
@@ -16,6 +20,16 @@ interface Idea {
   uniqueness: string;
   createdAt: string;
 }
+
+// Interfaz para los datos de un proyecto que vienen de la API
+interface Proyecto {
+  ID: number;
+  Titulo: string;
+  Descripcion: string;
+  estado?: string; // El estado puede ser opcional si no siempre viene de la API
+  fondo_seleccionado?: string; // Campo opcional
+}
+
 const colorPalette = {
   darkGreen: '#44624a',
   softGreen: '#8ba888',
@@ -24,10 +38,10 @@ const colorPalette = {
   tan: '#d5ccab',
   oliveGray: '#505143',
   background: '#f8f9fa',
-  danger: '#e53e3e', 
+  danger: '#e53e3e',
 };
 
-
+// --- COMPONENTES DE ICONOS (Sin cambios) ---
 const ChartBarIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5 mr-3"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>);
 const PaperAirplaneIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5 mr-3"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>);
 const ClockIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5 mr-3"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>);
@@ -42,34 +56,70 @@ const CustomTooltip = ({ active, payload }: any) => { if (active && payload && p
 
 const MisPostulaciones: React.FC = () => {
   const [activeSection, setActiveSection] = useState('estadisticas');
-  const RADIAN = Math.PI / 180;
-const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, name }: any) => {
-
-  const radius = outerRadius + 35; 
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-  return (
-    <text
-      x={x}
-      y={y}
-      fill={colorPalette.oliveGray}
-      textAnchor={x > cx ? 'start' : 'end'} 
-      dominantBaseline="central"
-      fontSize={14}
-    >
-      {`${name} (${(percent * 100).toFixed(0)}%)`}
-    </text>
-  );
-};
-  const [ideas, setIdeas] = useState<Idea[]>([]);
   const navigate = useNavigate();
 
+  // --- Estados para Ideas ---
+  const [ideas, setIdeas] = useState<Idea[]>([]);
+
+  // --- Estados para Proyectos ---
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
+  const [loadingProyectos, setLoadingProyectos] = useState<boolean>(false);
+  const [errorProyectos, setErrorProyectos] = useState<string | null>(null);
+
+
+  // --- Efecto para cargar IDEAS desde localStorage ---
   useEffect(() => {
     const storedIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
     setIdeas(storedIdeas);
   }, []);
 
+  // --- Efecto para cargar PROYECTOS desde la API ---
+  useEffect(() => {
+    const fetchProyectos = async () => {
+      const storedUser = sessionStorage.getItem("usuario");
+      if (!storedUser) {
+        setErrorProyectos("No se encontró información del usuario.");
+        return;
+      }
+
+      try {
+        const userData = JSON.parse(storedUser);
+        const empresaId = userData?.Beneficiario?.ID;
+
+        if (!empresaId) {
+          setErrorProyectos("No se pudo obtener el ID de la empresa.");
+          return;
+        }
+
+        setLoadingProyectos(true);
+        setErrorProyectos(null);
+
+        const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/verproyectosdeempresa/${empresaId}`);
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: No se pudo obtener la lista de proyectos.`);
+        }
+
+        const data = await response.json();
+        // Si la API devuelve el array directamente, `data` será el array.
+        // Si lo devuelve dentro de una clave como "proyectos", sería `data.proyectos`.
+        setProyectos(data || []); 
+
+      } catch (error: any) {
+        console.error("Error al obtener los proyectos:", error);
+        setErrorProyectos(error.message || "Ocurrió un error inesperado.");
+      } finally {
+        setLoadingProyectos(false);
+      }
+    };
+
+    // Llamamos a la función solo si la sección activa es 'proyectos'
+    if (activeSection === 'proyectos') {
+      fetchProyectos();
+    }
+  }, [activeSection]); // Se ejecuta cada vez que activeSection cambia
+
+
+  // --- Funciones de manejo ---
   const handleDeleteIdea = (idToDelete: number) => {
     if (window.confirm("¿Estás seguro de que quieres eliminar esta idea? Esta acción no se puede deshacer.")) {
       const updatedIdeas = ideas.filter(idea => idea.id !== idToDelete);
@@ -80,15 +130,39 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, name }:
 
   const handleRetakeIdea = (idea: Idea) => {
     console.log("Retomando idea:", idea);
-  
     alert(`Retomando la idea: "${idea.field}". Revisa la consola para ver los detalles.`);
   };
 
+  const handleEditProyecto = (proyecto: Proyecto) => {
+    console.log("Editando proyecto:", proyecto);
+    alert(`Funcionalidad para editar el proyecto "${proyecto.Titulo}" no implementada.`);
+  };
+    
+  const handleDeleteProyecto = (proyectoId: number) => {
+    if (window.confirm("¿Estás seguro de que quieres eliminar este proyecto?")) {
+      console.log("Eliminando proyecto con ID:", proyectoId);
+      alert(`Funcionalidad para eliminar el proyecto con ID ${proyectoId} no implementada.`);
+    }
+  };
 
-  const initialPostulacionesData: PostulacionData[] = [ { name: 'Aprobadas', value: 320, color: '#8ba888' }, { name: 'Adjudicadas', value: 90, color: '#d5ccab' }, { name: 'En Revisión', value: 39, color: '#d5e7cf' }, { name: 'Pendientes', value: 52, color: '#44624a' }, { name: 'Rechazadas', value: 24, color: '#c0d4ad' }, { name: 'Canceladas', value: 33, color: '#505143' }];
-  const postulacionesPorMes = [ { mes: 'Ene', Aprobadas: 40, Rechazadas: 10, Pendientes: 5 }, { mes: 'Feb', Aprobadas: 60, Rechazadas: 5, Pendientes: 10 }, { mes: 'Mar', Aprobadas: 50, Rechazadas: 8, Pendientes: 7 }, { mes: 'Abr', Aprobadas: 70, Rechazadas: 6, Pendientes: 9 }];
-  const postulacionesEnviadas = [ { id: 1, nombre: 'Wenapiolin', programa: 'bardiculo', estado: 'Aprobadas' }, { id: 2, nombre: 'MatchaFunding', programa: 'feria de software', estado: 'Pendientes' }];
+  // --- Datos y configuración para Gráficos ---
+  const initialPostulacionesData: PostulacionData[] = [{ name: 'Aprobadas', value: 320, color: '#8ba888' }, { name: 'Adjudicadas', value: 90, color: '#d5ccab' }, { name: 'En Revisión', value: 39, color: '#d5e7cf' }, { name: 'Pendientes', value: 52, color: '#44624a' }, { name: 'Rechazadas', value: 24, color: '#c0d4ad' }, { name: 'Canceladas', value: 33, color: '#505143' }];
+  const postulacionesPorMes = [{ mes: 'Ene', Aprobadas: 40, Rechazadas: 10, Pendientes: 5 }, { mes: 'Feb', Aprobadas: 60, Rechazadas: 5, Pendientes: 10 }, { mes: 'Mar', Aprobadas: 50, Rechazadas: 8, Pendientes: 7 }, { mes: 'Abr', Aprobadas: 70, Rechazadas: 6, Pendientes: 9 }];
+  const postulacionesEnviadas = [{ id: 1, nombre: 'Wenapiolin', programa: 'bardiculo', estado: 'Aprobadas' }, { id: 2, nombre: 'MatchaFunding', programa: 'feria de software', estado: 'Pendientes' }];
   const postulacionesHistoricas: any[] = [];
+  
+  const RADIAN = Math.PI / 180;
+  const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, name }: any) => {
+    const radius = outerRadius + 35;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    return (
+      <text x={x} y={y} fill={colorPalette.oliveGray} textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize={14}>
+        {`${name} (${(percent * 100).toFixed(0)}%)`}
+      </text>
+    );
+  };
+
 
   return (
     <div style={{ backgroundColor: colorPalette.background }} className="min-h-screen">
@@ -102,6 +176,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, name }:
               <button onClick={() => setActiveSection('estadisticas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'estadisticas' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'estadisticas' ? 'white' : colorPalette.oliveGray }}><ChartBarIcon />Estadísticas</button>
               <button onClick={() => setActiveSection('enviadas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'enviadas' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'enviadas' ? 'white' : colorPalette.oliveGray }}><PaperAirplaneIcon />Enviadas</button>
               <button onClick={() => setActiveSection('historial')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'historial' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'historial' ? 'white' : colorPalette.oliveGray }}><ClockIcon />Historial</button>
+              <button onClick={() => setActiveSection('proyectos')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'proyectos' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'proyectos' ? 'white' : colorPalette.oliveGray }}><PaperAirplaneIcon  />Mis Proyectos</button>
               
             
               <button onClick={() => setActiveSection('ideas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'ideas' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'ideas' ? 'white' : colorPalette.oliveGray }}><LightBulbIcon />Mis Ideas</button>
@@ -226,6 +301,73 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, name }:
                 </div>
               </div>
             )}
+
+              {activeSection === 'proyectos' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center">
+                                    <h1 className="text-3xl font-bold" style={{ color: colorPalette.darkGreen }}>Mis Proyectos</h1>
+                                    <div className="relative w-64">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><SearchIcon /></div>
+                                        <input type="text" placeholder="Buscar por título..." className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:border-transparent" style={{'--tw-ring-color': colorPalette.darkGreen} as React.CSSProperties}/>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                                    {loadingProyectos && <div className="text-center py-20" style={{ color: colorPalette.oliveGray }}>Cargando proyectos...</div>}
+                                    
+                                    {errorProyectos && <div className="text-center py-20 text-red-600">Error: {errorProyectos}</div>}
+
+                                    {!loadingProyectos && !errorProyectos && (
+                                        <>
+                                            {proyectos.length === 0 ? (
+                                                <div className="flex flex-col items-center justify-center text-center py-20 space-y-4">
+                                                    <EmptyBoxIcon />
+                                                    <p style={{ color: colorPalette.oliveGray }}>Aún no tienes proyectos guardados.</p>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    {/* Encabezado de la tabla */}
+                                                    <div className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 bg-slate-50">
+                                                        <div className="text-sm font-semibold col-span-2" style={{ color: colorPalette.oliveGray }}>Título del Proyecto</div>
+                                                        <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray }}>Fondo</div>
+                                                        <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray }}>Estado</div>
+                                                        <div className="text-sm font-semibold text-center" style={{ color: colorPalette.oliveGray }}>Acciones</div>
+                                                    </div>
+                                                    {/* Filas de la tabla */}
+                                                    {proyectos.map((proyecto) => (
+                                                        <div key={proyecto.ID} className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 items-center last:border-b-0 hover:bg-slate-50 transition-colors">
+                                                            <div className="col-span-2">
+                                                                <p className="font-medium" style={{ color: colorPalette.darkGreen }}>{proyecto.Titulo}</p>
+                                                                <p className="text-sm truncate" style={{ color: colorPalette.oliveGray }}>{proyecto.Descripcion}</p>
+                                                            </div>
+                                                            <div>
+                                                                <span className="inline-block px-3 py-1 text-sm font-semibold rounded-full" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen }}>
+                                                                    {/* NOTA: Ajusta `proyecto.fondo_seleccionado` al nombre real del campo de la API */}
+                                                                    {proyecto.fondo_seleccionado || "No asignado"}
+                                                                </span>
+                                                            </div>
+                                                            <div className="text-sm font-semibold" style={{ color: colorPalette.darkGreen }}>
+                                                                {/* El estado inicial debe ser "En preparación" */}
+                                                                {proyecto.estado || "En preparación"}
+                                                            </div>
+                                                            <div className="flex justify-center items-center space-x-3">
+                                                                <button onClick={() => handleEditProyecto(proyecto)} title="Editar Proyecto" className="p-2 rounded-full hover:bg-slate-200 transition-colors">
+                                                                    <PencilIcon className="h-5 w-5 text-[#505143]" />
+                                                                </button>
+                                                                <button onClick={() => handleDeleteProyecto(proyecto.ID)} title="Eliminar Proyecto" className="p-2 rounded-full hover:bg-red-100 transition-colors">
+                                                                    <TrashIcon className="h-5 w-5 text-red-500" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+            
             
             
           

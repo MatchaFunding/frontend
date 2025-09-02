@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import NavBar from '../../../components/NavBar/navbar';
 import { Link, useNavigate } from 'react-router-dom';
+import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -138,10 +139,12 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
     });
     return proyectos;
   }, [searchTerm, areaFilter, sortBy]);
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
 
   return (
     <div className="min-h-screen bg-[#f1f5f9]">
       <NavBar />
+       {showDisclaimer && <DisclaimerModal onClose={() => setShowDisclaimer(false)} />}
       <main className="flex-grow p-6 md:p-10 max-w-screen-2xl mx-auto mt-[5%]">
         <div className="text-center mb-10">
           {selectedProject ? (

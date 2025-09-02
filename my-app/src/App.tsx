@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import EditProfile from './pages/edit-profile/edit-profile.tsx';
 import FreeSearch from './pages/free-search/free-search.tsx';
 import SignUp from './pages/sign-up/sign-up.tsx';
+import Login from './pages/login/login.tsx';
 import MatchaHomePage from './pages/Landing/Mainpage.tsx';
 import MyProjects from './pages/Landing/Projects.tsx';
 import ProfileI from './pages/Landing/Profile.tsx';
@@ -26,6 +27,7 @@ function App() {
         <Route path="/free-search" element={<FreeSearch />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/Home-i" element={<MatchaHomePage />} />
         <Route path="/Proyectos" element={<MyProjects />} />
         <Route path="/Perfil" element={<ProfileI />} />

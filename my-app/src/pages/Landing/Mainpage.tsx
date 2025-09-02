@@ -1,13 +1,30 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import NavBar from '../../components/NavBar/navbar';
 import { useNavigate } from 'react-router-dom';
 
 const MatchaHomePage: React.FC = () => {
-     const navigate = useNavigate();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Obtener datos del usuario desde sessionStorage
+    const storedUser = sessionStorage.getItem('usuario');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        console.log('Datos del usuario cargados desde sessionStorage:', parsedUser);
+      } catch (error) {
+        console.error('Error al parsear datos del usuario desde sessionStorage:', error);
+      }
+    } else {
+      console.log('No se encontraron datos de usuario en sessionStorage');
+    }
+  }, []);
+
   return (
 
     <div className="bg-slate-50 h-screen flex flex-col">
       <NavBar />
+
    <main className="flex-grow p-8 md:p-12 lg:p-16 w-[100%] max-h-[100%]  mt-[5%] flex justify-center items-start">
   <div className="grid grid-cols-1 lg:grid-cols-5 gap-2 w-full h-full">
 

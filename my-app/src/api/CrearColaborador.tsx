@@ -3,14 +3,13 @@ import { useEffect, useState } from 'react';
 
 export async function CrearColaboradorAsync(data: Colaborador): Promise<Colaborador> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/crearcolaborador/`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearcolaborador/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'accept': 'application/json',
       },
       body: JSON.stringify({
-        'ID':data.ID,
         'Persona':data.Persona,
         'Proyecto':data.Proyecto,
       }),

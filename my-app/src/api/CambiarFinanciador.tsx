@@ -1,9 +1,9 @@
 import Financiador from '../models/Financiador.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CambiarFinanciadorAsync(id: number, data: Financiador): Promise<Financiador[]> {
+export async function CambiarFinanciadorAsync(id: number, data: Financiador): Promise<Financiador> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/cambiarfinanciador/${id}`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/cambiarfinanciador/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -25,22 +25,21 @@ export async function CambiarFinanciadorAsync(id: number, data: Financiador): Pr
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const result: Financiador[] = await response.json();
+    const result: Financiador = await response.json();
     return result;
   }
   catch (error) {
     console.error('Error en CambiarFinanciador:', error);
-    return [];
   }
 }
 export function CambiarFinanciador(id: number, data: Financiador) {
-  const [Financiador, setFinanciador] = useState<Financiador[]>([]);
+  const [Financiador, setFinanciador] = useState<Financiador>();
 
   useEffect(() => {
       CambiarFinanciadorAsync(id, data).then((out) => {
       setFinanciador(out);
       });
-  }, []);
+  }, );
   return Financiador;
 }
 export default CambiarFinanciador;

@@ -1,9 +1,9 @@
 import Postulacion from '../models/Postulacion.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CambiarPostulacionAsync(id: number, data: Postulacion): Promise<Postulacion[]> {
+export async function CambiarPostulacionAsync(id: number, data: Postulacion): Promise<Postulacion> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/cambiarpostulacion/${id}`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/cambiarpostulacion/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -24,22 +24,21 @@ export async function CambiarPostulacionAsync(id: number, data: Postulacion): Pr
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const result: Postulacion[] = await response.json();
+    const result: Postulacion = await response.json();
     return result;
   }
   catch (error) {
     console.error('Error en CambiarPostulacion:', error);
-    return [];
   }
 }
 export function CambiarPostulacion(id: number, data: Postulacion) {
-  const [Postulacion, setPostulacion] = useState<Postulacion[]>([]);
+  const [Postulacion, setPostulacion] = useState<Postulacion>();
 
   useEffect(() => {
       CambiarPostulacionAsync(id, data).then((out) => {
       setPostulacion(out);
       });
-  }, []);
+  }, );
   return Postulacion;
 }
 export default CambiarPostulacion;

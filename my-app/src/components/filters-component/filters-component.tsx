@@ -61,12 +61,12 @@ const FiltersComponent: React.FC<FiltersComponentProps> = ({ order, setOrder, ca
       <div className="filters-container">
         <button className="filter-btn" onClick={() => { setOpenFilters(true); setTempFilters(filters); }}>
           Filtros
-          <img src="/svgs/filter.svg" alt="Filter icon" style={{ width: '15px', height: '15px', filter: 'brightness(0) invert(1)' }} />
+          <img src="/svgs/filter.svg" alt="Filter icon" />
         </button>
         <div className="filter-dropdown" ref={dropdownOrderRef}>
           <button className="filter-btn" type="button" onClick={() => setOpenOrder(o => !o)} aria-haspopup="listbox" aria-expanded={openOrder}>
             Ordenar
-            <img src="/svgs/arrow-up-down.svg" alt="Sort icon" style={{ width: '15px', height: '15px', filter: 'brightness(0) invert(1)' }} />
+            <img src="/svgs/arrow-up-down.svg" alt="Sort icon" />
           </button>
           {openOrder && (
             <div className="dropdown-menu">
@@ -97,7 +97,7 @@ const FiltersComponent: React.FC<FiltersComponentProps> = ({ order, setOrder, ca
         <div className="filter-dropdown" ref={dropdownShowRef}>
           <button className="filter-btn" type="button" onClick={() => setOpenShow(o => !o)} aria-haspopup="listbox" aria-expanded={openShow}>
             Mostrar
-            <img src="/svgs/3-points.svg" alt="Show icon" style={{ width: '15px', height: '15px', filter: 'brightness(0) invert(1)' }} />
+            <img src="/svgs/3-points.svg" alt="Show icon" />
           </button>
           {openShow && (
             <div className="dropdown-menu">

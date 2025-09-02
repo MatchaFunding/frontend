@@ -1,9 +1,9 @@
 import Persona from '../models/Persona.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarPersonaAsync(id: number): Promise<Persona[]> {
+export async function BorrarPersonaAsync(id: number): Promise<Persona> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/borrarpersona/${id}`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borrarpersona/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -12,22 +12,21 @@ export async function BorrarPersonaAsync(id: number): Promise<Persona[]> {
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const data: Persona[] = await response.json();
+    const data: Persona = await response.json();
     return data;
   }
   catch (error) {
     console.error('Error en BorrarPersona:', error);
-    return [];
   }
 }
 export function BorrarPersona(id: number) {
-  const [Persona, setPersona] = useState<Persona[]>([]);
+  const [Persona, setPersona] = useState<Persona>();
 
   useEffect(() => {
       BorrarPersonaAsync(id).then((data) => {
       setPersona(data);
       });
-  }, []);
+  }, );
   return Persona;
 }
 export default BorrarPersona;

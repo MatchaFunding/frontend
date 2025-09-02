@@ -14,6 +14,8 @@ export const initialFilters: FiltersValues = {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Funciones de utilidad
 export function parseAmount(benefit: string): number {
+  if (!benefit) return 0;
+  
   // Primero verificar si el beneficio tiene formato "numero,currency"
   const benefitParts = benefit.split(',');
   if (benefitParts.length === 2 && !isNaN(Number(benefitParts[0].replace(/\./g, '')))) {
@@ -25,6 +27,8 @@ export function parseAmount(benefit: string): number {
 }
 
 export function isBenefitAmount(benefit: string): boolean {
+  if (!benefit) return false;
+  
   const benefitParts = benefit.split(',');
   return benefitParts.length === 2 && !isNaN(Number(benefitParts[0].replace(/\./g, '')));
 }
@@ -36,6 +40,8 @@ export function filterCardsByAmount(
   if (!filters.amountMin && !filters.amountMax) return cards;
   
   return cards.filter(card => {
+    if (!card.benefit) return false;
+    
     const benefitParts = card.benefit.split(',');
     if (benefitParts.length !== 2) return false;
     const amount = Number(benefitParts[0].replace(/\./g, ''));
@@ -54,48 +60,142 @@ export function sortCards(
   const sortedCards = [...cards];
   
   if (order === 'title-asc') {
-    return sortedCards.sort((a, b) => a.title.localeCompare(b.title));
+    return sortedCards.sort((a, b) => {
+      const titleA = a.title || '';
+      const titleB = b.title || '';
+      return titleA.localeCompare(titleB);
+    });
   } else if (order === 'amount-desc') {
-    const amountCards = sortedCards.filter(card => isBenefitAmount(card.benefit));
-    return amountCards.sort((a, b) => parseAmount(b.benefit) - parseAmount(a.benefit));
+    const amountCards = sortedCards.filter(card => card.benefit && isBenefitAmount(card.benefit));
+    return amountCards.sort((a, b) => {
+      const benefitA = a.benefit || '';
+      const benefitB = b.benefit || '';
+      return parseAmount(benefitB) - parseAmount(benefitA);
+    });
   } else if (order === 'amount-asc') {
-    const amountCards = sortedCards.filter(card => isBenefitAmount(card.benefit));
-    return amountCards.sort((a, b) => parseAmount(a.benefit) - parseAmount(b.benefit));
+    const amountCards = sortedCards.filter(card => card.benefit && isBenefitAmount(card.benefit));
+    return amountCards.sort((a, b) => {
+      const benefitA = a.benefit || '';
+      const benefitB = b.benefit || '';
+      return parseAmount(benefitA) - parseAmount(benefitB);
+    });
   }
   
   return sortedCards;
 }
 
-export function generateRandomCards(count: number): FreeSearchCardType[] {
-  const topics = ['Educación', 'Salud', 'Cultura', 'Ciencia', 'Medio Ambiente', 'Emprendimiento'];
-  const images = ['/prueba.png', '/anid.jpg'];
-  
-  return Array.from({ length: count }, (_, i) => ({
-    title: `Fondo Extra ${i + 1}`,
-    description: `Descripción inventada para el fondo número ${i + 1}.`,
-    topic: topics[i % topics.length],
-    benefit: i % 3 === 0 
-      ? `${Math.floor(Math.random() * 200 + 50)}.000.000,CLP` 
-      : `Beneficio de texto para el fondo ${i + 1} que puede ser más largo y descriptivo`,
-    image: images[i % images.length],
-  }));
-}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Datos de ejemplo
-export const baseCards: FreeSearchCardType[] = [
-  { title: 'Fondo de Innovación Educativa', description: 'Financiamiento para proyectos que desarrollen soluciones innovadoras en el sector educativo.', topic: 'Educación', benefit: '150.000.000,CLP', image: '/prueba.png' },
-  { title: 'Fondo de Innovación Educativa', description: 'Financiamiento para proyectos que desarrollen soluciones innovadoras en el sector educativo.', topic: 'Educación', benefit: '150.000.000,CLP', image: '/anid.jpg' },
-  { title: 'Fondo de Innovación Educativa', description: 'Financiamiento para proyectos que desarrollen soluciones innovadoras en el sector educativo.', topic: 'Educación', benefit: '150.000.000,CLP', image: '/prueba.png' },
-  { title: 'Fondo de Innovación Educativa', description: 'Financiamiento para proyectos que desarrollen soluciones innovadoras en el sector educativo.', topic: 'Educación', benefit: '150.000.000,CLP', image: '/anid.jpg' },
-  { title: 'Fondo de Innovación Educativaaaaaaaaaaaaaaaaaaaaaa', description: 'Financiamiento para proyectos que desarrollen soluciones innovadoras en el sector educativoaaaaaaaaaaaaaaaaaaaaaaaa.', topic: 'Educación', benefit: '150.000.000,CLP', image: '/prueba.png' },
-  { title: 'Fondo Verde Sustentable', description: 'Apoyo financiero para proyectos de energías renovables y sostenibilidad ambiental.', topic: 'Medio Ambiente', benefit: '200.000.000,CLP', image: '/anid.jpg' },
-  { title: 'Fondo Mujer Emprende', description: 'Financiamiento para emprendimientos liderados por mujeres en cualquier rubro.', topic: 'Emprendimiento', benefit: '100.000.000,CLP', image: '/prueba.png' },
-  { title: 'Fondo Salud Digital', description: 'Recursos para proyectos de innovación tecnológica en el área de la salud.', topic: 'Salud', benefit: '180.000.000,CLP', image: '/anid.jpg' },
-  { title: 'Fondo Cultura Viva', description: 'Apoyo a iniciativas culturales y artísticas a nivel nacional.', topic: 'Cultura', benefit: '120.000.000,CLP', image: '/prueba.png' },
-  { title: 'Fondo Ciencia Joven', description: 'Financiamiento para jóvenes investigadores y proyectos científicos emergentes.', topic: 'Ciencia', benefit: '90.000.000,CLP', image: '/anid.jpg' },
-];
+// Array vacío por defecto para usar solo datos del backend
+export const initialCards: FreeSearchCardType[] = [];
 
-export const initialCards: FreeSearchCardType[] = [
-  ...baseCards,
-  ...generateRandomCards(40)
-];
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Funciones para manejo de datos del backend
+
+export function formatAmount(amount: number): string {
+  if (!amount || amount <= 0) {
+    return 'Beneficio por consultar';
+  }
+  const formattedAmount = amount.toLocaleString('es-CL');
+  return `${formattedAmount},CLP`;
+}
+
+export function validateImageUrl(imageUrl: string): string {
+  return imageUrl && imageUrl.trim() !== '' ? imageUrl : '/sin-foto.png';
+}
+
+export function mapInstrumentToCard(instrumento: any): FreeSearchCardType {
+  console.log('mapInstrumentToCard - instrumento individual:', instrumento);
+  
+  const benefit = formatAmount(instrumento.MontoMaximo);
+  const imageUrl = validateImageUrl(instrumento.EnlaceDeLaFoto);
+
+  const mappedCard = {
+    title: instrumento.Titulo || 'Título no disponible',
+    description: instrumento.Descripcion || 'Descripción no disponible',
+    topic: instrumento.TipoDeBeneficio || 'General',
+    benefit: benefit,
+    image: imageUrl,
+    fechaApertura: instrumento.FechaDeApertura,
+    fechaCierre: instrumento.FechaDeCierre
+  };
+  
+  console.log('Card mapeada individual:', mappedCard);
+  return mappedCard;
+}
+
+export function mapInstrumentsToCards(instrumentos: any[]): FreeSearchCardType[] {
+  console.log('mapInstrumentsToCards - instrumentos recibidos:', instrumentos);
+  console.log('mapInstrumentsToCards - length:', instrumentos?.length);
+  
+  if (!instrumentos || instrumentos.length === 0) {
+    console.log('No hay instrumentos, retornando array vacío');
+    return [];
+  }
+  
+  const mappedCards = instrumentos.map(mapInstrumentToCard);
+  console.log('Cards mapeadas:', mappedCards);
+  return mappedCards;
+}
+
+export function calculatePagination(
+  totalCards: number, 
+  cardsPerPage: number, 
+  currentPage: number
+) {
+  const totalPages = Math.ceil(totalCards / cardsPerPage);
+  const startIndex = (currentPage - 1) * cardsPerPage;
+  const endIndex = startIndex + cardsPerPage;
+  
+  return {
+    totalPages,
+    startIndex,
+    endIndex,
+    paginatedIndices: { start: startIndex, end: endIndex }
+  };
+}
+
+export function getPaginatedCards<T>(cards: T[], page: number, cardsPerPage: number): T[] {
+  const { startIndex, endIndex } = calculatePagination(cards.length, cardsPerPage, page);
+  return cards.slice(startIndex, endIndex);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Funciones de búsqueda
+export function searchCardsByText(cards: FreeSearchCardType[], searchTerm: string): FreeSearchCardType[] {
+  if (!searchTerm || searchTerm.trim() === '') {
+    return cards;
+  }
+
+  const normalizedSearchTerm = searchTerm.toLowerCase().trim();
+  
+  return cards.filter(card => 
+    card.title?.toLowerCase().includes(normalizedSearchTerm) ||
+    card.description?.toLowerCase().includes(normalizedSearchTerm) ||
+    card.topic?.toLowerCase().includes(normalizedSearchTerm)
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Funciones para manejo de eventos
+export function createHandlePageChange(
+  setPage: (page: number) => void,
+  totalPages: number
+) {
+  return {
+    goToPage: (page: number) => {
+      if (page >= 1 && page <= totalPages) {
+        setPage(page);
+      }
+    },
+    goToNext: (currentPage: number) => {
+      if (currentPage < totalPages) {
+        setPage(currentPage + 1);
+      }
+    },
+    goToPrevious: (currentPage: number) => {
+      if (currentPage > 1) {
+        setPage(currentPage - 1);
+      }
+    }
+  };
+}

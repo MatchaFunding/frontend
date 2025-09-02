@@ -1,9 +1,9 @@
 import Miembro from '../models/Miembro.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CambiarMiembroAsync(id: number, data: Miembro): Promise<Miembro[]> {
+export async function CambiarMiembroAsync(id: number, data: Miembro): Promise<Miembro> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/cambiarmiembro/${id}`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/cambiarmiembro/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -18,22 +18,21 @@ export async function CambiarMiembroAsync(id: number, data: Miembro): Promise<Mi
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const result: Miembro[] = await response.json();
+    const result: Miembro = await response.json();
     return result;
   }
   catch (error) {
     console.error('Error en CambiarMiembro:', error);
-    return [];
   }
 }
 export function CambiarMiembro(id: number, data: Miembro) {
-  const [Miembro, setMiembro] = useState<Miembro[]>([]);
+  const [Miembro, setMiembro] = useState<Miembro>();
 
   useEffect(() => {
       CambiarMiembroAsync(id, data).then((out) => {
       setMiembro(out);
       });
-  }, []);
+  }, );
   return Miembro;
 }
 export default CambiarMiembro;

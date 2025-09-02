@@ -25,7 +25,7 @@ const SelectIdea: React.FC = () => {
 
           <Card className="flex flex-col items-center p-8 max-w-sm text-center">
             <div className="flex-grow">
-              <img src="/Matchitograduado.png" alt="Ilustración de taza de té" className="w-30 h-auto mb-4 mx-auto" />
+              <img src="/ideamatchito.png" alt="Ilustración de taza de té" className="w-30 h-auto mb-4 mx-auto" />
               <h2 className="text-2xl font-bold" style={{ color: colorPalette.oliveGray }}>
                 ¿Tienes una idea?
               </h2>
@@ -58,6 +58,24 @@ const SelectIdea: React.FC = () => {
                onClick={() => navigate("/Matcha/Nuevo-proyecto")}
             >
               Generar Proyecto
+            </button>
+          </Card>
+            <Card className="flex flex-col items-center p-8 max-w-sm text-center">
+            <div className="flex-grow">
+              <img src="/Matchitograduado.png" alt="Ilustración de taza de té" className="w-30 h-auto mb-4 mx-auto" />
+              <h2 className="text-2xl font-bold" style={{ color: colorPalette.oliveGray }}>
+                Encuentra los proyectos históricos
+              </h2>
+              <p className="text-slate-600 mt-2 text-base mt-5">
+               Compara con ideas anteriores para saber tu compatibilidad con fondos y mejorar tus posibilidades de exito con los proyectos ganadores.
+              </p>
+            </div>
+            <button
+              className="mt-5 font-bold py-3 px-8 rounded-2xl transition-transform transform hover:scale-105" 
+              style={{ backgroundColor: '#c5d888', color: colorPalette.darkGreen }}
+               onClick={() => navigate("/Matcha/My-projects")}
+            >
+              Generar Match histórico
             </button>
           </Card>
 

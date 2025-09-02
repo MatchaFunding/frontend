@@ -85,18 +85,24 @@ const Navbar: React.FC = () => {
             ))}
           </div>
 
-          {/* Sección Derecha: Idioma e Iniciar Sesión */}
+          {/* Sección Derecha: Idioma, Registrarse e Iniciar Sesión */}
           <div className="hidden md:flex items-center space-x-4">
             <button className="flex items-center px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 hover:text-white transition-colors">
               <GlobeIcon className="w-5 h-5 mr-1" />
               Idioma
             </button>
-            <a
-        
+            <Link
+              to="/signup"
               className="bg-white text-gray-900 px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-200 transition-colors"
             >
-              <Link to="/Login">Iniciar sesión </Link>
-            </a>
+              Registrarse
+            </Link>
+            <Link
+              to="/login"
+              className="text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-white hover:bg-opacity-20 transition-colors"
+            >
+              Iniciar sesión
+            </Link>
           </div>
 
           <div className="md:hidden flex items-center">
@@ -136,13 +142,20 @@ const Navbar: React.FC = () => {
               </button>
             </div>
             <div className="mt-3 px-2 space-y-1">
-              <a
-                
+              <Link
+                to="/signup"
                 className="block w-full text-left bg-gray-100 text-gray-900 px-4 py-2 rounded-md text-base font-semibold hover:bg-gray-200 transition-colors"
-                    
+                onClick={() => setIsMobileMenuOpen(false)}
               >
-               <Link to="/Login">Iniciar sesión </Link>
-              </a>
+                Registrarse
+              </Link>
+              <Link
+                to="/login"
+                className="block w-full text-left border border-gray-300 text-gray-300 px-4 py-2 rounded-md text-base font-semibold hover:bg-white hover:bg-opacity-20 hover:text-white transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Iniciar sesión
+              </Link>
             </div>
           </div>
         </div>

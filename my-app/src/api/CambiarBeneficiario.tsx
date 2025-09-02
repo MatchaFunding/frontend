@@ -1,9 +1,9 @@
 import Beneficiario from '../models/Beneficiario.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CambiarBeneficiarioAsync(id: number, data: Beneficiario): Promise<Beneficiario[]> {
+export async function CambiarBeneficiarioAsync(id: number, data: Beneficiario): Promise<Beneficiario> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/cambiarbeneficiario/${id}`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/cambiarbeneficiario/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -25,22 +25,21 @@ export async function CambiarBeneficiarioAsync(id: number, data: Beneficiario): 
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const result: Beneficiario[] = await response.json();
+    const result: Beneficiario = await response.json();
     return result;
   }
   catch (error) {
     console.error('Error en CambiarBeneficiario:', error);
-    return [];
   }
 }
 export function CambiarBeneficiario(id: number, data: Beneficiario) {
-  const [Beneficiario, setBeneficiario] = useState<Beneficiario[]>([]);
+  const [Beneficiario, setBeneficiario] = useState<Beneficiario>();
 
   useEffect(() => {
       CambiarBeneficiarioAsync(id, data).then((out) => {
       setBeneficiario(out);
       });
-  }, []);
+  }, );
   return Beneficiario;
 }
 export default CambiarBeneficiario;

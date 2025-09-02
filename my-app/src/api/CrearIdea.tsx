@@ -3,14 +3,13 @@ import { useEffect, useState } from 'react';
 
 export async function CrearIdeaAsync(data: Idea): Promise<Idea> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/crearidea/`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearidea/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'accept': 'application/json',
       },
       body: JSON.stringify({
-        'ID':data.ID,
         'Usuario':data.Usuario,
         'Campo':data.Campo,
         'Problema':data.Problema,

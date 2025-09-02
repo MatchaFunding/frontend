@@ -1,9 +1,9 @@
 import Colaborador from '../models/Colaborador.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarColaboradorAsync(id: number): Promise<Colaborador[]> {
+export async function BorrarColaboradorAsync(id: number): Promise<Colaborador> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/borrarcolaborador/${id}`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borrarcolaborador/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -12,22 +12,21 @@ export async function BorrarColaboradorAsync(id: number): Promise<Colaborador[]>
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const data: Colaborador[] = await response.json();
+    const data: Colaborador = await response.json();
     return data;
   }
   catch (error) {
     console.error('Error en BorrarColaborador:', error);
-    return [];
   }
 }
 export function BorrarColaborador(id: number) {
-  const [Colaborador, setColaborador] = useState<Colaborador[]>([]);
+  const [Colaborador, setColaborador] = useState<Colaborador>();
 
   useEffect(() => {
       BorrarColaboradorAsync(id).then((data) => {
       setColaborador(data);
       });
-  }, []);
+  }, );
   return Colaborador;
 }
 export default BorrarColaborador;

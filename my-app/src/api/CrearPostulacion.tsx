@@ -3,14 +3,13 @@ import { useEffect, useState } from 'react';
 
 export async function CrearPostulacionAsync(data: Postulacion): Promise<Postulacion> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/crearpostulacion/`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearpostulacion/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'accept': 'application/json',
       },
       body: JSON.stringify({
-        'ID':data.ID,
         'Beneficiario':data.Beneficiario,
         'Proyecto':data.Proyecto,
         'Instrumento':data.Instrumento,

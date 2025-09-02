@@ -1,9 +1,9 @@
 import Instrumento from '../models/Instrumento.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarInstrumentoAsync(id: number): Promise<Instrumento[]> {
+export async function BorrarInstrumentoAsync(id: number): Promise<Instrumento> {
   try {
-    const response = await fetch(`https://spring-park-flashing-ensures.trycloudflare.com/borrarinstrumento/${id}`, {
+    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borrarinstrumento/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -12,22 +12,21 @@ export async function BorrarInstrumentoAsync(id: number): Promise<Instrumento[]>
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const data: Instrumento[] = await response.json();
+    const data: Instrumento = await response.json();
     return data;
   }
   catch (error) {
     console.error('Error en BorrarInstrumento:', error);
-    return [];
   }
 }
 export function BorrarInstrumento(id: number) {
-  const [Instrumento, setInstrumento] = useState<Instrumento[]>([]);
+  const [Instrumento, setInstrumento] = useState<Instrumento>();
 
   useEffect(() => {
       BorrarInstrumentoAsync(id).then((data) => {
       setInstrumento(data);
       });
-  }, []);
+  }, );
   return Instrumento;
 }
 export default BorrarInstrumento;

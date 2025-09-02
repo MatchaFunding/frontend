@@ -7,8 +7,10 @@ import { Button } from "../../../components/UI/buttons";
 import { Textarea } from "../../../components/UI/textarea";
 import { StepIndicator } from "../../../components/Shared/StepIndicator";
 import { CrearProyectoAsync } from "../../../api/CrearProyecto";
+import { CrearColaboradorAsync } from "../../../api/CrearColaborador";
 import PersonaClass from "../../../models/Persona";
 import Proyecto from "../../../models/Proyecto";
+import Colaborador from "../../../models/Colaborador";
 
 interface PersonaPayload { Nombre: string; Sexo: string; RUT: string; FechaDeNacimiento: string; }
 
@@ -55,8 +57,8 @@ const NuevoProyecto: React.FC = () => {
   const [nuevaPersonaData, setNuevaPersonaData] = useState<PersonaPayload>({
     Nombre: "", Sexo: "OTR", RUT: "", FechaDeNacimiento: ""
   });
-  const storedUser = sessionStorage.getItem("usuario");
   const navigate = useNavigate();
+  const storedUser = sessionStorage.getItem("usuario");
 
   useEffect(() => {
     if (storedUser) {
@@ -65,6 +67,8 @@ const NuevoProyecto: React.FC = () => {
       setPersonas(usuario.Miembros.map((m: any) => new PersonaClass(m)));
     }
   }, [storedUser]);
+
+  console.log("Personas de la empresa: " + JSON.stringify(personas));
 
   const handleChange = ( e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> ) => {
     const { name, value } = e.target;
@@ -89,12 +93,11 @@ const NuevoProyecto: React.FC = () => {
         const personaCreada = await resPersona.json();
         setFormData(prev => ({ ...prev, Miembros: [...prev.Miembros, personaCreada.Nombre] }));
         setPersonas(prev => [...prev, new PersonaClass(personaCreada)]);
-        
         alert("Persona creada y añadida al proyecto exitosamente.");
         setIsModalOpen(false);
         setNuevaPersonaData({ Nombre: "", Sexo: "OTR", RUT: "", FechaDeNacimiento: "" });
-
-    } catch (error) {
+    }
+    catch (error) {
         if (error instanceof Error) alert(error.message);
         else alert("Ocurrió un error inesperado al crear la persona.");
     }
@@ -108,7 +111,7 @@ const NuevoProyecto: React.FC = () => {
     if (!formData.Alcance || !formData.Area) { alert("Debes seleccionar un Alcance y un Área."); return; }
 
     try {
-      const json = {
+      const json_proy = {
         Beneficiario: formData.Beneficiario,
         Titulo: formData.Titulo,
         Descripcion: formData.Descripcion,
@@ -117,10 +120,26 @@ const NuevoProyecto: React.FC = () => {
         Alcance: formData.Alcance,
         Area: formData.Area
       };
-      const proyecto: Proyecto = new Proyecto(json);
-      console.log("Proyecto a enviar: " + JSON.stringify(proyecto));
+      const proyecto: Proyecto = new Proyecto(json_proy);
       const proyectoCreado: Proyecto = await CrearProyectoAsync(proyecto);
-      console.log("Proyecto enviado correctamente: " + JSON.stringify(proyectoCreado));
+      
+      if (storedUser) {
+        const usuario = JSON.parse(storedUser);
+        const miembros = usuario.Miembros;
+        for (let p = 0; p < personas.length; p++) {
+          if (miembros.includes(personas[p]) === false) {
+            const json_colab = {
+              Persona: personas[p].ID,
+              Proyecto: proyectoCreado.ID
+            };
+            const colaborador: Colaborador = new Colaborador(json_colab);
+            await CrearColaboradorAsync(colaborador);
+          }
+        }
+      }
+      else {
+        console.log('No se encontraron datos de usuario en sessionStorage');
+      }
 
       alert("¡Proyecto y colaboradores creados exitosamente!");
       navigate("/Home-i");

@@ -1,7 +1,6 @@
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 import type { FreeSearchCard as FreeSearchCardType } from '../../components/free-search-card/free-search-card.ts';
 import type { FiltersValues, OrderOption } from '../../components/filters-component/filters-component.ts';
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Constantes iniciales
 export const initialFilters: FiltersValues = {
   region: '',
@@ -11,7 +10,7 @@ export const initialFilters: FiltersValues = {
   benefitType: '',
   status: '',
 };
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Funciones de utilidad
 export function parseAmount(benefit: string): number {
   if (!benefit) return 0;
@@ -84,13 +83,10 @@ export function sortCards(
   return sortedCards;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Array vacío por defecto para usar solo datos del backend
 export const initialCards: FreeSearchCardType[] = [];
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Funciones para manejo de datos del backend
-
 export function formatAmount(amount: number): string {
   if (!amount || amount <= 0) {
     return 'Beneficio por consultar';
@@ -104,8 +100,6 @@ export function validateImageUrl(imageUrl: string): string {
 }
 
 export function mapInstrumentToCard(instrumento: any): FreeSearchCardType {
-  console.log('mapInstrumentToCard - instrumento individual:', instrumento);
-  
   const benefit = formatAmount(instrumento.MontoMaximo);
   const imageUrl = validateImageUrl(instrumento.EnlaceDeLaFoto);
 
@@ -118,22 +112,14 @@ export function mapInstrumentToCard(instrumento: any): FreeSearchCardType {
     fechaApertura: instrumento.FechaDeApertura,
     fechaCierre: instrumento.FechaDeCierre
   };
-  
-  console.log('Card mapeada individual:', mappedCard);
   return mappedCard;
 }
 
 export function mapInstrumentsToCards(instrumentos: any[]): FreeSearchCardType[] {
-  console.log('mapInstrumentsToCards - instrumentos recibidos:', instrumentos);
-  console.log('mapInstrumentsToCards - length:', instrumentos?.length);
-  
   if (!instrumentos || instrumentos.length === 0) {
-    console.log('No hay instrumentos, retornando array vacío');
     return [];
   }
-  
   const mappedCards = instrumentos.map(mapInstrumentToCard);
-  console.log('Cards mapeadas:', mappedCards);
   return mappedCards;
 }
 
@@ -159,7 +145,6 @@ export function getPaginatedCards<T>(cards: T[], page: number, cardsPerPage: num
   return cards.slice(startIndex, endIndex);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Funciones de búsqueda
 export function searchCardsByText(cards: FreeSearchCardType[], searchTerm: string): FreeSearchCardType[] {
   if (!searchTerm || searchTerm.trim() === '') {
@@ -175,7 +160,6 @@ export function searchCardsByText(cards: FreeSearchCardType[], searchTerm: strin
   );
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Funciones para manejo de eventos
 export function createHandlePageChange(
   setPage: (page: number) => void,

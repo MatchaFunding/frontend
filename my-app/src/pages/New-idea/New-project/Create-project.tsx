@@ -8,6 +8,7 @@ import { Textarea } from "../../../components/UI/textarea";
 import { StepIndicator } from "../../../components/Shared/StepIndicator";
 import { CrearProyectoAsync } from "../../../api/CrearProyecto";
 import { CrearColaboradorAsync } from "../../../api/CrearColaborador";
+import { VerEmpresaCompletaAsync } from "../../../api/VerEmpresaCompleta";
 import PersonaClass from "../../../models/Persona";
 import Proyecto from "../../../models/Proyecto";
 import Colaborador from "../../../models/Colaborador";
@@ -121,10 +122,10 @@ const NuevoProyecto: React.FC = () => {
       };
       const proyecto: Proyecto = new Proyecto(json_proy);
       const proyectoCreado: Proyecto = await CrearProyectoAsync(proyecto);
-      
       if (storedUser) {
-        const usuario = JSON.parse(storedUser);
-        const miembros = usuario.Miembros;
+        const datos = JSON.parse(storedUser);
+        const usuario = datos.Usuario;
+        const miembros = datos.Miembros;
         for (let p = 0; p < personas.length; p++) {
           if (miembros.includes(personas[p]) === false) {
             const json_colab = {
@@ -132,16 +133,21 @@ const NuevoProyecto: React.FC = () => {
               Proyecto: proyectoCreado.ID
             };
             const colaborador: Colaborador = new Colaborador(json_colab);
-            await CrearColaboradorAsync(colaborador);
+            CrearColaboradorAsync(colaborador);
           }
+        }
+        if (usuario.ID) {
+          const resultado = await VerEmpresaCompletaAsync(usuario.ID);
+          if (resultado) {
+            sessionStorage.setItem('usuario', JSON.stringify(resultado));
+          }
+          alert("¡Proyecto y colaboradores creados exitosamente!");
+          navigate("/Home-i");
         }
       }
       else {
         console.log('No se encontraron datos de usuario en sessionStorage');
       }
-
-      alert("¡Proyecto y colaboradores creados exitosamente!");
-      navigate("/Home-i");
     } 
     catch (error) {
       console.error("Falló el proceso de creación:", error);

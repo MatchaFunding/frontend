@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './filters-idea.css';
 import type {OrderOption, FiltersIdeaValues, FiltersIdeaProps} from './filters-idea';
-import {camposIdea, publicosObjetivo, orderOptions, handleClickOutside, handleKeyDown} from './filters-idea';
+import { orderOptions, handleClickOutside, handleKeyDown} from './filters-idea';
 
 const FiltersIdea: React.FC<FiltersIdeaProps> = ({ filters, onApplyFilters }) => {
   const [openOrder, setOpenOrder] = useState(false);

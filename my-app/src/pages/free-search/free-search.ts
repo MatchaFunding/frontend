@@ -110,7 +110,8 @@ export function mapInstrumentToCard(instrumento: any): FreeSearchCardType {
     benefit: benefit,
     image: imageUrl,
     fechaApertura: instrumento.FechaDeApertura,
-    fechaCierre: instrumento.FechaDeCierre
+    fechaCierre: instrumento.FechaDeCierre,
+    link: instrumento.EnlaceDelDetalle
   };
   return mappedCard;
 }

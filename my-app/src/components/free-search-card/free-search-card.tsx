@@ -8,7 +8,7 @@ import {
   formatDate
 } from './free-search-card';
 
-const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ title, description, topic, benefit, image, fechaApertura, fechaCierre }) => {
+const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ title, description, topic, benefit, image, fechaApertura, fechaCierre, link }) => {
   const renderBenefit = (benefit: string) => {
     return (
       <span className={getBenefitClassName(benefit)}>
@@ -18,8 +18,8 @@ const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ title, description, top
   };
 
   const renderDates = () => {
-    if (!fechaApertura && !fechaCierre) return null;
-    
+    if (!fechaApertura && !fechaCierre) 
+      return null;
     return (
       <div className="free-search-card__dates">
         {fechaApertura && (
@@ -52,7 +52,9 @@ const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ title, description, top
             <span className="free-search-card__topic">{topic || 'General'}</span>
             {renderBenefit(benefit || 'Beneficio no disponible')}
           </div>
-          <button className="free-search-card__button">Ver más detalles</button>
+          <a href={link}>
+            <button className="free-search-card__button">Ver más detalles</button>
+          </a>
         </div>
       </div>
     </div>

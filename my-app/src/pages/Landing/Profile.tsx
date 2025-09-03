@@ -38,8 +38,6 @@ const ProfileI: React.FC = () => {
       persona = miembros[0];
     }
 
-    console.log("Usuario del Perfil: " + JSON.stringify(persona));
-
     const userData = {
       firstName: persona.Nombre,
       lastName: '',

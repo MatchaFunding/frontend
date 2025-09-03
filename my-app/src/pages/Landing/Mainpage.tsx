@@ -1,100 +1,128 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+//import React, { useEffect } from 'react';
 import NavBar from '../../components/NavBar/navbar';
 import { useNavigate } from 'react-router-dom';
 
 const MatchaHomePage: React.FC = () => {
   const navigate = useNavigate();
 
+  /*
   useEffect(() => {
-    // Obtener datos del usuario desde sessionStorage
     const storedUser = sessionStorage.getItem('usuario');
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
         console.log('Datos del usuario cargados desde sessionStorage:', parsedUser);
-      } catch (error) {
+      } 
+      catch (error) {
         console.error('Error al parsear datos del usuario desde sessionStorage:', error);
       }
     } else {
       console.log('No se encontraron datos de usuario en sessionStorage');
     }
   }, []);
+  */
 
   return (
-
-    <div className="bg-slate-50 h-screen flex flex-col">
-      <NavBar />
-
+  <div className="bg-slate-50 h-screen flex flex-col">
+    <NavBar />
    <main className="flex-grow p-8 md:p-12 lg:p-16 w-[100%] max-h-[100%]  mt-[5%] flex justify-center items-start">
   <div className="grid grid-cols-1 lg:grid-cols-5 gap-2 w-full h-full">
-
     <div
       onClick={() => navigate("/Matcha/Select-Idea")}
       className="lg:col-span-3 bg-white p-8 rounded-2xl shadow-lg flex flex-col justify-between w-[85%] h-[90%] my-auto mx-auto cursor-pointer hover:shadow-2xl transition-shadow ml-10 "
     >
       <div className="flex items-center gap-6">
-        <div>
+        <div className="w-[50%] h-auto self-center translate-y-[20%]">
           <span className="text-gray-500 text-2xl">Haz</span>
           <h1 className="text-8xl font-bold text-black tracking-tighter">Match</h1>
           <span className="text-gray-500 text-2xl block">con un fondo</span>
-             <p className="text-gray-500 text-2xl left-0 mt-10"> Ve todas las herramientas que puedas utilizar para agilizar tu proceso</p>
+            <br></br>
+            <br></br>
+            <br></br>
+            <span className="text-gray-500 text-2xl block">
+            ¿Tienes una idea?
+            </span>
+            <p className="text-gray-600 mt-2 text-md">
+                Convierte esa idea inicial en un proyecto real y estructurado a traves de la 
+                Inteligencia Artificial
+            </p>
+            <br></br>
+            <span className="text-gray-500 text-2xl block">
+            Construye tu proyecto
+            </span>
+            <p className="text-gray-600 mt-2 text-md">
+                Si ya tienes una idea clara, te guiamos paso a paso para transformarla en un
+                proyecto sólido.
+            </p>
+            <br></br>
+            <span className="text-gray-500 text-2xl block">
+            Encuentra tu fondo ideal
+            </span>
+            <p className="text-gray-600 mt-2 text-md">
+                Compara tu idea o proyecto con las distintas oportunidades de financiamiento 
+                abiertas actualmente.
+            </p>
         </div>
         <img
           src="./Tevolador.png"
           alt="Taza de matcha colgando"
           className="w-[50%] h-auto self-center translate-y-[20%] shadow-lg rounded-full"
         />
+        
       </div>
-     
-      
-       
     </div>
-
-
-    <div className="lg:col-span-2 flex flex-col gap-0 h-full">
-
-      <div className="bg-white p-6 rounded-2xl shadow-lg flex items-center h-[39%] my-auto">
-  <div className="flex-shrink-0">
-    <img 
-      src="./image.png"
-      alt="Mejora tu perfil"
-      className="w-41 h-40 rounded-full shadow-lg" 
-    />
-  </div>
-  <div className="ml-4"> 
-    <span className="text-gray-500 text-lg">Mejora tu</span>
-    <h2 className="text-5xl font-semibold text-black">Perfil</h2>
-    <p className="text-gray-600 mt-2 text-md">
-      Optimiza tus chances de adquirir financiamiento analizando puntos clave.
-    </p>
-  </div>
-</div>
-
-
-      <div className="bg-white p-6 rounded-2xl shadow-lg flex items-center gap-6 h-[39%] my-auto cursor-pointer hover:shadow-2xl" onClick={() => navigate("/free-search")}>
-         
+    <div 
+      className="lg:col-span-2 flex flex-col gap-0 h-full"
+      >
+      <div 
+        className="bg-white p-6 rounded-2xl shadow-lg flex items-center h-[39%] my-auto cursor-pointer hover:shadow-2xl transition-shadow"
+        onClick={() => navigate("/Perfil")}
+        >
+          <div className="flex-shrink-0">
+            <img 
+              src="./image.png"
+              alt="Mejora tu perfil"
+              className="w-41 h-40 rounded-full shadow-lg" 
+            />
+          </div>
+          <div className="ml-4"> 
+            <span className="text-gray-500 text-lg">Mejora tu</span>
+            <h2 className="text-5xl font-semibold text-black">Perfil</h2>
+            <p className="text-gray-600 mt-2 text-md">
+              <br></br>
+              Optimiza tus posibilidades de éxito con ayuda de inteligencia artificial. Esta herramienta analiza tu perfil y te entrega
+              recomendaciones personalizadas para potenciar tus puntos fuertes y mejorar los débiles. Así, aumentas las probabilidades de
+              adjudicarte un fondo o beneficio cuando postules.
+            </p>
+          </div>
+        </div>
+      <div 
+        onClick={() => navigate("/free-search")}
+        className="bg-white p-6 rounded-2xl shadow-lg flex items-center gap-6 h-[39%] my-auto cursor-pointer hover:shadow-2xl transition-shadow"
+        >
         <div className="flex-1 p-4">
           <span className="text-gray-500 text-lg">Busca</span>
           <h2 className="text-5xl font-semibold text-black">Fondos</h2>
           <span className="text-gray-500 text-lg">en un mismo lugar</span>
           <p className="text-gray-600 mt-4 text-md">
-            Busca todos los fondos abiertos en una misma plataforma.
+            <br></br>
+            Accede a una base de datos completa y siempre actualizada de fondos públicos y privados disponibles en Chile,
+            incluyendo CORFO, ANID y fondos.gob. Aquí puedes explorar y filtrar libremente todas las convocatorias abiertas
+            sin tener que visitar múltiples plataformas.
           </p>
         </div>
-         <div className="flex-shrink-0">
-    <img 
+        <div className="flex-shrink-0">
+        <img 
             src="./fondito.png"
-      alt="Mejora tu perfil"
-      className="w-41 h-40 rounded-full shadow-lg" 
-    />
-  </div>
-
+            alt="Mejora tu perfil"
+            className="w-41 h-40 rounded-full shadow-lg" 
+          />
+        </div>
       </div>
-
     </div>
   </div>
 </main>
-
     </div>
   );
 };

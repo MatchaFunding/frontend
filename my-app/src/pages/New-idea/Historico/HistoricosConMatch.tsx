@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import NavBar from '../../../components/NavBar/navbar';
 import { Link, useNavigate } from 'react-router-dom';
 import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
+import LoopAnimation from '../../../components/Shared/animationFrame';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -110,6 +111,11 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
   const [areaFilter, setAreaFilter] = useState('Todas');
   const [sortBy, setSortBy] = useState<'compatibilidad' | 'alfabetico' | 'duracion'>('compatibilidad');
   const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [showAnimation, setShowAnimation] = useState(true);
+   useEffect(() => {
+      const timer = setTimeout(() => setShowAnimation(false), 5000);
+      return () => clearTimeout(timer);
+    }, []);
 
   useEffect(() => {
     const projectData = localStorage.getItem('selectedProject');
@@ -140,6 +146,20 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
     return proyectos;
   }, [searchTerm, areaFilter, sortBy]);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
+   if (showAnimation) {
+  return (
+    <div className="min-h-screen bg-[#f1f5f9] flex flex-col">
+      <NavBar />
+      <div className="flex flex-col items-center justify-center flex-1 space-y-6">
+        <LoopAnimation />
+        <p className="text-xl sm:text-2xl font-semibold text-gray-700 animate-pulse">
+          Cargando...
+        </p>
+      </div>
+    </div>
+  );
+}
+
 
   return (
     <div className="min-h-screen bg-[#f1f5f9]">

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from "react"; 
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/NavBar/navbar";
 
@@ -46,10 +46,13 @@ type IdeaData = {
   uniqueness: string;
 };
 
+const MAX_CHARS = 1000;
+
 const CreateIdea: React.FC = () => {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [input, setInput] = useState("");
+  const [error, setError] = useState("");
   const [isCompleted, setIsCompleted] = useState(false);
   const navigate = useNavigate();
 
@@ -60,6 +63,16 @@ const CreateIdea: React.FC = () => {
     audience: "",
     uniqueness: "",
   });
+
+  // Maneja el input principal con límite
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value.length > MAX_CHARS) {
+      setError(`⚠️ Máximo ${MAX_CHARS} caracteres`);
+      return;
+    }
+    setInput(e.target.value);
+    setError("");
+  };
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -84,17 +97,17 @@ const CreateIdea: React.FC = () => {
     }
   };
 
+  // Maneja cambios en el preview (inputs y textareas) con límite
   const handlePreviewChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    if (value.length > MAX_CHARS) return;
     setPreviewData(prevData => ({
       ...prevData,
       [name]: value,
     }));
   };
 
-  const handleCancelPreview = () => {
-    setShowPreview(false);
-  };
+  const handleCancelPreview = () => setShowPreview(false);
 
   const handleConfirmAndSaveIdea = () => {
     try {
@@ -121,17 +134,18 @@ const CreateIdea: React.FC = () => {
     setInput("");
     setIsCompleted(false);
   };
-  const handleNavigateToFondos = () => {
-  const lastIdea = JSON.parse(localStorage.getItem("userIdeas") || "[]").slice(-1)[0];
-  localStorage.setItem("selectedIdea", JSON.stringify(lastIdea));
-  navigate("/Matcha/New-idea/Fondo-idea");
-};
 
+  const handleNavigateToFondos = () => {
+    const lastIdea = JSON.parse(localStorage.getItem("userIdeas") || "[]").slice(-1)[0];
+    localStorage.setItem("selectedIdea", JSON.stringify(lastIdea));
+    navigate("/Matcha/New-idea/Fondo-idea");
+  };
 
   return (
     <div className="flex flex-col min-h-screen" style={{ backgroundColor: colorPalette.background }}>
       <Navbar />
       <div className="flex-grow flex flex-col lg:flex-row justify-center items-center p-6 lg:p-12 gap-8 mt-[5%]">
+        {/* Imagen */}
         <div className="w-full lg:w-[40%] flex justify-center items-center">
           <img
             src="/ideamatch.png"
@@ -140,12 +154,14 @@ const CreateIdea: React.FC = () => {
           />
         </div>
 
+        {/* Chat y Inputs */}
         <div className="w-full lg:w-[60%] h-[70vh] bg-white p-6 rounded-2xl shadow-xl flex flex-col">
           {!isCompleted ? (
             <>
               <h1 className="text-2xl font-bold text-center mb-4" style={{ color: colorPalette.primary }}>
                 Crear Nueva Idea 💡
               </h1>
+
               <div className="flex-1 overflow-y-auto space-y-4 p-2">
                 {answers.map((answer, index) => (
                   <div key={index} className="space-y-2">
@@ -163,27 +179,36 @@ const CreateIdea: React.FC = () => {
                   </div>
                 )}
               </div>
-              <div className="mt-4 flex">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  placeholder="Escribe tu respuesta..."
-                  className="flex-1 border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-2"
-                  style={{ "--tw-ring-color": colorPalette.primary } as React.CSSProperties}
-                  disabled={showPreview}
-                />
-                <button
-                  onClick={handleSend}
-                  className="text-white px-5 py-2 rounded-r-md transition-colors duration-300"
-                  style={{ backgroundColor: colorPalette.secondary }}
-                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = colorPalette.primary)}
-                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = colorPalette.secondary)}
-                  disabled={showPreview}
-                >
-                  Enviar
-                </button>
+
+              {/* Input y botón enviar */}
+              <div className="mt-4 flex flex-col">
+                <div className="flex">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={handleChange}
+                    onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                    placeholder="Escribe tu respuesta..."
+                    className={`flex-1 border rounded-l-md px-3 py-2 focus:outline-none focus:ring-2 ${
+                      error ? "border-red-500" : "border-gray-300"
+                    }`}
+                    style={{ "--tw-ring-color": colorPalette.primary } as React.CSSProperties}
+                    disabled={showPreview}
+                  />
+                  <button
+                    onClick={handleSend}
+                    className="text-white px-5 py-2 rounded-r-md transition-colors duration-300"
+                    style={{ backgroundColor: colorPalette.secondary }}
+                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = colorPalette.primary)}
+                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = colorPalette.secondary)}
+                    disabled={showPreview}
+                  >
+                    Enviar
+                  </button>
+                </div>
+                <div className="text-sm mt-1 text-right" style={{ color: error ? "red" : colorPalette.textSecondary }}>
+                  {error ? error : `${input.length}/${MAX_CHARS}`}
+                </div>
               </div>
             </>
           ) : (
@@ -218,6 +243,7 @@ const CreateIdea: React.FC = () => {
         </div>
       </div>
 
+      {/* Preview Modal */}
       {showPreview && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-xl shadow-2xl p-6 md:p-8 w-11/12 max-w-2xl transform transition-all">
@@ -235,25 +261,35 @@ const CreateIdea: React.FC = () => {
                     {ideaFields[key]}
                   </label>
                   {index === 0 || index === 2 ? (
-                    <input
-                      type="text"
-                      id={key}
-                      name={key}
-                      value={previewData[key]}
-                      onChange={handlePreviewChange}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2"
-                      style={{ "--tw-ring-color": colorPalette.primary } as React.CSSProperties}
-                    />
+                    <div className="flex flex-col">
+                      <input
+                        type="text"
+                        id={key}
+                        name={key}
+                        value={previewData[key]}
+                        onChange={handlePreviewChange}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2"
+                        style={{ "--tw-ring-color": colorPalette.primary } as React.CSSProperties}
+                      />
+                      <div className="text-sm mt-1 text-right text-gray-500">
+                        {previewData[key].length}/{MAX_CHARS}
+                      </div>
+                    </div>
                   ) : (
-                    <textarea
-                      id={key}
-                      name={key}
-                      value={previewData[key]}
-                      onChange={handlePreviewChange}
-                      rows={3}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2"
-                      style={{ "--tw-ring-color": colorPalette.primary } as React.CSSProperties}
-                    />
+                    <div className="flex flex-col">
+                      <textarea
+                        id={key}
+                        name={key}
+                        value={previewData[key]}
+                        onChange={handlePreviewChange}
+                        rows={3}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2"
+                        style={{ "--tw-ring-color": colorPalette.primary } as React.CSSProperties}
+                      />
+                      <div className="text-sm mt-1 text-right text-gray-500">
+                        {previewData[key].length}/{MAX_CHARS}
+                      </div>
+                    </div>
                   )}
                 </div>
               ))}

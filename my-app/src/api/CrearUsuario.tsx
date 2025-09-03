@@ -1,7 +1,7 @@
 import Usuario from '../models/Usuario.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CrearUsuarioAsync(data: Usuario): Promise<Usuario> {
+export async function CrearUsuarioAsync(data: Usuario) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearusuario/`, {
       method: 'POST',

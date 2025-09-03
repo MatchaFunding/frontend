@@ -1,7 +1,7 @@
 import Miembro from '../models/Miembro.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CambiarMiembroAsync(id: number, data: Miembro): Promise<Miembro> {
+export async function CambiarMiembroAsync(id: number, data: Miembro) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/cambiarmiembro/${id}`, {
       method: 'PUT',

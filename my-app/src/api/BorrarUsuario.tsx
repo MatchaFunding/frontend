@@ -1,7 +1,7 @@
 import Usuario from '../models/Usuario.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarUsuarioAsync(id: number): Promise<Usuario> {
+export async function BorrarUsuarioAsync(id: number) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borrarusuario/${id}`, {
       method: 'DELETE',

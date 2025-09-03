@@ -1,7 +1,7 @@
 import Instrumento from '../models/Instrumento.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CrearInstrumentoAsync(data: Instrumento): Promise<Instrumento> {
+export async function CrearInstrumentoAsync(data: Instrumento) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearinstrumento/`, {
       method: 'POST',

@@ -1,7 +1,7 @@
 import Proyecto from '../models/Proyecto.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CrearProyectoAsync(data: Proyecto): Promise<Proyecto> {
+export async function CrearProyectoAsync(data: Proyecto) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearproyecto/`, {
       method: 'POST',

@@ -1,7 +1,7 @@
 import Colaborador from '../models/Colaborador.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CrearColaboradorAsync(data: Colaborador): Promise<Colaborador> {
+export async function CrearColaboradorAsync(data: Colaborador) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearcolaborador/`, {
       method: 'POST',

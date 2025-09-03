@@ -1,7 +1,7 @@
 import Consorcio from '../models/Consorcio.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarConsorcioAsync(id: number): Promise<Consorcio> {
+export async function BorrarConsorcioAsync(id: number) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borrarconsorcio/${id}`, {
       method: 'DELETE',

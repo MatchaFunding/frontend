@@ -1,4 +1,4 @@
-export async function VerificarEmailExiste(email: string): Promise<boolean> {
+export async function VerificarEmailExiste(email: string) {
   try {
     console.log('Verificando email:', email);
     

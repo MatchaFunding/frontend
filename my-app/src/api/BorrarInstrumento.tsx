@@ -1,7 +1,7 @@
 import Instrumento from '../models/Instrumento.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarInstrumentoAsync(id: number): Promise<Instrumento> {
+export async function BorrarInstrumentoAsync(id: number) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borrarinstrumento/${id}`, {
       method: 'DELETE',

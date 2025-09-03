@@ -1,7 +1,7 @@
 import Miembro from '../models/Miembro.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CrearMiembroAsync(data: Miembro): Promise<Miembro> {
+export async function CrearMiembroAsync(data: Miembro) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearmiembro/`, {
       method: 'POST',

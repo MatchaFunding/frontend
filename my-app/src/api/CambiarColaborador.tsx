@@ -1,7 +1,7 @@
 import Colaborador from '../models/Colaborador.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CambiarColaboradorAsync(id: number, data: Colaborador): Promise<Colaborador> {
+export async function CambiarColaboradorAsync(id: number, data: Colaborador) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/cambiarcolaborador/${id}`, {
       method: 'PUT',

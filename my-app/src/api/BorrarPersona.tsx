@@ -1,7 +1,7 @@
 import Persona from '../models/Persona.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarPersonaAsync(id: number): Promise<Persona> {
+export async function BorrarPersonaAsync(id: number) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borrarpersona/${id}`, {
       method: 'DELETE',

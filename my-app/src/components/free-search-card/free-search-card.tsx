@@ -8,7 +8,7 @@ import {
   formatDate
 } from './free-search-card';
 
-const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ title, description, topic, benefit, image, fechaApertura, fechaCierre }) => {
+const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ title, description, topic, benefit, image, fechaApertura, fechaCierre, EnlaceDelDetalle }) => {
   const renderBenefit = (benefit: string) => {
     return (
       <span className={getBenefitClassName(benefit)}>
@@ -38,6 +38,12 @@ const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ title, description, top
     );
   };
 
+  const handleVerMasDetalles = () => {
+    if (EnlaceDelDetalle) {
+      window.open(EnlaceDelDetalle, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div className="free-search-card">
       <div className="free-search-card__image-container">
@@ -52,7 +58,18 @@ const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ title, description, top
             <span className="free-search-card__topic">{topic || 'General'}</span>
             {renderBenefit(benefit || 'Beneficio no disponible')}
           </div>
-          <button className="free-search-card__button">Ver más detalles</button>
+          <button 
+            className="free-search-card__button"
+            onClick={handleVerMasDetalles}
+            disabled={!EnlaceDelDetalle}
+            style={{
+              cursor: EnlaceDelDetalle ? 'pointer' : 'not-allowed',
+              opacity: EnlaceDelDetalle ? 1 : 0.6
+            }}
+            type="button"
+          >
+            Ver más detalles
+          </button>
         </div>
       </div>
     </div>

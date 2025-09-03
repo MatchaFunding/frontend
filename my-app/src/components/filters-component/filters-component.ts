@@ -22,21 +22,70 @@ export interface FiltersComponentProps {
   onApplyFilters: (filters: FiltersValues) => void;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Datos estáticos
+// Datos estáticos basados en el modelo Django
 export const regionesChile = 
 ['Arica y Parinacota', 'Tarapacá', 'Antofagasta', 'Atacama', 
-'Coquimbo', 'Valparaíso', 'Metropolitana de Santiago', 'Libertador General Bernardo O\'Higgins', 
+'Coquimbo', 'Valparaíso', 'Santiago', 'O\'Higgins', 
 'Maule', 'Ñuble', 'Biobío', 'La Araucanía', 
-'Los Ríos', 'Los Lagos', 'Aysén del General Carlos Ibáñez del Campo', 'Magallanes y de la Antártica Chilena'];
+'Los Ríos', 'Los Lagos', 'Aysén', 'Magallanes', 'Nacional'];
+
+// Mapeo de nombres de regiones del frontend a códigos del backend
+export const regionMapping: Record<string, string> = {
+  'Arica y Parinacota': 'AP',
+  'Tarapacá': 'TA',
+  'Antofagasta': 'AN',
+  'Atacama': 'AT',
+  'Coquimbo': 'CO',
+  'Valparaíso': 'VA',
+  'Santiago': 'RM',
+  'O\'Higgins': 'LI',
+  'Maule': 'ML',
+  'Ñuble': 'NB',
+  'Biobío': 'BI',
+  'La Araucanía': 'AR',
+  'Los Ríos': 'LR',
+  'Los Lagos': 'LL',
+  'Aysén': 'AI',
+  'Magallanes': 'MA',
+  'Nacional': 'NA'
+};
 
 export const monedas = ['CLP', 'EUR', 'USD'];
 
+// Tipos de beneficio basados en el modelo Django BENEFICIO
 export const tiposBeneficio = [
-  'Financiamiento', 'Capacitación', 'Asesoría', 'Networking', 'Difusión', 
-  'Infraestructura', 'Mentoría', 'Acceso a mercados', 'Premios', 'Certificación'
+  'Capacitacion', 'Capital de riesgo', 'Creditos', 'Garantias', 
+  'Incentivo mujeres', 'Otros incentivos', 'Subsidios'
 ];
 
-export const estados = ['Activo', 'No activo'];
+// Mapeo de tipos de beneficio del frontend a códigos del backend
+export const tipoBeneficioMapping: Record<string, string> = {
+  'Capacitacion': 'CAP',
+  'Capital de riesgo': 'RIE',
+  'Creditos': 'CRE',
+  'Garantias': 'GAR',
+  'Incentivo mujeres': 'MUJ',
+  'Otros incentivos': 'OTR',
+  'Subsidios': 'SUB'
+};
+
+// Estados basados en el modelo Django ESTADO
+export const estados = [
+  'Próximo', 'Abierto', 'En evaluación', 'Adjudicado', 
+  'Suspendido', 'Patrocinio Institucional', 'Desierto', 'Cerrado'
+];
+
+// Mapeo de estados del frontend a códigos del backend
+export const estadoMapping: Record<string, string> = {
+  'Próximo': 'PRX',
+  'Abierto': 'ABI',
+  'En evaluación': 'EVA',
+  'Adjudicado': 'ADJ',
+  'Suspendido': 'SUS',
+  'Patrocinio Institucional': 'PAY',
+  'Desierto': 'DES',
+  'Cerrado': 'CER'  // Nota: En el modelo backend está "CER": "Cerrrado" (con doble 'r')
+};
 
 export const orderOptions = [
   { value: 'none', label: 'Sin orden' },

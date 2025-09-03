@@ -4,7 +4,7 @@ import FreeSearchCard from '../../components/free-search-card/free-search-card.t
 import FiltersComponent from '../../components/filters-component/filters-component.tsx';
 import NavBar from '../../components/NavBar/navbar';
 import type { FiltersValues, OrderOption, CardsPerPageOption } from '../../components/filters-component/filters-component.ts';
-import { initialFilters, filterCardsByAmount, sortCards, mapInstrumentsToCards, getPaginatedCards, calculatePagination, searchCardsByText, createHandlePageChange } from './free-search';
+import { initialFilters, filterCards, sortCards, mapInstrumentsToCards, getPaginatedCards, calculatePagination, searchCardsByText, createHandlePageChange } from './free-search';
 import VerTodosLosInstrumentos from '../../api/VerTodosLosInstrumentos.tsx';
 
 function FreeSearch() {
@@ -20,7 +20,7 @@ function FreeSearch() {
 
 	const cards = useMemo(() => {
 		let processedCards = searchCardsByText(availableCards, searchTerm);
-		let filteredCards = filterCardsByAmount(processedCards, filters);
+		let filteredCards = filterCards(processedCards, filters);
 		const sortedCards = sortCards(filteredCards, order);
 		return sortedCards;
 	}, [order, filters, availableCards, searchTerm]);

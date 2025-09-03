@@ -9,6 +9,7 @@ import { CambiarPersonaAsync } from '../../api/CambiarPersona';
 import { CrearBeneficiarioAsync } from '../../api/CrearBeneficiario';
 import { CrearMiembroAsync } from '../../api/CrearMiembro';
 import { VerificarEmailExiste } from '../../api/VerificarEmail';
+import { ValidarCredencialesDeEmpresaAsync } from '../../api/Login';
 import Persona from '../../models/Persona';
 import Usuario from '../../models/Usuario';
 import Beneficiario from '../../models/Beneficiario';
@@ -25,6 +26,7 @@ const SignUp: React.FC = () => {
   const [createdPersonaId, setCreatedPersonaId] = useState<number | null>(null);
   const [createdUsuarioId, setCreatedUsuarioId] = useState<number | null>(null);
   const [userEmail, setUserEmail] = useState<string>('');
+  const [userPassword, setUserPassword] = useState<string>('');
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [openDropdowns, setOpenDropdowns] = useState<{ [key: string]: boolean }>({});
@@ -285,6 +287,7 @@ const SignUp: React.FC = () => {
       // Guardar la información del usuario creado
       setCreatedUsuarioId(usuarioId);
       setUserEmail(email);
+      setUserPassword(password);
 
       // Solo después de crear ambas entidades, continuar al formulario paso a paso
       setShowStepForm(true);
@@ -394,21 +397,57 @@ const SignUp: React.FC = () => {
         setIsUpdatingBeneficiario(false);
       }
     } else if (currentStep === 3) {
-      // Si estamos en el paso 3 (último paso), guardar usuario en sessionStorage y redirigir al home
-      if (createdUsuarioId && userEmail) {
-        const userData = {
-          ID: createdUsuarioId,
-          Correo: userEmail,
-          NombreDeUsuario: userEmail,
-          // Agregar otros datos si están disponibles
-          ...(formData.firstName && formData.lastName && {
-            Nombre: `${formData.firstName} ${formData.lastName}`
-          })
-        };
-        sessionStorage.setItem('usuario', JSON.stringify(userData));
-        console.log('Usuario guardado en sessionStorage (SignUp):', userData);
+      // Si estamos en el paso 3 (último paso), validar credenciales y guardar datos completos en sessionStorage
+      if (createdUsuarioId && userEmail && userPassword) {
+        try {
+          // Llamar a la API de validación de credenciales de empresa para obtener todos los datos
+          const resultado = await ValidarCredencialesDeEmpresaAsync({ 
+            email: userEmail, 
+            password: userPassword 
+          });
+          
+          if (resultado.success && resultado.usuario) {
+            // Guardar todos los datos de empresa en sessionStorage (igual que en login)
+            sessionStorage.setItem('usuario', JSON.stringify(resultado.usuario));
+            console.log('Datos completos de empresa guardados en sessionStorage (SignUp):', resultado.usuario);
+            
+            // Redirigir al home
+            navigate('/Home-i');
+          } else {
+            // Si no se pueden validar las credenciales, usar datos básicos como respaldo
+            const userData = {
+              ID: createdUsuarioId,
+              Correo: userEmail,
+              NombreDeUsuario: userEmail,
+              // Agregar otros datos si están disponibles
+              ...(formData.firstName && formData.lastName && {
+                Nombre: `${formData.firstName} ${formData.lastName}`
+              })
+            };
+            sessionStorage.setItem('usuario', JSON.stringify(userData));
+            console.log('Datos básicos guardados en sessionStorage (SignUp - respaldo):', userData);
+            navigate('/Home-i');
+          }
+        } catch (error) {
+          console.error('Error al validar credenciales después del registro:', error);
+          // En caso de error, usar datos básicos como respaldo
+          const userData = {
+            ID: createdUsuarioId,
+            Correo: userEmail,
+            NombreDeUsuario: userEmail,
+            // Agregar otros datos si están disponibles
+            ...(formData.firstName && formData.lastName && {
+              Nombre: `${formData.firstName} ${formData.lastName}`
+            })
+          };
+          sessionStorage.setItem('usuario', JSON.stringify(userData));
+          console.log('Datos básicos guardados en sessionStorage (SignUp - error):', userData);
+          navigate('/Home-i');
+        }
+      } else {
+        console.error('Faltan datos del usuario para validar credenciales');
+        navigate('/Home-i');
       }
-      navigate('/Home-i');
     } else {
       // Para otros pasos, simplemente avanzar
       setCurrentStep(getNextStep(currentStep));

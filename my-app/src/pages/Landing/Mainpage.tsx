@@ -37,13 +37,17 @@ const MatchaHomePage: React.FC = () => {
           <span className="text-gray-500 text-2xl">Haz</span>
           <h1 className="text-8xl font-bold text-black tracking-tighter">Match</h1>
           <span className="text-gray-500 text-2xl block">con un fondo</span>
+             <p className="text-gray-500 text-2xl left-0 mt-10"> Ve todas las herramientas que puedas utilizar para agilizar tu proceso</p>
         </div>
         <img
           src="./Tevolador.png"
           alt="Taza de matcha colgando"
-          className="w-[50%] h-auto self-center translate-y-[30%] shadow-lg rounded-full"
+          className="w-[50%] h-auto self-center translate-y-[20%] shadow-lg rounded-full"
         />
       </div>
+     
+      
+       
     </div>
 
 
@@ -67,7 +71,7 @@ const MatchaHomePage: React.FC = () => {
 </div>
 
 
-      <div className="bg-white p-6 rounded-2xl shadow-lg flex items-center gap-6 h-[39%] my-auto cursor-pointer" onClick={() => navigate("/free-search")}>
+      <div className="bg-white p-6 rounded-2xl shadow-lg flex items-center gap-6 h-[39%] my-auto cursor-pointer hover:shadow-2xl" onClick={() => navigate("/free-search")}>
          
         <div className="flex-1 p-4">
           <span className="text-gray-500 text-lg">Busca</span>
@@ -84,8 +88,7 @@ const MatchaHomePage: React.FC = () => {
       className="w-41 h-40 rounded-full shadow-lg" 
     />
   </div>
-      
-       
+
       </div>
 
     </div>

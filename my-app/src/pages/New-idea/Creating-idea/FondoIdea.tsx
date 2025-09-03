@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import NavBar from '../../../components/NavBar/navbar';
 import { useNavigate } from 'react-router-dom';
+import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
+import LoopAnimation from '../../../components/Shared/animationFrame';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -107,6 +109,12 @@ const FondosIdea: React.FC = () => {
   const [categoriaFilter, setCategoriaFilter] = useState('Todas');
   const [sortBy, setSortBy] = useState<'compatibilidad' | 'alfabetico' | 'presupuesto'>('compatibilidad');
   const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
+  const [showAnimation, setShowAnimation] = useState(true);
+   useEffect(() => {
+      const timer = setTimeout(() => setShowAnimation(false), 5000);
+      return () => clearTimeout(timer);
+    }, []);
 
   useEffect(() => {
 
@@ -163,10 +171,26 @@ const FondosIdea: React.FC = () => {
       </div>
     );
   }
+   if (showAnimation) {
+  return (
+    <div className="min-h-screen bg-[#f1f5f9] flex flex-col">
+      <NavBar />
+      <div className="flex flex-col items-center justify-center flex-1 space-y-6">
+        <LoopAnimation />
+        <p className="text-xl sm:text-2xl font-semibold text-gray-700 animate-pulse">
+          Cargando...
+        </p>
+      </div>
+    </div>
+  );
+}
+
+  
 
   return (
     <div className="min-h-screen bg-[#f1f5f9]">
       <NavBar />
+      {showDisclaimer && <DisclaimerModal onClose={() => setShowDisclaimer(false)} />}
       <main className="flex-grow p-6 md:p-10 max-w-screen-2xl mx-auto mt-[5%]">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-[#505143]">Fondos Recomendados para tu Idea</h1>

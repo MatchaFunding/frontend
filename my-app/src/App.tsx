@@ -18,6 +18,9 @@ import NuevoProyecto from './pages/New-idea/New-project/Create-project.tsx';
 import FondosIdea from './pages/New-idea/Creating-idea/FondoIdea.tsx';
 import DetalleF from './pages/New-idea/Creating-idea/detalle.tsx';
 import CrearProyectoMatch from './pages/New-idea/Creating-idea/Proyecto-idea.tsx';
+import MisProyectosH from './pages/New-idea/Historico/SelectProjectH.tsx';
+import ProyectosHistoricosConPorcentaje from './pages/New-idea/Historico/HistoricosConMatch.tsx';
+import DetalleProyecto from './pages/New-idea/Historico/HistoricoDetalle.tsx';
 
 function App() {
   return (
@@ -41,6 +44,9 @@ function App() {
         <Route path="/Matcha/New-idea/Fondo-idea/detalle" element={<DetalleF/>} />
         <Route path="/Matcha/New-idea/Fondo-idea/detalle/Nuevo-proyecto" element={<CrearProyectoMatch />} />
         <Route path="/Matcha/Nuevo-proyecto" element={<NuevoProyecto />} />
+        <Route path="/Matcha/My-projects" element={<MisProyectosH/>} />
+        <Route path="/Matcha/My-projects/proyectos-historicos" element={<ProyectosHistoricosConPorcentaje/>} />
+        <Route path="/Matcha/My-projects/proyectos-historicos/Detalle" element={<DetalleProyecto/>} />
       </Routes>
     </BrowserRouter>
   );

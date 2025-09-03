@@ -58,14 +58,12 @@ const ProfileI: React.FC = () => {
           <div className="max-w-7xl mx-auto space-y-10">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
               <div>
-              
               </div>
               <button className="flex items-center gap-2 px-4 py-2 text-sm md:text-base font-semibold text-white rounded-xl shadow-md transition-transform hover:scale-105" style={{ backgroundColor: colorPalette.softGreen }} onClick={() => navigate("/edit-profile")}>
                 <Edit className="w-5 h-5" />
                 Editar Perfil
               </button>
             </header>
-
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-1">
                 <Card className="p-8">
@@ -83,7 +81,6 @@ const ProfileI: React.FC = () => {
                   </div>
                 </Card>
               </div>
-
               <div className="lg:col-span-2">
                 <Card className="p-8">
                   <div className="border-b border-slate-200 pb-4 mb-6">
@@ -94,7 +91,6 @@ const ProfileI: React.FC = () => {
                     <InfoField icon={User} label="Apellidos" value={userData.lastName} />
                     <InfoField icon={ShieldCheck} label="RUT" value={userData.rut} />
                     <InfoField icon={Briefcase} label="Profesión/Ocupación" value={userData.occupation} />
-                  
                   </div>
                 </Card>
               </div>

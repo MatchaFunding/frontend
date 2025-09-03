@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import NavBar from '../../components/NavBar/navbar';
+import FiltersIdea from '../../components/filters-ideas/filters-idea.tsx';
+import type { FiltersIdeaValues } from '../../components/filters-ideas/filters-idea';
+import { applyFiltersAndSorting } from '../../components/filters-ideas/filters-idea';
 
 interface PostulacionData {
   name: string;
@@ -53,8 +56,20 @@ const MisPostulaciones: React.FC = () => {
   const [activeSection, setActiveSection] = useState('ideas');
   const navigate = useNavigate();
 
-
+  // Estado para las ideas
   const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [filteredIdeas, setFilteredIdeas] = useState<Idea[]>([]);
+  
+  // Estado para los filtros de ideas
+  const [filtersIdea, setFiltersIdea] = useState<FiltersIdeaValues>({
+    campo: '',
+    publico: '',
+    orderBy: 'none',
+    searchIdea: '',
+    searchCampo: '',
+    fechaMin: '',
+    fechaMax: ''
+  });
 
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [loadingProyectos, setLoadingProyectos] = useState<boolean>(false);
@@ -64,7 +79,14 @@ const MisPostulaciones: React.FC = () => {
   useEffect(() => {
     const storedIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
     setIdeas(storedIdeas);
+    setFilteredIdeas(storedIdeas); // Inicializar ideas filtradas
   }, []);
+
+  // Actualizar ideas filtradas cuando cambien las ideas o filtros
+  useEffect(() => {
+    const filtered = applyFiltersAndSorting(ideas, filtersIdea);
+    setFilteredIdeas(filtered);
+  }, [ideas, filtersIdea]);
 
   useEffect(() => {
     const fetchProyectos = async () => {
@@ -108,6 +130,15 @@ const MisPostulaciones: React.FC = () => {
     }
   }, [activeSection]); 
 
+  // Función para manejar los cambios de filtros de ideas
+  const handleFiltersIdeaChange = (newFilters: FiltersIdeaValues) => {
+    setFiltersIdea(newFilters);
+    // Aplicar filtros y ordenamiento
+    const filtered = applyFiltersAndSorting(ideas, newFilters);
+    setFilteredIdeas(filtered);
+    console.log('Filtros de ideas cambiados:', newFilters);
+    console.log('Ideas filtradas:', filtered);
+  };
 
   const handleDeleteIdea = (idToDelete: number) => {
     if (window.confirm("¿Estás seguro de que quieres eliminar esta idea? Esta acción no se puede deshacer.")) {
@@ -181,13 +212,20 @@ const MisPostulaciones: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <h1 className="text-3xl font-bold" style={{ color: colorPalette.darkGreen }}>Mis Ideas Guardadas</h1>
                 
-                  <button
-                    onClick={() => navigate('/create-idea')} 
-                    className="px-5 py-2 font-semibold text-white rounded-lg shadow-md transition-transform duration-300 hover:scale-105"
-                    style={{ backgroundColor: colorPalette.darkGreen }}
-                  >
-                    + Generar Nueva Idea
-                  </button>
+                  <div className="flex items-center gap-4">
+                    <FiltersIdea 
+                      filters={filtersIdea}
+                      onApplyFilters={handleFiltersIdeaChange}
+                    />
+                    <button
+                      onClick={() => navigate('/create-idea')} 
+                      className="px-5 py-2 font-semibold text-white rounded-lg shadow-md transition-transform duration-300 hover:scale-105 flex items-center gap-2"
+                      style={{ backgroundColor: colorPalette.darkGreen }}
+                    >
+                      Generar Nueva Idea
+                      <img src="/svgs/plus2.svg" alt="Plus icon" className="w-4 h-4" style={{ filter: 'brightness(0) saturate(100%) invert(100%)' }} />
+                    </button>
+                  </div>
                 </div>
                 
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -199,8 +237,8 @@ const MisPostulaciones: React.FC = () => {
                     <div className="text-sm font-semibold text-center" style={{ color: colorPalette.oliveGray }}>Acciones</div>
                   </div>
                   
-                  {ideas.length > 0 ? (
-                    ideas.map((idea) => (
+                  {filteredIdeas.length > 0 ? (
+                    filteredIdeas.map((idea) => (
                       <div key={idea.id} className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 items-center last:border-b-0 hover:bg-slate-50 transition-colors">
                         <div className="col-span-2">
                           <p className="font-medium truncate" style={{ color: colorPalette.darkGreen }}>{idea.problem}</p>
@@ -227,7 +265,12 @@ const MisPostulaciones: React.FC = () => {
                   ) : (
                     <div className="flex flex-col items-center justify-center text-center py-20 space-y-4">
                       <EmptyBoxIcon />
-                      <p style={{ color: colorPalette.oliveGray }}>Aún no has guardado ideas. ¡Genera una nueva!</p>
+                      <p style={{ color: colorPalette.oliveGray }}>
+                        {ideas.length === 0 
+                          ? 'Aún no has guardado ideas. ¡Genera una nueva!' 
+                          : 'No hay ideas que coincidan con los filtros aplicados.'
+                        }
+                      </p>
                     </div>
                   )}
                 </div>

@@ -84,7 +84,19 @@ export const estadoMapping: Record<string, string> = {
   'Suspendido': 'SUS',
   'Patrocinio Institucional': 'PAY',
   'Desierto': 'DES',
-  'Cerrado': 'CER'  // Nota: En el modelo backend está "CER": "Cerrrado" (con doble 'r')
+  'Cerrado': 'CER'
+};
+
+// Mapeo inverso: códigos del backend a nombres del frontend
+export const estadoMappingInverse: Record<string, string> = {
+  'PRX': 'Próximo',
+  'ABI': 'Abierto',
+  'EVA': 'En evaluación',
+  'ADJ': 'Adjudicado',
+  'SUS': 'Suspendido',
+  'PAY': 'Patrocinio Institucional',
+  'DES': 'Desierto',
+  'CER': 'Cerrado'  // Backend devuelve "CER", mostramos "Cerrado"
 };
 
 export const orderOptions = [

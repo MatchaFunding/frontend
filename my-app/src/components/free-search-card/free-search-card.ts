@@ -13,6 +13,12 @@ export interface FreeSearchCard {
   fechaApertura?: string;
   fechaCierre?: string;
   link?: string;
+  alcance?: string; // Región/alcance del instrumento (código del backend)
+  estado?: string; // Estado del instrumento (código del backend)
+  tipoDePerfil?: string; // Tipo de perfil (código del backend)
+  tipoDeBeneficio?: string; // Tipo de beneficio (código del backend) para filtrado
+  regionDisplay?: string; // Nombre legible de la región
+  estadoDisplay?: string; // Nombre legible del estado
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Constantes

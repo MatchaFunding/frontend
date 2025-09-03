@@ -1,5 +1,30 @@
 import type { FreeSearchCard as FreeSearchCardType } from '../../components/free-search-card/free-search-card.ts';
 import type { FiltersValues, OrderOption } from '../../components/filters-component/filters-component.ts';
+import { regionMapping, tipoBeneficioMapping, estadoMapping, estadoMappingInverse } from '../../components/filters-component/filters-component.ts';
+
+// Crear mappings inversos para mostrar nombres legibles en la UI
+const regionMappingInverse = Object.fromEntries(
+  Object.entries(regionMapping).map(([key, value]) => [value, key])
+);
+
+const tipoBeneficioMappingInverse = Object.fromEntries(
+  Object.entries(tipoBeneficioMapping).map(([key, value]) => [value, key])
+);
+
+// Usar el estadoMappingInverse importado desde filters-component
+
+// Funciones utilitarias para convertir códigos a nombres legibles
+export function getRegionDisplayName(regionCode: string): string {
+  return regionMappingInverse[regionCode] || regionCode;
+}
+
+export function getTipoBeneficioDisplayName(tipoBeneficioCode: string): string {
+  return tipoBeneficioMappingInverse[tipoBeneficioCode] || tipoBeneficioCode;
+}
+
+export function getEstadoDisplayName(estadoCode: string): string {
+  return estadoMappingInverse[estadoCode] || estadoCode;
+}
 
 // Constantes iniciales
 export const initialFilters: FiltersValues = {
@@ -50,6 +75,72 @@ export function filterCardsByAmount(
     if (filters.amountMax && amount > Number(filters.amountMax)) return false;
     return true;
   });
+}
+
+export function filterCards(
+  cards: FreeSearchCardType[], 
+  filters: FiltersValues
+): FreeSearchCardType[] {
+  let filteredCards = [...cards];
+
+  // Filtrar por región/alcance
+  if (filters.region && filters.region !== '') {
+    const regionCode = regionMapping[filters.region];
+    filteredCards = filteredCards.filter(card => {
+      return card.alcance === regionCode || card.alcance === 'NA'; // NA = Nacional
+    });
+  }
+
+  // Filtrar por tipo de beneficio
+  if (filters.benefitType && filters.benefitType !== '') {
+    const benefitCode = tipoBeneficioMapping[filters.benefitType];
+    filteredCards = filteredCards.filter(card => {
+      return card.tipoDeBeneficio === benefitCode;
+    });
+  }
+
+  // Filtrar por estado
+  if (filters.status && filters.status !== '') {
+    const statusCode = estadoMapping[filters.status];
+    console.log(`Filtrando por estado: "${filters.status}" → código: "${statusCode}"`);
+    
+    filteredCards = filteredCards.filter(card => {
+      // Si el instrumento tiene estado directo del backend, usar ese
+      if (card.estado && card.estado.trim() !== '') {
+        const match = card.estado === statusCode;
+        if (!match) {
+          console.log(`Estado no coincide: card.estado="${card.estado}" vs statusCode="${statusCode}"`);
+        }
+        return match;
+      }
+      
+      // Si no tiene estado directo, calcular basado en fechas como fallback
+      const now = new Date();
+      const fechaApertura = card.fechaApertura ? new Date(card.fechaApertura) : null;
+      const fechaCierre = card.fechaCierre ? new Date(card.fechaCierre) : null;
+      
+      console.log(`Card sin estado directo, usando fechas. Título: "${card.title}"`);
+      
+      // Solo usar cálculo de fechas para estados básicos
+      if (statusCode === 'ABI') { // Abierto
+        return fechaApertura && fechaCierre && now >= fechaApertura && now <= fechaCierre;
+      } else if (statusCode === 'CER') { // Cerrado
+        return fechaCierre && now > fechaCierre;
+      } else if (statusCode === 'PRX') { // Próximo
+        return fechaApertura && now < fechaApertura;
+      }
+      
+      // Para otros estados (EVA, ADJ, SUS, PAY, DES), solo filtrar si tiene estado directo
+      return false;
+    });
+    
+    console.log(`Después del filtro de estado: ${filteredCards.length} cards restantes`);
+  }
+
+  // Filtrar por monto
+  filteredCards = filterCardsByAmount(filteredCards, filters);
+
+  return filteredCards;
 }
 
 export function sortCards(
@@ -103,15 +194,27 @@ export function mapInstrumentToCard(instrumento: any): FreeSearchCardType {
   const benefit = formatAmount(instrumento.MontoMaximo);
   const imageUrl = validateImageUrl(instrumento.EnlaceDeLaFoto);
 
+  // Debug: verificar el estado que viene del backend
+  if (instrumento.Estado) {
+    console.log(`Instrumento "${instrumento.Titulo}" - Estado backend: "${instrumento.Estado}"`);
+  }
+
   const mappedCard = {
     title: instrumento.Titulo || 'Título no disponible',
     description: instrumento.Descripcion || 'Descripción no disponible',
-    topic: instrumento.TipoDeBeneficio || 'General',
+    topic: getTipoBeneficioDisplayName(instrumento.TipoDeBeneficio) || 'General', // Mostrar nombre legible
     benefit: benefit,
     image: imageUrl,
     fechaApertura: instrumento.FechaDeApertura,
     fechaCierre: instrumento.FechaDeCierre,
-    link: instrumento.EnlaceDelDetalle
+    link: instrumento.EnlaceDelDetalle,
+    alcance: instrumento.Alcance, // Mantener código del backend para filtrado
+    estado: instrumento.Estado, // Mantener código del backend para filtrado
+    tipoDePerfil: instrumento.TipoDePerfil, // Mantener código del backend
+    tipoDeBeneficio: instrumento.TipoDeBeneficio, // Agregar código del backend para filtrado
+    // Agregar versiones legibles para display si es necesario
+    regionDisplay: getRegionDisplayName(instrumento.Alcance),
+    estadoDisplay: getEstadoDisplayName(instrumento.Estado)
   };
   return mappedCard;
 }

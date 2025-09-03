@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../../../components/NavBar/navbar';
+import VerProyectosDeEmpresa from '../../../api/VerProyectosDeEmpresa';
 
 interface Proyecto {
   id: number;
@@ -35,6 +36,9 @@ const ProjectCard: React.FC<{ proyecto: Proyecto; onSelect: () => void }> = ({ p
 const MisProyectosH: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const proyectos = VerProyectosDeEmpresa(4);
+
+  console.log("Proyectos de la empresa: " + JSON.stringify(proyectos));
 
   const filteredProyectos = mockProyectosUsuario.filter(p =>
     p.nombre.toLowerCase().includes(searchTerm.toLowerCase())

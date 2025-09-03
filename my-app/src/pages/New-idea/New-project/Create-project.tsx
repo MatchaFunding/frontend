@@ -6,7 +6,11 @@ import { Input } from "../../../components/UI/input";
 import { Button } from "../../../components/UI/buttons";
 import { Textarea } from "../../../components/UI/textarea";
 import { StepIndicator } from "../../../components/Shared/StepIndicator";
+import { CrearProyectoAsync } from "../../../api/CrearProyecto";
+import { CrearColaboradorAsync } from "../../../api/CrearColaborador";
 import PersonaClass from "../../../models/Persona";
+import Proyecto from "../../../models/Proyecto";
+import Colaborador from "../../../models/Colaborador";
 
 interface PersonaPayload { Nombre: string; Sexo: string; RUT: string; FechaDeNacimiento: string; }
 
@@ -53,8 +57,8 @@ const NuevoProyecto: React.FC = () => {
   const [nuevaPersonaData, setNuevaPersonaData] = useState<PersonaPayload>({
     Nombre: "", Sexo: "OTR", RUT: "", FechaDeNacimiento: ""
   });
-  const storedUser = sessionStorage.getItem("usuario");
   const navigate = useNavigate();
+  const storedUser = sessionStorage.getItem("usuario");
 
   useEffect(() => {
     if (storedUser) {
@@ -63,6 +67,8 @@ const NuevoProyecto: React.FC = () => {
       setPersonas(usuario.Miembros.map((m: any) => new PersonaClass(m)));
     }
   }, [storedUser]);
+
+  console.log("Personas de la empresa: " + JSON.stringify(personas));
 
   const handleChange = ( e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> ) => {
     const { name, value } = e.target;
@@ -83,22 +89,20 @@ const NuevoProyecto: React.FC = () => {
     try {
         const resPersona = await fetch("https://referral-charlotte-fee-powers.trycloudflare.com/crearpersona/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevaPersonaData) });
         if (!resPersona.ok) throw new Error("No se pudo crear la persona. Verifique los datos.");
-        
         const personaCreada = await resPersona.json();
         setFormData(prev => ({ ...prev, Miembros: [...prev.Miembros, personaCreada.Nombre] }));
         setPersonas(prev => [...prev, new PersonaClass(personaCreada)]);
-        
         alert("Persona creada y añadida al proyecto exitosamente.");
         setIsModalOpen(false);
         setNuevaPersonaData({ Nombre: "", Sexo: "OTR", RUT: "", FechaDeNacimiento: "" });
-
-    } catch (error) {
+    }
+    catch (error) {
         if (error instanceof Error) alert(error.message);
         else alert("Ocurrió un error inesperado al crear la persona.");
     }
   };
 
-  const crearProyecto = async () => {
+  const EnviarProyecto = async () => {
     if (formData.Titulo.length < 10) { alert("El título debe tener al menos 10 caracteres."); return; }
     if (formData.Descripcion.length < 10) { alert("La descripción debe tener al menos 10 caracteres."); return; }
     if (formData.DuracionEnMesesMinimo <= 0 || formData.DuracionEnMesesMaximo <= 0) { alert("La duración debe ser mayor a cero."); return; }
@@ -106,25 +110,40 @@ const NuevoProyecto: React.FC = () => {
     if (!formData.Alcance || !formData.Area) { alert("Debes seleccionar un Alcance y un Área."); return; }
 
     try {
-      const proyectoData = { ...formData };
-      const resProyecto = await fetch("https://referral-charlotte-fee-powers.trycloudflare.com/crearproyecto/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(proyectoData), });
-      if (!resProyecto.ok) {
-        if (resProyecto.status === 400) throw new Error("Los datos enviados no son válidos. Por favor, revise todos los campos.");
-        throw new Error(`Error del servidor: ${resProyecto.status}`);
-      }
-      const proyectoCreado = await resProyecto.json();
-      if (formData.Miembros.length > 0) {
-        for (const nombreMiembro of formData.Miembros) {
-          let persona = personas.find((p) => p.Nombre === nombreMiembro);
-          if (!persona) throw new Error(`No se encontró la persona ${nombreMiembro} para crear el colaborador. Esto no debería ocurrir.`);
-          const colaboradorPayload = { Persona: persona.ID, Proyecto: proyectoCreado.ID };
-          const resColaborador = await fetch("https://referral-charlotte-fee-powers.trycloudflare.com/crearcolaborador/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(colaboradorPayload) });
-          if (!resColaborador.ok) throw new Error(`Error al crear el colaborador para ${nombreMiembro}`);
+      const json_proy = {
+        Beneficiario: formData.Beneficiario,
+        Titulo: formData.Titulo,
+        Descripcion: formData.Descripcion,
+        DuracionEnMesesMinimo: formData.DuracionEnMesesMinimo,
+        DuracionEnMesesMaximo: formData.DuracionEnMesesMaximo,
+        Alcance: formData.Alcance,
+        Area: formData.Area
+      };
+      const proyecto: Proyecto = new Proyecto(json_proy);
+      const proyectoCreado: Proyecto = await CrearProyectoAsync(proyecto);
+      
+      if (storedUser) {
+        const usuario = JSON.parse(storedUser);
+        const miembros = usuario.Miembros;
+        for (let p = 0; p < personas.length; p++) {
+          if (miembros.includes(personas[p]) === false) {
+            const json_colab = {
+              Persona: personas[p].ID,
+              Proyecto: proyectoCreado.ID
+            };
+            const colaborador: Colaborador = new Colaborador(json_colab);
+            await CrearColaboradorAsync(colaborador);
+          }
         }
       }
+      else {
+        console.log('No se encontraron datos de usuario en sessionStorage');
+      }
+
       alert("¡Proyecto y colaboradores creados exitosamente!");
       navigate("/Home-i");
-    } catch (error) {
+    } 
+    catch (error) {
       console.error("Falló el proceso de creación:", error);
       if (error instanceof Error) alert(error.message);
       else alert("Ha ocurrido un error inesperado.");
@@ -140,7 +159,7 @@ const NuevoProyecto: React.FC = () => {
       <main className="flex flex-col items-center justify-center px-4 py-10 mt-[5%]">
         <StepIndicator currentStep={step} totalSteps={4} />
         <Card className="w-full max-w-3xl px-9 py-8">
-          <form onSubmit={(e) => { e.preventDefault(); if (step < 4) nextStep(); else crearProyecto(); }}>
+          <form onSubmit={(e) => { e.preventDefault(); if (step < 4) nextStep(); else EnviarProyecto(); }}>
             {step === 1 && (
               <CardContent className="space-y-6">
                 <h2 className="text-2xl font-semibold text-center text-slate-800">Información Básica</h2>

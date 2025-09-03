@@ -12,10 +12,7 @@ export interface FreeSearchCard {
   image?: string;
   fechaApertura?: string;
   fechaCierre?: string;
-  EnlaceDelDetalle?: string;
-  alcance?: string; // Campo para filtros de región
-  tipoDeBeneficio?: string; // Campo para filtros de tipo de beneficio
-  estado?: string; // Campo para filtros de estado
+  link?: string;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Constantes

@@ -2,10 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import NavBar from '../../components/NavBar/navbar';
-// He eliminado 'import Proyecto from ...' y lo defino aquí mismo para que el código sea autocontenido.
-// Si tienes el archivo del modelo, puedes volver a importarlo.
 
-// --- INTERFACES ---
 interface PostulacionData {
   name: string;
   value: number;
@@ -21,13 +18,12 @@ interface Idea {
   createdAt: string;
 }
 
-// Interfaz para los datos de un proyecto que vienen de la API
 interface Proyecto {
   ID: number;
   Titulo: string;
   Descripcion: string;
-  estado?: string; // El estado puede ser opcional si no siempre viene de la API
-  fondo_seleccionado?: string; // Campo opcional
+  estado?: string; 
+  fondo_seleccionado?: string; 
 }
 
 const colorPalette = {
@@ -41,7 +37,6 @@ const colorPalette = {
   danger: '#e53e3e',
 };
 
-// --- COMPONENTES DE ICONOS (Sin cambios) ---
 const ChartBarIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5 mr-3"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>);
 const PaperAirplaneIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5 mr-3"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>);
 const ClockIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5 mr-3"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>);
@@ -55,25 +50,22 @@ const CustomTooltip = ({ active, payload }: any) => { if (active && payload && p
 
 
 const MisPostulaciones: React.FC = () => {
-  const [activeSection, setActiveSection] = useState('estadisticas');
+  const [activeSection, setActiveSection] = useState('ideas');
   const navigate = useNavigate();
 
-  // --- Estados para Ideas ---
+
   const [ideas, setIdeas] = useState<Idea[]>([]);
 
-  // --- Estados para Proyectos ---
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [loadingProyectos, setLoadingProyectos] = useState<boolean>(false);
   const [errorProyectos, setErrorProyectos] = useState<string | null>(null);
 
 
-  // --- Efecto para cargar IDEAS desde localStorage ---
   useEffect(() => {
     const storedIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
     setIdeas(storedIdeas);
   }, []);
 
-  // --- Efecto para cargar PROYECTOS desde la API ---
   useEffect(() => {
     const fetchProyectos = async () => {
       const storedUser = sessionStorage.getItem("usuario");
@@ -100,8 +92,7 @@ const MisPostulaciones: React.FC = () => {
         }
 
         const data = await response.json();
-        // Si la API devuelve el array directamente, `data` será el array.
-        // Si lo devuelve dentro de una clave como "proyectos", sería `data.proyectos`.
+
         setProyectos(data || []); 
 
       } catch (error: any) {
@@ -112,14 +103,12 @@ const MisPostulaciones: React.FC = () => {
       }
     };
 
-    // Llamamos a la función solo si la sección activa es 'proyectos'
     if (activeSection === 'proyectos') {
       fetchProyectos();
     }
-  }, [activeSection]); // Se ejecuta cada vez que activeSection cambia
+  }, [activeSection]); 
 
 
-  // --- Funciones de manejo ---
   const handleDeleteIdea = (idToDelete: number) => {
     if (window.confirm("¿Estás seguro de que quieres eliminar esta idea? Esta acción no se puede deshacer.")) {
       const updatedIdeas = ideas.filter(idea => idea.id !== idToDelete);
@@ -145,7 +134,6 @@ const MisPostulaciones: React.FC = () => {
     }
   };
 
-  // --- Datos y configuración para Gráficos ---
   const initialPostulacionesData: PostulacionData[] = [{ name: 'Aprobadas', value: 320, color: '#8ba888' }, { name: 'Adjudicadas', value: 90, color: '#d5ccab' }, { name: 'En Revisión', value: 39, color: '#d5e7cf' }, { name: 'Pendientes', value: 52, color: '#44624a' }, { name: 'Rechazadas', value: 24, color: '#c0d4ad' }, { name: 'Canceladas', value: 33, color: '#505143' }];
   const postulacionesPorMes = [{ mes: 'Ene', Aprobadas: 40, Rechazadas: 10, Pendientes: 5 }, { mes: 'Feb', Aprobadas: 60, Rechazadas: 5, Pendientes: 10 }, { mes: 'Mar', Aprobadas: 50, Rechazadas: 8, Pendientes: 7 }, { mes: 'Abr', Aprobadas: 70, Rechazadas: 6, Pendientes: 9 }];
   const postulacionesEnviadas = [{ id: 1, nombre: 'Wenapiolin', programa: 'bardiculo', estado: 'Aprobadas' }, { id: 2, nombre: 'MatchaFunding', programa: 'feria de software', estado: 'Pendientes' }];
@@ -173,72 +161,78 @@ const MisPostulaciones: React.FC = () => {
        
           <aside className="lg:col-span-1">
             <nav className="space-y-2">
-              <button onClick={() => setActiveSection('estadisticas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'estadisticas' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'estadisticas' ? 'white' : colorPalette.oliveGray }}><ChartBarIcon />Estadísticas</button>
+               <button onClick={() => setActiveSection('ideas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'ideas' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'ideas' ? 'white' : colorPalette.oliveGray }}><LightBulbIcon />Mis Ideas</button>
+              
               <button onClick={() => setActiveSection('enviadas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'enviadas' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'enviadas' ? 'white' : colorPalette.oliveGray }}><PaperAirplaneIcon />Enviadas</button>
               <button onClick={() => setActiveSection('historial')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'historial' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'historial' ? 'white' : colorPalette.oliveGray }}><ClockIcon />Historial</button>
               <button onClick={() => setActiveSection('proyectos')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'proyectos' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'proyectos' ? 'white' : colorPalette.oliveGray }}><PaperAirplaneIcon  />Mis Proyectos</button>
+              <button onClick={() => setActiveSection('estadisticas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'estadisticas' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'estadisticas' ? 'white' : colorPalette.oliveGray }}><ChartBarIcon />Estadísticas</button>
               
             
-              <button onClick={() => setActiveSection('ideas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'ideas' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'ideas' ? 'white' : colorPalette.oliveGray }}><LightBulbIcon />Mis Ideas</button>
+             
             </nav>
           </aside>
 
         
 <div className="lg:col-span-3">
-  {activeSection === 'estadisticas' && (
-    <div className="space-y-8">
-      <h2 className="text-3xl font-bold" style={{ color: colorPalette.darkGreen }}>Resumen de Postulaciones</h2>
 
-     <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-  <h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Distribución de Postulaciones</h3>
-  <div style={{ height: 350 }}>
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart margin={{ top: 20, right: 30, left: 30, bottom: 20 }}>
-        <Pie
-          data={initialPostulacionesData}
-          cx="50%"
-          cy="50%"
-          labelLine={true} 
-          label={renderCustomizedLabel} 
-          innerRadius={65}
-          outerRadius={90}
-          fill="#8884d8"
-          dataKey="value"
-          paddingAngle={5}
-        >
-          {initialPostulacionesData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.color} />
-          ))}
-        </Pie>
-        <Tooltip content={<CustomTooltip />} />
-      </PieChart>
-    </ResponsiveContainer>
-  </div>
-</div>
+  {activeSection === 'ideas' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h1 className="text-3xl font-bold" style={{ color: colorPalette.darkGreen }}>Mis Ideas Guardadas</h1>
+                
+                  <button
+                    onClick={() => navigate('/create-idea')} 
+                    className="px-5 py-2 font-semibold text-white rounded-lg shadow-md transition-transform duration-300 hover:scale-105"
+                    style={{ backgroundColor: colorPalette.darkGreen }}
+                  >
+                    + Generar Nueva Idea
+                  </button>
+                </div>
+                
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Postulaciones por Mes</h3>
-        <div style={{ height: 350 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={postulacionesPorMes}
-              margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="mes" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="Aprobadas" stroke={colorPalette.softGreen} strokeWidth={3} />
-              <Line type="monotone" dataKey="Rechazadas" stroke={colorPalette.mediumGreen} strokeWidth={3} />
-              <Line type="monotone" dataKey="Pendientes" stroke={colorPalette.darkGreen} strokeWidth={3} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-    </div>
-  )}
+                  <div className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 bg-slate-50">
+                    <div className="text-sm font-semibold col-span-2" style={{ color: colorPalette.oliveGray }}>Idea / Problema</div>
+                    <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray }}>Campo</div>
+                    <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray }}>Fecha</div>
+                    <div className="text-sm font-semibold text-center" style={{ color: colorPalette.oliveGray }}>Acciones</div>
+                  </div>
+                  
+                  {ideas.length > 0 ? (
+                    ideas.map((idea) => (
+                      <div key={idea.id} className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 items-center last:border-b-0 hover:bg-slate-50 transition-colors">
+                        <div className="col-span-2">
+                          <p className="font-medium truncate" style={{ color: colorPalette.darkGreen }}>{idea.problem}</p>
+                          <p className="text-sm truncate" style={{ color: colorPalette.oliveGray }}>{idea.uniqueness}</p>
+                        </div>
+                        <div>
+                          <span className="inline-block px-3 py-1 text-sm font-semibold rounded-full" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen }}>
+                            {idea.field}
+                          </span>
+                        </div>
+                        <div className="text-sm" style={{ color: colorPalette.oliveGray }}>{new Date(idea.createdAt).toLocaleDateString()}</div>
+                        
+                       
+                        <div className="flex justify-center items-center space-x-3">
+                          <button onClick={() => handleRetakeIdea(idea)} title="Retomar Idea" className="p-2 rounded-full hover:bg-slate-200 transition-colors">
+                            <PencilIcon className="h-5 w-5 text-[#505143]" />
+                          </button>
+                          <button onClick={() => handleDeleteIdea(idea.id)} title="Eliminar Idea" className="p-2 rounded-full hover:bg-red-100 transition-colors">
+                            <TrashIcon className="h-5 w-5"  />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-center py-20 space-y-4">
+                      <EmptyBoxIcon />
+                      <p style={{ color: colorPalette.oliveGray }}>Aún no has guardado ideas. ¡Genera una nueva!</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
 
 
@@ -326,7 +320,7 @@ const MisPostulaciones: React.FC = () => {
                                                 </div>
                                             ) : (
                                                 <>
-                                                    {/* Encabezado de la tabla */}
+                                                
                                                     <div className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 bg-slate-50">
                                                         <div className="text-sm font-semibold col-span-2" style={{ color: colorPalette.oliveGray }}>Título del Proyecto</div>
                                                         <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray }}>Fondo</div>
@@ -371,63 +365,62 @@ const MisPostulaciones: React.FC = () => {
             
             
           
-            {activeSection === 'ideas' && (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h1 className="text-3xl font-bold" style={{ color: colorPalette.darkGreen }}>Mis Ideas Guardadas</h1>
-                
-                  <button
-                    onClick={() => navigate('/create-idea')} 
-                    className="px-5 py-2 font-semibold text-white rounded-lg shadow-md transition-transform duration-300 hover:scale-105"
-                    style={{ backgroundColor: colorPalette.darkGreen }}
-                  >
-                    + Generar Nueva Idea
-                  </button>
-                </div>
-                
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            
+              {activeSection === 'estadisticas' && (
+    <div className="space-y-8">
+      <h2 className="text-3xl font-bold" style={{ color: colorPalette.darkGreen }}>Resumen de Postulaciones</h2>
 
-                  <div className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 bg-slate-50">
-                    <div className="text-sm font-semibold col-span-2" style={{ color: colorPalette.oliveGray }}>Idea / Problema</div>
-                    <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray }}>Campo</div>
-                    <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray }}>Fecha</div>
-                    <div className="text-sm font-semibold text-center" style={{ color: colorPalette.oliveGray }}>Acciones</div>
-                  </div>
-                  
-                  {ideas.length > 0 ? (
-                    ideas.map((idea) => (
-                      <div key={idea.id} className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 items-center last:border-b-0 hover:bg-slate-50 transition-colors">
-                        <div className="col-span-2">
-                          <p className="font-medium truncate" style={{ color: colorPalette.darkGreen }}>{idea.problem}</p>
-                          <p className="text-sm truncate" style={{ color: colorPalette.oliveGray }}>{idea.uniqueness}</p>
-                        </div>
-                        <div>
-                          <span className="inline-block px-3 py-1 text-sm font-semibold rounded-full" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen }}>
-                            {idea.field}
-                          </span>
-                        </div>
-                        <div className="text-sm" style={{ color: colorPalette.oliveGray }}>{new Date(idea.createdAt).toLocaleDateString()}</div>
-                        
-                       
-                        <div className="flex justify-center items-center space-x-3">
-                          <button onClick={() => handleRetakeIdea(idea)} title="Retomar Idea" className="p-2 rounded-full hover:bg-slate-200 transition-colors">
-                            <PencilIcon className="h-5 w-5 text-[#505143]" />
-                          </button>
-                          <button onClick={() => handleDeleteIdea(idea.id)} title="Eliminar Idea" className="p-2 rounded-full hover:bg-red-100 transition-colors">
-                            <TrashIcon className="h-5 w-5"  />
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="flex flex-col items-center justify-center text-center py-20 space-y-4">
-                      <EmptyBoxIcon />
-                      <p style={{ color: colorPalette.oliveGray }}>Aún no has guardado ideas. ¡Genera una nueva!</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+     <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+  <h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Distribución de Postulaciones</h3>
+  <div style={{ height: 350 }}>
+    <ResponsiveContainer width="100%" height="100%">
+      <PieChart margin={{ top: 20, right: 30, left: 30, bottom: 20 }}>
+        <Pie
+          data={initialPostulacionesData}
+          cx="50%"
+          cy="50%"
+          labelLine={true} 
+          label={renderCustomizedLabel} 
+          innerRadius={65}
+          outerRadius={90}
+          fill="#8884d8"
+          dataKey="value"
+          paddingAngle={5}
+        >
+          {initialPostulacionesData.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.color} />
+          ))}
+        </Pie>
+        <Tooltip content={<CustomTooltip />} />
+      </PieChart>
+    </ResponsiveContainer>
+  </div>
+</div>
+
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Postulaciones por Mes</h3>
+        <div style={{ height: 350 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={postulacionesPorMes}
+              margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="mes" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="Aprobadas" stroke={colorPalette.softGreen} strokeWidth={3} />
+              <Line type="monotone" dataKey="Rechazadas" stroke={colorPalette.mediumGreen} strokeWidth={3} />
+              <Line type="monotone" dataKey="Pendientes" stroke={colorPalette.darkGreen} strokeWidth={3} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+    </div>
+  )}
+
           </div>
         </div>
       </main>

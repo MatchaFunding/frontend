@@ -11,8 +11,7 @@ export interface FiltersIdeaValues {
   orderBy: OrderOption;
   searchIdea: string;
   searchCampo: string;
-  fechaMin: string;
-  fechaMax: string;
+  fecha: string;
 }
 
 // Describe qué datos y funciones externas necesita el componente
@@ -88,8 +87,7 @@ export const initialFiltersIdea: FiltersIdeaValues = {
   orderBy: 'none',
   searchIdea: '',
   searchCampo: '',
-  fechaMin: '',
-  fechaMax: ''
+  fecha: ''
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,37 +95,27 @@ export const initialFiltersIdea: FiltersIdeaValues = {
 
 // Interfaz para representar una idea (ajusta según tu estructura de datos)
 export interface IdeaItem {
-  id: number;
-  field: string;        // Campo de la idea
-  problem: string;      // Problema/título de la idea
-  audience: string;     // Público objetivo
-  uniqueness: string;   // Innovación/unicidad
-  createdAt: string;    // Fecha de creación
+  ID: number;
+  Usuario: number;
+  Campo: string;
+  Problema: string;
+  Publico: string;
+  Innovacion: string;
+  FechaDeCreacion: string;
 }
 
 // Función principal de ordenamiento
 export function sortIdeas(ideas: IdeaItem[], orderBy: OrderOption): IdeaItem[] {
   const sortedIdeas = [...ideas];
-  
   switch (orderBy) {
     case 'idea-asc':
-      return sortedIdeas.sort((a, b) => a.problem.localeCompare(b.problem));
-    
+      return sortedIdeas.sort((a, b) => a.Problema.localeCompare(b.Problema));
     case 'idea-desc':
-      return sortedIdeas.sort((a, b) => b.problem.localeCompare(a.problem));
-    
+      return sortedIdeas.sort((a, b) => b.Problema.localeCompare(a.Problema));
     case 'campo-asc':
-      return sortedIdeas.sort((a, b) => a.field.localeCompare(b.field));
-    
+      return sortedIdeas.sort((a, b) => a.Campo.localeCompare(b.Campo));
     case 'campo-desc':
-      return sortedIdeas.sort((a, b) => b.field.localeCompare(a.field));
-    
-    case 'fecha-desc':
-      return sortedIdeas.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    
-    case 'fecha-asc':
-      return sortedIdeas.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    
+      return sortedIdeas.sort((a, b) => b.Campo.localeCompare(a.Campo));
     case 'none':
     default:
       return sortedIdeas;
@@ -135,19 +123,19 @@ export function sortIdeas(ideas: IdeaItem[], orderBy: OrderOption): IdeaItem[] {
 }
 
 // Función para filtrar ideas por campo
-export function filterIdeasByField(ideas: IdeaItem[], field: string): IdeaItem[] {
-  if (!field || field === '') {
+export function filterIdeasByCampo(ideas: IdeaItem[], Campo: string): IdeaItem[] {
+  if (!Campo || Campo === '') {
     return ideas;
   }
-  return ideas.filter(idea => idea.field === field);
+  return ideas.filter(idea => idea.Campo === Campo);
 }
 
 // Función para filtrar ideas por público objetivo
-export function filterIdeasByAudience(ideas: IdeaItem[], audience: string): IdeaItem[] {
-  if (!audience || audience === '') {
+export function filterIdeasByAudience(ideas: IdeaItem[], Publico: string): IdeaItem[] {
+  if (!Publico || Publico === '') {
     return ideas;
   }
-  return ideas.filter(idea => idea.audience === audience);
+  return ideas.filter(idea => idea.Publico === Publico);
 }
 
 // Función para filtrar ideas por texto en idea/problema
@@ -157,7 +145,7 @@ export function filterIdeasByIdeaText(ideas: IdeaItem[], searchText: string): Id
   }
   const searchLower = searchText.toLowerCase().trim();
   return ideas.filter(idea => 
-    idea.problem?.toLowerCase().includes(searchLower)
+    idea.Problema?.toLowerCase().includes(searchLower)
   );
 }
 
@@ -168,54 +156,17 @@ export function filterIdeasByCampoText(ideas: IdeaItem[], searchText: string): I
   }
   const searchLower = searchText.toLowerCase().trim();
   return ideas.filter(idea => 
-    idea.field?.toLowerCase().includes(searchLower)
+    idea.Campo?.toLowerCase().includes(searchLower)
   );
 }
 
-// Función para filtrar ideas por rango de fechas
-export function filterIdeasByDateRange(ideas: IdeaItem[], fechaMin: string, fechaMax: string): IdeaItem[] {
-  if (!fechaMin && !fechaMax) {
-    return ideas;
-  }
-  
-  return ideas.filter(idea => {
-    if (!idea.createdAt) return false;
-    
-    const ideaDate = new Date(idea.createdAt);
-    const minDate = fechaMin ? new Date(fechaMin) : null;
-    const maxDate = fechaMax ? new Date(fechaMax) : null;
-    
-    if (minDate && ideaDate < minDate) return false;
-    if (maxDate && ideaDate > maxDate) return false;
-    
-    return true;
-  });
-}
-
 // Función combinada para aplicar todos los filtros y ordenamiento
-export function applyFiltersAndSorting(
-  ideas: IdeaItem[], 
-  filters: FiltersIdeaValues
-): IdeaItem[] {
+export function applyFiltersAndSorting(ideas: IdeaItem[], filters: FiltersIdeaValues): IdeaItem[] {
   let filteredIdeas = [...ideas];
-  
-  // Aplicar filtro por campo
-  filteredIdeas = filterIdeasByField(filteredIdeas, filters.campo);
-  
-  // Aplicar filtro por público objetivo
+  filteredIdeas = filterIdeasByCampo(filteredIdeas, filters.campo);
   filteredIdeas = filterIdeasByAudience(filteredIdeas, filters.publico);
-  
-  // Aplicar filtro por texto en idea/problema
   filteredIdeas = filterIdeasByIdeaText(filteredIdeas, filters.searchIdea);
-  
-  // Aplicar filtro por texto en campo
   filteredIdeas = filterIdeasByCampoText(filteredIdeas, filters.searchCampo);
-  
-  // Aplicar filtro por rango de fechas
-  filteredIdeas = filterIdeasByDateRange(filteredIdeas, filters.fechaMin, filters.fechaMax);
-  
-  // Aplicar ordenamiento
   filteredIdeas = sortIdeas(filteredIdeas, filters.orderBy);
-  
   return filteredIdeas;
 }

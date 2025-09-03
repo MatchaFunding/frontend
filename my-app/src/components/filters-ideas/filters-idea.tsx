@@ -56,8 +56,7 @@ const FiltersIdea: React.FC<FiltersIdeaProps> = ({ filters, onApplyFilters }) =>
       orderBy: filters.orderBy,
       searchIdea: '',
       searchCampo: '',
-      fechaMin: '',
-      fechaMax: ''
+      fecha: ''
     };
     setTempFilters(resetFilters);
     onApplyFilters(resetFilters);

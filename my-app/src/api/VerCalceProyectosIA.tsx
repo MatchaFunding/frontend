@@ -2,10 +2,9 @@
 import MatchRequest from '../models/MatchRequest.tsx'
 import MatchResult from '../models/MatchResult.tsx'
 
-
-export async function VerTodosLosInstrumentosIAAsync(input : MatchRequest) {
+export async function VerLosProyectosIAAsync(input : MatchRequest) {
   try {
-    const response = await fetch(`https://uruguay-cigarettes-advised-answering.trycloudflare.com/api/v1/ia/match`, {
+    const response = await fetch(`https://uruguay-cigarettes-advised-answering.trycloudflare.com/api/v1/ia/match/projectmatchhistoric`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -16,7 +15,6 @@ export async function VerTodosLosInstrumentosIAAsync(input : MatchRequest) {
         'estado':input.estado,
         'regiones':input.regiones,
         'tipos_perfil':input.tipos_perfil
-        
       }),
     });
     if (!response.ok) {

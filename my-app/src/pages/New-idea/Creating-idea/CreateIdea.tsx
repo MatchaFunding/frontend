@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/NavBar/navbar";
 import { CrearIdeaAsync } from "../../../api/CrearIdea";
 import { CrearIdeaIAAsync } from "../../../api/CrearIdeaIa";
+import { VerEmpresaCompletaAsync } from "../../../api/VerEmpresaCompleta";
 import Idea from '../../../models/Idea.tsx';
 //import IdeaRespuesta from '../../../models/IdeaRespuesta'
 
@@ -120,8 +121,27 @@ const CreateIdea: React.FC = () => {
 
       if (ideaBackend && ideaBackend.ID) {
         IdeaDato.ID = ideaBackend.ID;
-        const ideaRespuesta =  CrearIdeaIAAsync(IdeaDato)
+        const ideaRespuesta = await CrearIdeaIAAsync(IdeaDato);
+         const storedUser = sessionStorage.getItem("usuario");
+         if (storedUser) {
+          const datos = JSON.parse(storedUser);
+          const usuario = datos.Usuario;
+          const opiniones = datos.OpinionesIAdeIdea;
+          opiniones.push(ideaRespuesta);;
+          if (usuario.ID) {
+            const resultado = await VerEmpresaCompletaAsync(usuario.ID);
+            resultado.OpinionesIAdeIdea = opiniones;
+            if (resultado) {
+              sessionStorage.setItem('usuario', JSON.stringify(resultado));
+              console.log(resultado);
+            }
+          }
+        }
+        else {
+          console.log('No se encontraron datos de usuario en sessionStorage');
+        }
         console.log(ideaRespuesta)
+        
         return ideaRespuesta
       }
     } catch (error) {
@@ -130,13 +150,13 @@ const CreateIdea: React.FC = () => {
   }
   const handleConfirmAndSaveIdea = () => {
     try {
-      const existingIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
-      const newIdea = {
-        id: Date.now(),
-        ...previewData,
-        createdAt: new Date().toISOString(),
-      };
-      localStorage.setItem("userIdeas", JSON.stringify([...existingIdeas, newIdea]));
+      //const existingIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
+      //const newIdea = {
+      //  id: Date.now(),
+      //  ...previewData,
+      //  createdAt: new Date().toISOString(),
+      //};
+      //localStorage.setItem("userIdeas", JSON.stringify([...existingIdeas, newIdea]));
       const JSONidea = {
         Usuario : 5,
         Campo : previewData.field,
@@ -146,14 +166,8 @@ const CreateIdea: React.FC = () => {
         FechaDeCreacion : "2000-07-01"
 
       }
-      const IdeaDato = new Idea(JSONidea)
-      
-      
-
-      handleCreateIdea(IdeaDato)
-      
-      
-      console.log("me voy a matar")
+      const IdeaDato = new Idea(JSONidea);
+      handleCreateIdea(IdeaDato);
       setAnswers([previewData.field, previewData.problem, previewData.audience, previewData.uniqueness]);
       setIsCompleted(true);
       setShowPreview(false);

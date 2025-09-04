@@ -2,7 +2,14 @@ import React, { useState, useMemo, useEffect } from 'react';
 import NavBar from '../../../components/NavBar/navbar';
 import { Link, useNavigate } from 'react-router-dom';
 import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
+//import { VerLosProyectosIAAsync } from '../../../api/VerLosProyectosIA';
 import LoopAnimation from '../../../components/Shared/animationFrame';
+//import type MatchRequest from '../../../models/MatchRequest';
+
+import { VerProyectosHistoricosIAAsync } from '../../../api/VerProyectosHistoricosIA';
+import { VerLosProyectosIAAsync } from '../../../api/VerCalceProyectosIA';
+
+import Proyecto from '../../../models/Proyecto';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -112,10 +119,18 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
   const [sortBy, setSortBy] = useState<'compatibilidad' | 'alfabetico' | 'duracion'>('compatibilidad');
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [showAnimation, setShowAnimation] = useState(true);
-   useEffect(() => {
-      const timer = setTimeout(() => setShowAnimation(false), 5000);
-      return () => clearTimeout(timer);
-    }, []);
+  
+  const [historicos, setHistoricos] = useState();
+    
+  async function VerProyectosHistoricos() {
+    const proyectoshistoricos = await VerProyectosHistoricosIAAsync();
+    console.log("Proyectos historicos: " + JSON.stringify(proyectoshistoricos));
+  }
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowAnimation(false), 5000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const projectData = localStorage.getItem('selectedProject');
@@ -130,6 +145,15 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
   }, []);
 
   const areas = useMemo(() => ['Todas', ...new Set(mockProyectosHistoricos.map(p => p.Area))], []);
+
+  const storedUser = sessionStorage.getItem("usuario");
+  if (storedUser) {
+    const datos = JSON.parse(storedUser);
+    const misproyectos = datos.Proyectos;
+    console.log("Mis proyectos: " + JSON.stringify(misproyectos));
+  }
+
+  VerProyectosHistoricos();
 
   const filteredProyectos = useMemo(() => {
     let proyectos = [...mockProyectosHistoricos];

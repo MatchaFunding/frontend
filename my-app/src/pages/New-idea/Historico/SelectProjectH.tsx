@@ -14,25 +14,17 @@ const ProjectCard: React.FC<{ proyecto: Proyecto; onSelect: () => void }> = ({ p
   return (
     <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80 h-full">
       <div className="p-6 flex flex-col flex-grow">
-
-        {/* Título con altura mínima fija y centrado */}
         <h3 className="text-xl font-bold text-[#44624a] mb-3 min-h-[64px] flex items-center justify-center text-center leading-snug">
           {proyecto.Titulo}
         </h3>
-
-        {/* Descripción con altura fija para alinear todas */}
         <p className="text-slate-600 text-sm mb-4 text-left flex-grow leading-relaxed min-h-[100px]">
           {fixedDescripcion}
         </p>
-
-        {/* Categoría ajustada al texto */}
         <div className="mb-6">
           <span className="inline-block bg-[#8ba888]/20 text-[#44624a] text-xs font-semibold px-3 py-0.25 rounded-full">
             {proyecto.Area}
           </span>
         </div>
-
-        {/* Botón */}
         <button
           onClick={onSelect}
           className="w-full bg-[#8ba888] hover:bg-[#3a523f] text-white font-semibold py-3 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-1"

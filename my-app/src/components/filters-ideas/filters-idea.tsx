@@ -56,8 +56,7 @@ const FiltersIdea: React.FC<FiltersIdeaProps> = ({ filters, onApplyFilters }) =>
       orderBy: filters.orderBy,
       searchIdea: '',
       searchCampo: '',
-      fechaMin: '',
-      fechaMax: ''
+      fecha: ''
     };
     setTempFilters(resetFilters);
     onApplyFilters(resetFilters);
@@ -147,18 +146,10 @@ const FiltersIdea: React.FC<FiltersIdeaProps> = ({ filters, onApplyFilters }) =>
                 <div className="date-inputs-container">
                   <input
                     type="date"
-                    value={tempFilters.fechaMin}
+                    value={tempFilters.fecha}
                     onChange={(e) => setTempFilters(prev => ({ ...prev, fechaMin: e.target.value }))}
                     className="date-input"
                     placeholder="Fecha mínima"
-                  />
-                  <span>-</span>
-                  <input
-                    type="date"
-                    value={tempFilters.fechaMax}
-                    onChange={(e) => setTempFilters(prev => ({ ...prev, fechaMax: e.target.value }))}
-                    className="date-input"
-                    placeholder="Fecha máxima"
                   />
                 </div>
               </div>

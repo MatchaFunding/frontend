@@ -1,7 +1,7 @@
 import Consorcio from '../models/Consorcio.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CrearConsorcioAsync(data: Consorcio): Promise<Consorcio> {
+export async function CrearConsorcioAsync(data: Consorcio) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearconsorcio/`, {
       method: 'POST',

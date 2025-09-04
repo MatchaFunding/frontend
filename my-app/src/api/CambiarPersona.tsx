@@ -1,7 +1,7 @@
 import Persona from '../models/Persona.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CambiarPersonaAsync(id: number, data: Persona): Promise<Persona> {
+export async function CambiarPersonaAsync(id: number, data: Persona) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/cambiarpersona/${id}/`, {
       method: 'PUT',

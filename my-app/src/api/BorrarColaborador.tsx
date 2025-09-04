@@ -1,7 +1,7 @@
 import Colaborador from '../models/Colaborador.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarColaboradorAsync(id: number): Promise<Colaborador> {
+export async function BorrarColaboradorAsync(id: number) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borrarcolaborador/${id}`, {
       method: 'DELETE',

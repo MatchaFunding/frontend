@@ -1,7 +1,7 @@
 import Beneficiario from '../models/Beneficiario.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CrearBeneficiarioAsync(data: Beneficiario): Promise<Beneficiario> {
+export async function CrearBeneficiarioAsync(data: Beneficiario) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearbeneficiario/`, {
       method: 'POST',

@@ -183,7 +183,7 @@ const LandingPageTailwind: React.FC = () => {
             </h1>
             <p className="text-base sm:text-lg mb-8 opacity-90">La guía que necesitas</p>
             <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-5">
-              <Link to="/Home-I">
+              <Link to="/signup">
                 <button className="bg-gradient-to-r from-[#44624a] to-[#8ba888] hover:from-[#8ba888] hover:to-[#44624a] text-white py-3 px-8 rounded-full text-base font-semibold shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto">
                   Comencemos
                 </button>

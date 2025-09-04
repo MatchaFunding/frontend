@@ -1,7 +1,7 @@
 import Beneficiario from '../models/Beneficiario.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CambiarBeneficiarioAsync(id: number, data: Beneficiario): Promise<Beneficiario> {
+export async function CambiarBeneficiarioAsync(id: number, data: Beneficiario) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/cambiarbeneficiario/${id}`, {
       method: 'PUT',

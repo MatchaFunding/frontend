@@ -1,7 +1,7 @@
 import Postulacion from '../models/Postulacion.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarPostulacionAsync(id: number): Promise<Postulacion> {
+export async function BorrarPostulacionAsync(id: number) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borrarpostulacion/${id}`, {
       method: 'DELETE',

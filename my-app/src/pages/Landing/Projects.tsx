@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import NavBar from '../../components/NavBar/navbar';
 import FiltersIdea from '../../components/filters-ideas/filters-idea.tsx';
-import type { FiltersIdeaValues } from '../../components/filters-ideas/filters-idea';
 import { applyFiltersAndSorting } from '../../components/filters-ideas/filters-idea';
+import type { FiltersIdeaValues } from '../../components/filters-ideas/filters-idea';
+import Idea from "../../models/Idea";
 
 interface PostulacionData {
   name: string;
@@ -12,6 +13,7 @@ interface PostulacionData {
   color: string;
 }
 
+/*
 interface Idea {
   id: number;
   field: string;
@@ -20,6 +22,7 @@ interface Idea {
   uniqueness: string;
   createdAt: string;
 }
+  */
 
 interface Proyecto {
   ID: number;
@@ -53,36 +56,39 @@ const CustomTooltip = ({ active, payload }: any) => { if (active && payload && p
 
 
 const MisPostulaciones: React.FC = () => {
+  const [filteredIdeas, setFilteredIdeas] = useState<Idea[]>([]);
+  const [ideas, setIdeas] = useState<Idea[]>([]);
   const [activeSection, setActiveSection] = useState('ideas');
   const navigate = useNavigate();
-
-  // Estado para las ideas
-  const [ideas, setIdeas] = useState<Idea[]>([]);
-  const [filteredIdeas, setFilteredIdeas] = useState<Idea[]>([]);
   
-  // Estado para los filtros de ideas
   const [filtersIdea, setFiltersIdea] = useState<FiltersIdeaValues>({
     campo: '',
     publico: '',
     orderBy: 'none',
     searchIdea: '',
     searchCampo: '',
-    fechaMin: '',
-    fechaMax: ''
+    fecha: ''
   });
 
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [loadingProyectos, setLoadingProyectos] = useState<boolean>(false);
   const [errorProyectos, setErrorProyectos] = useState<string | null>(null);
 
-
   useEffect(() => {
-    const storedIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
-    setIdeas(storedIdeas);
-    setFilteredIdeas(storedIdeas); // Inicializar ideas filtradas
+    const storedUser = sessionStorage.getItem("usuario");
+    if (storedUser) {
+      const datos = JSON.parse(storedUser);
+      if (!datos) {
+        setErrorProyectos("No se encontró información del usuario.");
+        return;
+      }
+      const userIdeas = datos.Ideas;
+      setIdeas(userIdeas);
+      setFilteredIdeas(userIdeas);
+      console.log("Mis ideas: " + JSON.stringify(userIdeas));
+    }
   }, []);
 
-  // Actualizar ideas filtradas cuando cambien las ideas o filtros
   useEffect(() => {
     const filtered = applyFiltersAndSorting(ideas, filtersIdea);
     setFilteredIdeas(filtered);
@@ -95,7 +101,6 @@ const MisPostulaciones: React.FC = () => {
         setErrorProyectos("No se encontró información del usuario.");
         return;
       }
-
       try {
         const userData = JSON.parse(storedUser);
         const empresaId = userData?.Beneficiario?.ID;
@@ -104,20 +109,16 @@ const MisPostulaciones: React.FC = () => {
           setErrorProyectos("No se pudo obtener el ID de la empresa.");
           return;
         }
-
         setLoadingProyectos(true);
         setErrorProyectos(null);
-
         const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/verproyectosdeempresa/${empresaId}`);
         if (!response.ok) {
           throw new Error(`Error ${response.status}: No se pudo obtener la lista de proyectos.`);
         }
-
         const data = await response.json();
-
         setProyectos(data || []); 
-
-      } catch (error: any) {
+      }
+      catch (error: any) {
         console.error("Error al obtener los proyectos:", error);
         setErrorProyectos(error.message || "Ocurrió un error inesperado.");
       } finally {
@@ -142,7 +143,7 @@ const MisPostulaciones: React.FC = () => {
 
   const handleDeleteIdea = (idToDelete: number) => {
     if (window.confirm("¿Estás seguro de que quieres eliminar esta idea? Esta acción no se puede deshacer.")) {
-      const updatedIdeas = ideas.filter(idea => idea.id !== idToDelete);
+      const updatedIdeas = ideas.filter(idea => idea.ID !== idToDelete);
       setIdeas(updatedIdeas);
       localStorage.setItem("userIdeas", JSON.stringify(updatedIdeas));
     }
@@ -150,7 +151,7 @@ const MisPostulaciones: React.FC = () => {
 
   const handleRetakeIdea = (idea: Idea) => {
     console.log("Retomando idea:", idea);
-    alert(`Retomando la idea: "${idea.field}". Revisa la consola para ver los detalles.`);
+    alert(`Retomando la idea: "${idea.Campo}". Revisa la consola para ver los detalles.`);
   };
 
   const handleEditProyecto = (proyecto: Proyecto) => {
@@ -181,33 +182,21 @@ const MisPostulaciones: React.FC = () => {
       </text>
     );
   };
-
-
   return (
     <div style={{ backgroundColor: colorPalette.background }} className="min-h-screen">
       <NavBar />
       <main className="p-6 md:p-10 mt-10 mt-[6%]">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
-          
-       
           <aside className="lg:col-span-1">
             <nav className="space-y-2">
-               <button onClick={() => setActiveSection('ideas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'ideas' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'ideas' ? 'white' : colorPalette.oliveGray }}><LightBulbIcon />Mis Ideas</button>
-              
-              <button onClick={() => setActiveSection('enviadas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'enviadas' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'enviadas' ? 'white' : colorPalette.oliveGray }}><PaperAirplaneIcon />Enviadas</button>
+              <button onClick={() => setActiveSection('ideas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'ideas' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'ideas' ? 'white' : colorPalette.oliveGray }}><LightBulbIcon />Mis Ideas</button>
               <button onClick={() => setActiveSection('historial')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'historial' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'historial' ? 'white' : colorPalette.oliveGray }}><ClockIcon />Historial</button>
               <button onClick={() => setActiveSection('proyectos')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'proyectos' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'proyectos' ? 'white' : colorPalette.oliveGray }}><PaperAirplaneIcon  />Mis Proyectos</button>
               <button onClick={() => setActiveSection('estadisticas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'estadisticas' ? colorPalette.darkGreen : 'transparent', color: activeSection === 'estadisticas' ? 'white' : colorPalette.oliveGray }}><ChartBarIcon />Estadísticas</button>
-              
-            
-             
             </nav>
           </aside>
-
-        
-<div className="lg:col-span-3">
-
-  {activeSection === 'ideas' && (
+          <div className="lg:col-span-3">
+            {activeSection === 'ideas' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h1 className="text-3xl font-bold" style={{ color: colorPalette.darkGreen }}>Mis Ideas Guardadas</h1>
@@ -229,7 +218,6 @@ const MisPostulaciones: React.FC = () => {
                 </div>
                 
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-
                   <div className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 bg-slate-50">
                     <div className="text-sm font-semibold col-span-2" style={{ color: colorPalette.oliveGray }}>Idea / Problema</div>
                     <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray }}>Campo</div>
@@ -239,24 +227,22 @@ const MisPostulaciones: React.FC = () => {
                   
                   {filteredIdeas.length > 0 ? (
                     filteredIdeas.map((idea) => (
-                      <div key={idea.id} className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 items-center last:border-b-0 hover:bg-slate-50 transition-colors">
+                      <div key={idea.ID} className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 items-center last:border-b-0 hover:bg-slate-50 transition-colors">
                         <div className="col-span-2">
-                          <p className="font-medium truncate" style={{ color: colorPalette.darkGreen }}>{idea.problem}</p>
-                          <p className="text-sm truncate" style={{ color: colorPalette.oliveGray }}>{idea.uniqueness}</p>
+                          <p className="font-medium truncate" style={{ color: colorPalette.darkGreen }}>{idea.Problema}</p>
+                          <p className="text-sm truncate" style={{ color: colorPalette.oliveGray }}>{idea.Innovacion}</p>
                         </div>
                         <div>
                           <span className="inline-block px-3 py-1 text-sm font-semibold rounded-full" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen }}>
-                            {idea.field}
+                            {idea.Campo}
                           </span>
                         </div>
-                        <div className="text-sm" style={{ color: colorPalette.oliveGray }}>{new Date(idea.createdAt).toLocaleDateString()}</div>
                         
-                       
                         <div className="flex justify-center items-center space-x-3">
                           <button onClick={() => handleRetakeIdea(idea)} title="Retomar Idea" className="p-2 rounded-full hover:bg-slate-200 transition-colors">
                             <PencilIcon className="h-5 w-5 text-[#505143]" />
                           </button>
-                          <button onClick={() => handleDeleteIdea(idea.id)} title="Eliminar Idea" className="p-2 rounded-full hover:bg-red-100 transition-colors">
+                          <button onClick={() => handleDeleteIdea(idea.ID)} title="Eliminar Idea" className="p-2 rounded-full hover:bg-red-100 transition-colors">
                             <TrashIcon className="h-5 w-5"  />
                           </button>
                         </div>

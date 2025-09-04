@@ -1,7 +1,7 @@
 import Proyecto from '../models/Proyecto.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarProyectoAsync(id: number): Promise<Proyecto> {
+export async function BorrarProyectoAsync(id: number) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borrarproyecto/${id}`, {
       method: 'DELETE',

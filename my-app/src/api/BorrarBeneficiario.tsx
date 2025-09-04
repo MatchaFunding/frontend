@@ -1,7 +1,7 @@
 import Beneficiario from '../models/Beneficiario.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarBeneficiarioAsync(id: number): Promise<Beneficiario> {
+export async function BorrarBeneficiarioAsync(id: number) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borrarbeneficiario/${id}`, {
       method: 'DELETE',

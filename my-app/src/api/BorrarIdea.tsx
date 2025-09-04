@@ -1,7 +1,7 @@
 import Idea from '../models/Idea.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarIdeaAsync(id: number): Promise<Idea> {
+export async function BorrarIdeaAsync(id: number) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borraridea/${id}`, {
       method: 'DELETE',

@@ -1,7 +1,7 @@
 import Financiador from '../models/Financiador.tsx'
 import { useEffect, useState } from 'react';
 
-export async function BorrarFinanciadorAsync(id: number): Promise<Financiador> {
+export async function BorrarFinanciadorAsync(id: number) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/borrarfinanciador/${id}`, {
       method: 'DELETE',

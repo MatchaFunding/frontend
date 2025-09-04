@@ -1,7 +1,7 @@
 import Proyecto from '../models/Proyecto.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CambiarProyectoAsync(id: number, data: Proyecto): Promise<Proyecto> {
+export async function CambiarProyectoAsync(id: number, data: Proyecto) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/cambiarproyecto/${id}`, {
       method: 'PUT',

@@ -1,7 +1,7 @@
 import Idea from '../models/Idea.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CambiarIdeaAsync(id: number, data: Idea): Promise<Idea> {
+export async function CambiarIdeaAsync(id: number, data: Idea) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/cambiaridea/${id}`, {
       method: 'PUT',

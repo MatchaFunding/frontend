@@ -1,7 +1,7 @@
 import Financiador from '../models/Financiador.tsx'
 import { useEffect, useState } from 'react';
 
-export async function CambiarFinanciadorAsync(id: number, data: Financiador): Promise<Financiador> {
+export async function CambiarFinanciadorAsync(id: number, data: Financiador) {
   try {
     const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/cambiarfinanciador/${id}`, {
       method: 'PUT',

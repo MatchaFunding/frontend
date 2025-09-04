@@ -8,6 +8,7 @@ import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
 import { VerProyectosHistoricosIAAsync } from '../../../api/VerProyectosHistoricosIA';
 import { VerCalceProyectosIAAsync } from '../../../api/VerCalceProyectosIA';
 import LoopAnimation from '../../../components/Shared/animationFrame';
+import type MatchResult from '../../../models/MatchResult';
 //import MatchRequest from '../../../models/MatchRequest';
 //import MatchResult from '../../../models/MatchResult';
 // import { VerLosProyectosIAAsync } from '../../../api/VerCalceProyectosIA';
@@ -108,28 +109,52 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [showAnimation, setShowAnimation] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const [historicos, setHistoricos] = useState<ProyectoHistorico[]>([]);
   const [calces, setCalces] = useState<MatchResult[]>([]);
-    
-  async function VerProyectosHistoricos(id: number) {
-    try {
-      setIsLoading(true);
-      const proyectoshistoricos = await VerProyectosHistoricosIAAsync();
-      console.log("Proyectos historicos: " + JSON.stringify(proyectoshistoricos.projects));
 
-      if (proyectoshistoricos && proyectoshistoricos.projects) {
-        setHistoricos(proyectoshistoricos.projects);
-        const calce = await VerCalceProyectosIAAsync(id);
-        console.log("Los calces fueron: " + JSON.stringify(calce));
-        setCalces(calce);
-      }
-    } catch (error) {
-      console.error("Error al obtener proyectos históricos:", error);
-    } finally {
-      setIsLoading(false);
+  async function VerProyectosHistoricos(id: number) {
+  try {
+    setIsLoading(true);
+
+    const proyectoshistoricos = await VerProyectosHistoricosIAAsync();
+    console.log("Proyectos historicos:", proyectoshistoricos.projects);
+
+    if (proyectoshistoricos && proyectoshistoricos.projects) {
+      const calce = await VerCalceProyectosIAAsync(id);
+      console.log("Los calces fueron:", calce);
+
+    
+      const proyectosConCompatibilidad = proyectoshistoricos.projects
+        .filter((p: ProyectoHistorico) =>
+          calce.some(c => c.name === p.Titulo)
+        )
+        .map((p: ProyectoHistorico) => {
+          const match = calce.find(c => c.name === p.Titulo);
+          return {
+            ...p,
+            Compatibilidad: Math.floor((match?.affinity || 0) * 100),
+            CallId: match?.call_id, 
+          };
+        });
+
+      setHistoricos(proyectosConCompatibilidad);
+      setCalces(calce);
     }
+  } catch (error) {
+    console.error("Error al obtener proyectos históricos:", error);
+  } finally {
+    setIsLoading(false);
   }
+}
+
+
+useEffect(() => {
+  if (calces.length > 0) {
+    const affinities = calces.map(c => Math.floor(c.affinity * 100));
+    console.log("Affinitys en porcentaje:", affinities);
+  }
+}, [calces]);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowAnimation(false), 5000);
@@ -143,6 +168,7 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
         const project = JSON.parse(projectData);
         setSelectedProject(project);
         console.log("Proyecto seleccionado: " + JSON.stringify(project));
+
         if (project.ID) {
           VerProyectosHistoricos(project.ID);
         }

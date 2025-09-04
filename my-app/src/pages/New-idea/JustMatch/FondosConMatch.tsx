@@ -102,10 +102,6 @@ const FondosconPorcentaje: React.FC = () => {
     }
   }, []);
 
-  async function VerFondosVigentes() {
-    const proyectoshistoricos = await VerFondosVigentesIAAsync();
-    console.log("Proyectos historicos: " + JSON.stringify(proyectoshistoricos));
-  }
 
   const categorias = useMemo(() => ['Todas', ...new Set(mockFondos.map(f => f.categoria))], []);
 

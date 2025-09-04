@@ -6,7 +6,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: 18rem; /* Aumentado de 14.7rem a 18rem */
+  width: 19rem; /* Aumentado de 14.7rem a 19rem */
   height: 33rem;
   transition: box-shadow 0.3s ease-in-out;
   font-family: 'Roboto', sans-serif;
@@ -26,18 +26,18 @@
 }
 .free-search-card__image-container {
   position: relative;
-  height: 13rem; /* h-52 */
+  height: 9rem; /* Reducido de 13rem a 9rem */
   width: 100%;
   overflow: hidden;
+  flex-shrink: 0; /* Evita que el contenedor se reduzca */
 }
 
 .free-search-card__image {
   width: 100%;
-  height: 100%;
+  height: 9rem; /* Altura fija igual al contenedor */
   object-fit: cover;
   object-position: center;
-  min-width: 100%;
-  min-height: 100%;
+  display: block; /* Elimina espacio en blanco debajo de la imagen */
 }
 
 .free-search-card:hover {
@@ -73,14 +73,17 @@
   text-overflow: ellipsis;
   width: 100%;
   flex: 1;
+  max-height: 4.9rem; /* Altura máxima para 4 líneas: 0.875rem * 1.4 * 4 = 4.9rem */
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
 .free-search-card__dates {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem; /* Reducido de 0.75rem a 0.5rem */
   display: flex;
   width: 100%;
   border-top: 1px solid #e2e8f0; /* border-slate-200 */
-  padding-top: 1rem; /* pt-4 */
+  padding-top: 0.5rem; /* Reducido de 1rem a 0.5rem */
 }
 
 .free-search-card__date {
@@ -109,6 +112,16 @@
   word-break: break-word; /* Permite que las fechas largas se rompan si es necesario */
 }
 
+.free-search-card__metadata {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  border-top: 1px solid #e2e8f0; /* border-slate-200 */
+  padding-top: 0.5rem;
+  margin-bottom: 1rem;
+  gap: 0.5rem;
+}
+
 .free-search-card__topic {
   background: rgba(139, 168, 136, 0.2); /* bg-[rgba(139,168,136,0.2)] */
   color: rgba(68, 98, 74, 1); /* text-[rgba(68,98,74,1)] */
@@ -117,27 +130,33 @@
   padding: 0.25rem 0.75rem; /* px-3 py-1 */
   border-radius: 9999px; /* rounded-full */
   display: inline-block;
-  align-self: flex-start;
+  white-space: nowrap; /* No se rompe en múltiples líneas */
+  line-height: 1.2; /* Altura de línea consistente */
 }
+
 .free-search-card__amount {
-  font-weight: 700; /* font-bold */
-  font-size: 1rem;
-  color: #334155; /* text-slate-700 */
-  display: flex;
-  align-items: center;
+  font-weight: 800; /* Más pesado para más resalte */
+  font-size: 1.125rem; /* Aumentado a text-lg para más prominencia */
+  color: #1e293b; /* Color más oscuro para más contraste */
+  line-height: 1.2;
+  width: 100%; /* Ocupa todo el ancho disponible */
+  word-break: break-word; /* Permite romper palabras largas si es necesario */
+  text-align: left; /* Ancla el beneficio a la izquierda */
 }
+
 .free-search-card__benefit {
   font-weight: 700; /* font-bold */
-  font-size: 1rem;
-  color: #334155; /* text-slate-700 */
-  line-height: 1.4;
+  font-size: 1rem; /* Ligeramente más grande que antes */
+  color: #1e293b; /* Color más oscuro para más contraste */
+  line-height: 1.2;
+  width: 100%; /* Ocupa todo el ancho disponible */
+  text-align: left; /* Ancla el beneficio a la izquierda */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 100%;
 }
 .free-search-card__button {
   width: 100%;
@@ -167,8 +186,9 @@
 .free-search-card__metadata {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   border-top: 1px solid #e2e8f0; /* border-slate-200 */
   padding-top: 1rem; /* pt-4 */
   margin-bottom: 1rem; /* mb-4 */
+  gap: 0.75rem; /* Espacio entre elementos */
 }

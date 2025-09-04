@@ -207,7 +207,7 @@ const MisPostulaciones: React.FC = () => {
                       onApplyFilters={handleFiltersIdeaChange}
                     />
                     <button
-                      onClick={() => navigate('/create-idea')} 
+                      onClick={() => navigate('/Matcha/New-idea')}
                       className="px-5 py-2 font-semibold text-white rounded-lg shadow-md transition-transform duration-300 hover:scale-105 flex items-center gap-2"
                       style={{ backgroundColor: colorPalette.darkGreen }}
                     >
@@ -218,32 +218,41 @@ const MisPostulaciones: React.FC = () => {
                 </div>
                 
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                  <div className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 bg-slate-50">
-                    <div className="text-sm font-semibold col-span-2" style={{ color: colorPalette.oliveGray }}>Idea / Problema</div>
-                    <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray }}>Campo</div>
-                    <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray }}>Fecha</div>
-                    <div className="text-sm font-semibold text-center" style={{ color: colorPalette.oliveGray }}>Acciones</div>
+                  <div className="flex gap-2 px-6 py-4 border-b border-slate-200 bg-slate-50" style={{ minWidth: '100%' }}>
+                    <div className="text-sm font-semibold flex-shrink-0" style={{ color: colorPalette.oliveGray, width: '50%', minWidth: '50%', maxWidth: '50%' }}>Idea / Problema</div>
+                    <div className="text-sm font-semibold flex-shrink-0" style={{ color: colorPalette.oliveGray, width: '25%', minWidth: '25%', maxWidth: '25%' }}>Campo</div>
+                    <div className="text-sm font-semibold flex-shrink-0" style={{ color: colorPalette.oliveGray, width: '15%', minWidth: '15%', maxWidth: '15%' }}>Fecha</div>
+                    <div className="text-sm font-semibold text-center flex-shrink-0" style={{ color: colorPalette.oliveGray, width: '10%', minWidth: '10%', maxWidth: '10%' }}>Acciones</div>
                   </div>
                   
                   {filteredIdeas.length > 0 ? (
                     filteredIdeas.map((idea) => (
-                      <div key={idea.ID} className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 items-center last:border-b-0 hover:bg-slate-50 transition-colors">
-                        <div className="col-span-2">
-                          <p className="font-medium truncate" style={{ color: colorPalette.darkGreen }}>{idea.Problema}</p>
-                          <p className="text-sm truncate" style={{ color: colorPalette.oliveGray }}>{idea.Innovacion}</p>
+                      <div key={idea.ID} className="flex gap-2 px-6 py-4 border-b border-slate-200 items-center last:border-b-0 hover:bg-slate-50 transition-colors" style={{ minWidth: '100%' }}>
+                        <div className="flex-shrink-0" style={{ width: '50%', minWidth: '50%', maxWidth: '50%' }}>
+                          <p className="font-medium text-ellipsis overflow-hidden" style={{ color: colorPalette.darkGreen, whiteSpace: 'nowrap' }}>{idea.Problema}</p>
+                          <p className="text-sm text-ellipsis overflow-hidden" style={{ color: colorPalette.oliveGray, whiteSpace: 'nowrap' }}>{idea.Innovacion}</p>
                         </div>
-                        <div>
-                          <span className="inline-block px-3 py-1 text-sm font-semibold rounded-full" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen }}>
+                        <div className="flex-shrink-0" style={{ width: '25%', minWidth: '25%', maxWidth: '25%' }}>
+                          <span className="inline-block px-3 py-1 text-sm font-semibold rounded-full text-ellipsis overflow-hidden" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen, whiteSpace: 'nowrap', maxWidth: '100%' }}>
                             {idea.Campo}
                           </span>
                         </div>
-                        
-                        <div className="flex justify-center items-center space-x-3">
-                          <button onClick={() => handleRetakeIdea(idea)} title="Retomar Idea" className="p-2 rounded-full hover:bg-slate-200 transition-colors">
-                            <PencilIcon className="h-5 w-5 text-[#505143]" />
+                        <div className="flex-shrink-0" style={{ width: '15%', minWidth: '15%', maxWidth: '15%' }}>
+                          <span className="text-sm text-ellipsis overflow-hidden" style={{ color: colorPalette.oliveGray, whiteSpace: 'nowrap' }}>
+                            {idea.FechaDeCreacion ? (() => {
+                              // Crear la fecha sin conversión de zona horaria
+                              const [year, month, day] = idea.FechaDeCreacion.split('-');
+                              const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                              return date.toLocaleDateString();
+                            })() : 'Sin fecha'}
+                          </span>
+                        </div>
+                        <div className="flex justify-center items-center space-x-1 flex-shrink-0" style={{ width: '10%', minWidth: '10%', maxWidth: '10%' }}>
+                          <button onClick={() => handleRetakeIdea(idea)} title="Retomar Idea" className="p-1 rounded-full hover:bg-slate-200 transition-colors">
+                            <PencilIcon className="h-4 w-4 text-[#505143]" />
                           </button>
-                          <button onClick={() => handleDeleteIdea(idea.ID)} title="Eliminar Idea" className="p-2 rounded-full hover:bg-red-100 transition-colors">
-                            <TrashIcon className="h-5 w-5"  />
+                          <button onClick={() => handleDeleteIdea(idea.ID)} title="Eliminar Idea" className="p-1 rounded-full hover:bg-red-100 transition-colors">
+                            <TrashIcon className="h-4 w-4"  />
                           </button>
                         </div>
                       </div>

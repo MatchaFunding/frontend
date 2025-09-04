@@ -48,7 +48,7 @@ function FreeSearch() {
 			{/* Contenedor principal con ancho máximo del 90% */}
 			<div className="max-w-[90%] mx-auto w-full flex-1">
 				{/* searchbar y filtros */}
-				<div className="w-full px-4" style={{ marginTop: '120px' }}>
+				   <div className="w-full px-4 mt-32">
 					<div className="max-w-screen-2xl mx-auto flex justify-between items-center">
 						{/* Searchbar */}
 						<div className="flex items-center bg-white shadow px-4 py-2 flex-1 mr-4" style={{ borderRadius: '8px' }}>
@@ -87,12 +87,12 @@ function FreeSearch() {
 					{/* Paginación debajo de las cards */}
 					<div className="flex justify-center py-4 gap-2" style={{ marginTop: '60px' }}>
 						{/* Flecha izquierda */}
-						<button className={`px-3 py-2 rounded-full font-semibold border ${page === 1 ? 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-[#989F2B] border-[#989F2B]'}`} onClick={() => pageHandlers.goToPrevious(page)} disabled={page === 1} aria-label="Anterior">
-							&#8592;
+						<button className={`px-3 py-2 rounded-full font-semibold border ${page === 1 ? 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-[#8ba888] border-[#8ba888]'}`} onClick={() => pageHandlers.goToPrevious(page)} disabled={page === 1} aria-label="Anterior">
+							<img src="/svgs/right-arrow.svg" alt="Anterior" className="w-4 h-4" style={{ transform: 'rotate(180deg)', filter: page === 1 ? 'brightness(0) saturate(100%) invert(70%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(96%)' : 'brightness(0) saturate(100%) invert(63%) sepia(15%) saturate(357%) hue-rotate(73deg) brightness(95%) contrast(88%)' }} />
 						</button>
 								{/* Página actual */}
 								<button
-									className={`px-4 py-2 rounded-full font-semibold border bg-[#989F2B] text-white`}
+									className={`px-3 py-1 rounded-full font-semibold bg-[#8ba888] text-white text-sm`}
 									disabled
 								>
 									{page}
@@ -100,7 +100,7 @@ function FreeSearch() {
 								{/* Página siguiente */}
 								{page + 1 <= totalPages && (
 									<button
-										className={`px-4 py-2 rounded-full font-semibold border bg-white text-[#989F2B] border-[#989F2B]`}
+										className={`px-3 py-2 font-semibold text-[#8ba888] hover:bg-gray-100`}
 										onClick={() => pageHandlers.goToPage(page + 1)}
 									>
 										{page + 1}
@@ -109,7 +109,7 @@ function FreeSearch() {
 								{/* Página siguiente +1 */}
 								{page + 2 <= totalPages && (
 									<button
-										className={`px-4 py-2 rounded-full font-semibold border bg-white text-[#989F2B] border-[#989F2B]`}
+										className={`px-3 py-2 font-semibold text-[#8ba888] hover:bg-gray-100`}
 										onClick={() => pageHandlers.goToPage(page + 2)}
 									>
 										{page + 2}
@@ -122,7 +122,7 @@ function FreeSearch() {
 								{/* Última página si no es visible como subsiguiente */}
 								{totalPages > 1 && page !== totalPages && (page + 2 < totalPages) && (
 									<button
-										className={`px-4 py-2 rounded-full font-semibold border ${page === totalPages ? 'bg-[#989F2B] text-white' : 'bg-white text-[#989F2B] border-[#989F2B]'}`}
+										className={`px-3 py-2 font-semibold text-[#8ba888] hover:bg-gray-100`}
 										onClick={() => pageHandlers.goToPage(totalPages)}
 									>
 										{totalPages}
@@ -130,12 +130,12 @@ function FreeSearch() {
 								)}
 						{/* Flecha derecha */}
 						<button
-							className={`px-3 py-2 rounded-full font-semibold border ${page === totalPages ? 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-[#989F2B] border-[#989F2B]'}`}
+							className={`px-3 py-2 rounded-full font-semibold border ${page === totalPages ? 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-[#8ba888] border-[#8ba888]'}`}
 							onClick={() => pageHandlers.goToNext(page)}
 							disabled={page === totalPages}
 							aria-label="Siguiente"
 						>
-							&#8594;
+							<img src="/svgs/right-arrow.svg" alt="Siguiente" className="w-4 h-4" style={{ filter: page === totalPages ? 'brightness(0) saturate(100%) invert(70%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(96%)' : 'brightness(0) saturate(100%) invert(63%) sepia(15%) saturate(357%) hue-rotate(73deg) brightness(95%) contrast(88%)' }} />
 						</button>
 					</div>
 				</div>

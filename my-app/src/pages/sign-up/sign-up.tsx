@@ -33,6 +33,7 @@ const SignUp: React.FC = () => {
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
   const [emailCheckTimeout, setEmailCheckTimeout] = useState<number | null>(null);
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const setDropdownRef = (field: string) => (ref: HTMLDivElement | null) => {
     dropdownRefs.current[field] = ref;
@@ -228,7 +229,7 @@ const SignUp: React.FC = () => {
       console.log('Email válido según nuestra validación:', isValidEmail(email));
 
       // Validar campos básicos
-      const validacion = validarFormularioInicial(email, password);
+      const validacion = validarFormularioInicial(email, password, isTermsAccepted);
       if (!validacion.valid) {
         alert(validacion.error);
         setIsLoading(false);
@@ -253,7 +254,7 @@ const SignUp: React.FC = () => {
         ID: 0, // El backend asignará el ID
         Nombre: 'Usuario Temporal', // Nombre genérico que se actualizará en el paso 1
         Sexo: 'NA', // Valor por defecto válido que se puede cambiar después
-        RUT: '00000000-0', // RUT temporal válido que se llenará en el formulario paso a paso
+        RUT: '00.000.000-0', // RUT temporal válido que se llenará en el formulario paso a paso
         FechaDeNacimiento: '2000-01-01'
       });
 
@@ -320,7 +321,7 @@ const SignUp: React.FC = () => {
           ID: createdPersonaId,
           Nombre: nombreCompleto,
           Sexo: mapearSexoParaBackend(formData.gender || ''),
-          RUT: formData.rut || '00000000-0',
+          RUT: formData.rut || '00.000.000-0',
           FechaDeNacimiento: formData.birthDate || '2000-01-01'
         });
 
@@ -551,7 +552,14 @@ const SignUp: React.FC = () => {
               </div>
               {/* Checkbox */}
               <div className="checkbox-group">
-                <input id="agree" name="agree" type="checkbox" className="checkbox-input" />
+                <input 
+                  id="agree" 
+                  name="agree" 
+                  type="checkbox" 
+                  className="checkbox-input"
+                  checked={isTermsAccepted}
+                  onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                />
                   <label htmlFor="agree" className="checkbox-label">
                     Estoy de acuerdo con los <a href="#" className="terms-link">Términos</a> y <a href="#" className="terms-link">Condiciones</a>
                   </label>
@@ -563,9 +571,11 @@ const SignUp: React.FC = () => {
                     isLoading || 
                     isCheckingEmail || 
                     emailExists || 
+                    !isTermsAccepted ||
                     !isInitialFormValid( 
                       (document.getElementById('email') as HTMLInputElement)?.value || '', 
-                      (document.getElementById('password') as HTMLInputElement)?.value || '' 
+                      (document.getElementById('password') as HTMLInputElement)?.value || '',
+                      isTermsAccepted
                     )
                   } >
                   <span>{isLoading ? 'Creando cuenta...' : 'Registrarse'}</span>

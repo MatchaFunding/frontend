@@ -8,6 +8,7 @@ import { Textarea } from "../../../components/UI/textarea";
 import { StepIndicator } from "../../../components/Shared/StepIndicator";
 import PersonaClass from "../../../models/Persona";
 
+
 interface PersonaPayload { Nombre: string; Sexo: string; RUT: string; FechaDeNacimiento: string; }
 interface ProyectoForm {
   Beneficiario: number;
@@ -55,6 +56,7 @@ const defaultFondo: Fondo = {
     categoria: "Tecnología e Innovación",
 };
 
+
 const CrearProyectoMatch: React.FC = () => {
   const [step, setStep] = useState(1);
   const [activeTab, setActiveTab] = useState<"presentacion" | "publico">("presentacion");
@@ -67,6 +69,8 @@ const CrearProyectoMatch: React.FC = () => {
     Beneficiario: 0, Titulo: "", Descripcion: "", DuracionEnMesesMinimo: 6,
     DuracionEnMesesMaximo: 12, Alcance: "", Area: "", Miembros: [],
   });
+  
+
   const [personas, setPersonas] = useState<PersonaClass[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [nuevaPersonaData, setNuevaPersonaData] = useState<PersonaPayload>({
@@ -74,14 +78,42 @@ const CrearProyectoMatch: React.FC = () => {
   });
   const storedUser = sessionStorage.getItem("usuario");
 
+
+
   useEffect(() => {
+  
+    const ideaActiva = idea || JSON.parse(localStorage.getItem("selectedIdea") || JSON.stringify(defaultIdea));
+
+
+    const storedApiResponse = localStorage.getItem('ideaRespuestaIA');
+    let descripcionSugerida = `Basado en la idea que resuelve el problema de "${ideaActiva.problem}" para el público "${ideaActiva.audience}", este proyecto busca financiamiento del fondo ${fondo.nombre}. La propuesta se diferencia por lo siguiente: "${ideaActiva.uniqueness}".`;
+
+    if (storedApiResponse) {
+      try {
+        const respuestaParseada = JSON.parse(storedApiResponse);
+        if (respuestaParseada && respuestaParseada.ResumenLLM) {
+    
+          descripcionSugerida = respuestaParseada.ResumenLLM;
+        }
+      } catch (e) {
+        console.error("No se pudo parsear la respuesta de la IA desde localStorage.", e);
+      }
+    }
+
+
     setFormData((prevData) => ({
       ...prevData,
-      Titulo: `Proyecto: ${idea.field} - Aplicación a ${fondo.nombre}`,
-      Descripcion: `Basado en la idea que resuelve el problema de "${idea.problem}" para el público "${idea.audience}", este proyecto busca financiamiento del fondo ${fondo.nombre}. La propuesta se diferencia por lo siguiente: "${idea.uniqueness}".`,
-      Area: idea.field,
+      Titulo: `Proyecto de ${ideaActiva.field}: Aplicación a ${fondo.nombre}`,
+      Descripcion: descripcionSugerida,
+      Area: ideaActiva.field,
     }));
+    
+
+    localStorage.removeItem('ideaRespuestaIA');
+
   }, [idea, fondo]);
+
+
 
   useEffect(() => {
     if (storedUser) {
@@ -90,6 +122,7 @@ const CrearProyectoMatch: React.FC = () => {
       setPersonas(usuario.Miembros.map((m: any) => new PersonaClass(m)));
     }
   }, [storedUser]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -159,7 +192,9 @@ const CrearProyectoMatch: React.FC = () => {
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 
+
   return (
+
     <div className="min-h-screen bg-slate-50">
       <NavBar />
       <main className="flex flex-col items-center justify-center px-4 py-10 mt-[5%]">
@@ -206,6 +241,7 @@ const CrearProyectoMatch: React.FC = () => {
                 </div>
               </CardContent>
             )}
+            {/* ... resto del JSX ... */}
             {step === 3 && (
                 <CardContent className="space-y-6">
                     <h2 className="text-2xl font-semibold text-center" style={{ color: colorPalette.oliveGray }}>Añadir Miembros</h2>

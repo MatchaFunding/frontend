@@ -48,14 +48,14 @@ const CloseIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+{/*
   const navLinks = [
     { href: '#productos', label: 'Planes' },
     { href: '#mas-informacion', label: 'Más información' },
     { href: '#seguridad', label: 'Confiabilidad' },
     { href: '#asistencia', label: 'Asistencia' },
     { href: '#descarga', label: 'App' },
-  ];
+  ]; */}
 
   return (
     <nav className="b-transparent text-white shadow-md fixed top-0 left-0 right-0 z-50">
@@ -73,6 +73,8 @@ const Navbar: React.FC = () => {
             </div>
           </div>
 
+          {/*
+
           <div className="hidden md:flex md:items-center md:space-x-4 lg:space-x-6">
             {navLinks.map((link) => (
               <a
@@ -83,14 +85,14 @@ const Navbar: React.FC = () => {
                 {link.label}
               </a>
             ))}
-          </div>
+          </div>*/}
 
           {/* Sección Derecha: Idioma, Registrarse e Iniciar Sesión */}
           <div className="hidden md:flex items-center space-x-4">
-            <button className="flex items-center px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 hover:text-white transition-colors">
+            {/*<button className="flex items-center px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 hover:text-white transition-colors">
               <GlobeIcon className="w-5 h-5 mr-1" />
               Idioma
-            </button>
+            </button> */}
             <Link
               to="/signup"
               className="bg-white text-gray-900 px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-200 transition-colors"
@@ -122,7 +124,7 @@ const Navbar: React.FC = () => {
 
       {isMobileMenuOpen && (
         <div className="md:hidden" id="mobile-menu">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          {/*<div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {navLinks.map((link) => (
               <a
                 key={link.label}
@@ -133,7 +135,7 @@ const Navbar: React.FC = () => {
                 {link.label}
               </a>
             ))}
-          </div>
+          </div>*/}
           <div className="pt-4 pb-3 border-t border-gray-700">
             <div className="flex items-center px-5">
               <button className="w-full flex items-center justify-start px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">

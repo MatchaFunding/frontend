@@ -40,7 +40,7 @@ const MatchaHomePage: React.FC = () => {
       className="lg:col-span-3 bg-white p-8 rounded-2xl shadow-lg flex flex-col justify-between cursor-pointer hover:shadow-2xl transition-shadow w-full min-h-[500px] lg:min-h-[600px]"
     >
       <div className="flex items-center gap-12 h-full w-full">
-        {/* Lado izquierdo */}
+    
         <div className="w-1/2 flex flex-col items-center justify-center">
           <div className="text mb-6 text-center">
             <span className="text-gray-500 text-xl lg:text-2xl">Haz</span>

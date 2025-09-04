@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+
 
 const NavBar: React.FC = () => {
   const location = useLocation();
@@ -48,7 +48,7 @@ const NavBar: React.FC = () => {
       <div className="flex items-center justify-between relative">
         <div className="flex-1 text-left z-20">
           <span
-            className="text-white font-extrabold text-3xl tracking-wider hover:opacity-90 transition cursor-pointer"
+            className="text-white font-extrabold text-3xl tracking-wider  transition cursor-pointer"
             onClick={() => navigate("/Home-i")}
           >
             <img
@@ -62,12 +62,22 @@ const NavBar: React.FC = () => {
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-5 z-10">
           {!isMatchaRoute && (
             <>
-              <button
-                onClick={() => navigateTo("prev")}
-                className="flex items-center justify-center p-4 rounded-full hover:bg-white/10 transition-colors"
-              >
-                <ChevronLeft className="w-10 h-10 text-white" />
-              </button>
+             <button
+  onClick={() => navigateTo("prev")}
+  className="w-12 h-12 flex items-center justify-center rounded-full bg-white  transition-colors shadow-md"
+>
+
+  <svg
+    className="w-6 h-6 text-gray-700"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    viewBox="0 0 24 24"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+  </svg>
+</button>
+
 
               <div className="text-center">
                 <span className="block text-white font-bold text-xl sm:text-2xl">
@@ -77,13 +87,29 @@ const NavBar: React.FC = () => {
                   {currentNav.subtitle}
                 </span>
               </div>
+<button
+  onClick={() => navigateTo("next")}
+  className="w-12 h-12 flex items-center justify-center rounded-full bg-white hover:bg-gray-200 transition-colors shadow-md"
+>
+  <svg
+  className="w-6 h-6 text-gray-700 pointer-events-none"
+  fill="none"
+  stroke="currentColor"
+  strokeWidth={2}
+  viewBox="0 0 24 24"
+>
+  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+</svg>
 
-              <button
-                onClick={() => navigateTo("next")}
-                className="flex items-center justify-center p-4 rounded-full hover:bg-white/10 transition-colors"
-              >
-                <ChevronRight className="w-10 h-10 text-white" />
-              </button>
+
+
+  {/* Esto asegura que toda el área sea clickeable */}
+  <span className="absolute inset-0"></span>
+</button>
+
+
+
+
             </>
           )}
 

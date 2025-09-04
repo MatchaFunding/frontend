@@ -7,9 +7,9 @@ import LoopAnimation from '../../../components/Shared/animationFrame';
 //import type MatchRequest from '../../../models/MatchRequest';
 
 import { VerProyectosHistoricosIAAsync } from '../../../api/VerProyectosHistoricosIA';
-import { VerLosProyectosIAAsync } from '../../../api/VerCalceProyectosIA';
+// import { VerLosProyectosIAAsync } from '../../../api/VerCalceProyectosIA';
 
-import Proyecto from '../../../models/Proyecto';
+// import Proyecto from '../../../models/Proyecto';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -27,8 +27,8 @@ interface ProyectoHistorico {
   DuracionEnMesesMaximo: number;
   Alcance: string;
   Area: string;
-  Compatibilidad: number;
-  ImagenUrl: string;
+  Compatibilidad?: number;
+  ImagenUrl?: string;
 }
 
 interface ProyectoSeleccionado {
@@ -37,45 +37,6 @@ interface ProyectoSeleccionado {
   resumen: string;
   area: string;
 }
-
-const mockProyectosHistoricos: ProyectoHistorico[] = [
-  {
-    ID: 1,
-    Beneficiario: 1001,
-    Titulo: 'Plataforma de Telemedicina',
-    Descripcion: 'Atención médica remota para zonas rurales.',
-    DuracionEnMesesMinimo: 12,
-    DuracionEnMesesMaximo: 24,
-    Alcance: 'Nacional',
-    Area: 'Salud',
-    Compatibilidad: 95,
-    ImagenUrl: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=800&q=60',
-  },
-  {
-    ID: 2,
-    Beneficiario: 1002,
-    Titulo: 'Energía Solar para Escuelas',
-    Descripcion: 'Implementación de paneles solares en zonas vulnerables.',
-    DuracionEnMesesMinimo: 18,
-    DuracionEnMesesMaximo: 36,
-    Alcance: 'Regional',
-    Area: 'Sostenibilidad',
-    Compatibilidad: 88,
-    ImagenUrl: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=800&q=60',
-  },
-  {
-    ID: 3,
-    Beneficiario: 1003,
-    Titulo: 'Aula Virtual Inclusiva',
-    Descripcion: 'Mejora de accesibilidad en plataformas educativas.',
-    DuracionEnMesesMinimo: 10,
-    DuracionEnMesesMaximo: 20,
-    Alcance: 'Local',
-    Area: 'Educación',
-    Compatibilidad: 82,
-    ImagenUrl: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=60',
-  },
-];
 
 const SearchIcon: React.FC = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={colorPalette.oliveGray} className="w-5 h-5">
@@ -87,17 +48,29 @@ const ProyectoCard: React.FC<ProyectoHistorico> = ({
   Titulo, Descripcion, Area, Alcance, DuracionEnMesesMinimo, DuracionEnMesesMaximo, Compatibilidad, ImagenUrl 
 }) => {
   const navigate = useNavigate();
+  
+  // Imagen por defecto si no viene ImagenUrl desde la API
+  const defaultImage = '/sin-foto.png';
+  
   return (
     <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80">
       <div className="relative h-52">
-        <img src={ImagenUrl} alt={Titulo} className="w-full h-full object-cover" />
+        <img 
+          src={ImagenUrl || defaultImage} 
+          alt={Titulo} 
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            console.log('Error loading image:', ImagenUrl);
+            e.currentTarget.src = defaultImage;
+          }}
+        />
         <span className="absolute top-4 left-4 bg-[rgba(68,98,74,0.8)] backdrop-blur-sm text-white text-sm font-semibold py-1 px-3 rounded-lg">
-          {Compatibilidad}% compatibilidad
+          {Compatibilidad || 0}% compatibilidad
         </span>
       </div>
       <div className="p-6 flex flex-col flex-grow">
         <h2 className="text-xl font-bold text-slate-800 mb-2">{Titulo}</h2>
-        <p className="text-slate-500 text-sm flex-grow mb-2">{Descripcion}</p>
+        <p className="text-slate-500 text-sm flex-grow mb-2 line-clamp-3">{Descripcion}</p>
         <p className="text-xs text-slate-400 italic mb-2">Área: {Area}</p>
         <p className="text-xs text-slate-400 italic mb-2">Duración: {DuracionEnMesesMinimo}-{DuracionEnMesesMaximo} meses</p>
         <p className="text-xs text-slate-400 italic mb-4">Alcance: {Alcance}</p>
@@ -119,12 +92,24 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
   const [sortBy, setSortBy] = useState<'compatibilidad' | 'alfabetico' | 'duracion'>('compatibilidad');
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [showAnimation, setShowAnimation] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   
-  const [historicos, setHistoricos] = useState();
+  const [historicos, setHistoricos] = useState<ProyectoHistorico[]>([]);
     
   async function VerProyectosHistoricos() {
-    const proyectoshistoricos = await VerProyectosHistoricosIAAsync();
-    console.log("Proyectos historicos: " + JSON.stringify(proyectoshistoricos));
+    try {
+      setIsLoading(true);
+      const proyectoshistoricos = await VerProyectosHistoricosIAAsync();
+      console.log("Proyectos historicos: " + JSON.stringify(proyectoshistoricos));
+      
+      if (proyectoshistoricos && proyectoshistoricos.projects) {
+        setHistoricos(proyectoshistoricos.projects);
+      }
+    } catch (error) {
+      console.error("Error al obtener proyectos históricos:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -142,9 +127,12 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
         console.error(error);
       }
     }
+    
+    // Obtener proyectos históricos al cargar el componente
+    VerProyectosHistoricos();
   }, []);
 
-  const areas = useMemo(() => ['Todas', ...new Set(mockProyectosHistoricos.map(p => p.Area))], []);
+  const areas = useMemo(() => ['Todas', ...new Set(historicos.map(p => p.Area))], [historicos]);
 
   const storedUser = sessionStorage.getItem("usuario");
   if (storedUser) {
@@ -153,36 +141,35 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
     console.log("Mis proyectos: " + JSON.stringify(misproyectos));
   }
 
-  VerProyectosHistoricos();
-
   const filteredProyectos = useMemo(() => {
-    let proyectos = [...mockProyectosHistoricos];
+    let proyectos = [...historicos];
     if (searchTerm) proyectos = proyectos.filter(p => p.Titulo.toLowerCase().includes(searchTerm.toLowerCase()));
     if (areaFilter !== 'Todas') proyectos = proyectos.filter(p => p.Area === areaFilter);
     proyectos.sort((a, b) => {
       switch (sortBy) {
         case 'alfabetico': return a.Titulo.localeCompare(b.Titulo);
-        case 'compatibilidad': return b.Compatibilidad - a.Compatibilidad;
+        case 'compatibilidad': return (b.Compatibilidad || 0) - (a.Compatibilidad || 0);
         case 'duracion': return (b.DuracionEnMesesMaximo - b.DuracionEnMesesMinimo) - (a.DuracionEnMesesMaximo - a.DuracionEnMesesMinimo);
         default: return 0;
       }
     });
     return proyectos;
-  }, [searchTerm, areaFilter, sortBy]);
+  }, [searchTerm, areaFilter, sortBy, historicos]);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
-   if (showAnimation) {
-  return (
-    <div className="min-h-screen bg-[#f1f5f9] flex flex-col">
-      <NavBar />
-      <div className="flex flex-col items-center justify-center flex-1 space-y-6">
-        <LoopAnimation />
-        <p className="text-xl sm:text-2xl font-semibold text-gray-700 animate-pulse">
-          Cargando...
-        </p>
+  
+  if (showAnimation || isLoading) {
+    return (
+      <div className="min-h-screen bg-[#f1f5f9] flex flex-col">
+        <NavBar />
+        <div className="flex flex-col items-center justify-center flex-1 space-y-6">
+          <LoopAnimation />
+          <p className="text-xl sm:text-2xl font-semibold text-gray-700 animate-pulse">
+            {isLoading ? "Cargando proyectos históricos..." : "Cargando..."}
+          </p>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
 
   return (
@@ -250,11 +237,17 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredProyectos.map(proyecto => <ProyectoCard key={proyecto.ID} {...proyecto} />)}
+          {filteredProyectos.length > 0 ? (
+            filteredProyectos.map(proyecto => <ProyectoCard key={proyecto.ID} {...proyecto} />)
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <p className="text-xl text-gray-500">No se encontraron proyectos históricos que coincidan con los filtros seleccionados.</p>
+            </div>
+          )}
         </div>
 
         <footer className="flex flex-col sm:flex-row justify-between items-center mt-10 text-[rgba(80,81,67,1)]">
-          <p>Mostrando {filteredProyectos.length} de {mockProyectosHistoricos.length} proyectos</p>
+          <p>Mostrando {filteredProyectos.length} de {historicos.length} proyectos</p>
           <div className="flex items-center gap-2 mt-4 sm:mt-0">
             <button className="px-3 py-1 border rounded-lg hover:bg-[rgba(139,168,136,0.2)]">&lt;</button>
             <button className="px-3 py-1 border rounded-lg bg-[rgba(68,98,74,1)] text-white border-[rgba(68,98,74,1)]">1</button>

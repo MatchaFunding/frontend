@@ -59,12 +59,12 @@ const NavBar: React.FC = () => {
           </span>
         </div>
 
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-5 z-10">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-5 z-30">
           {!isMatchaRoute && (
             <>
               <button
                 onClick={() => navigateTo("prev")}
-                className="flex items-center justify-center p-4 rounded-full hover:bg-white/10 transition-colors"
+                className="flex items-center justify-center p-4 rounded-full hover:bg-white/10 transition-colors relative z-40"
               >
                 <ChevronLeft className="w-10 h-10 text-white" />
               </button>
@@ -80,7 +80,7 @@ const NavBar: React.FC = () => {
 
               <button
                 onClick={() => navigateTo("next")}
-                className="flex items-center justify-center p-4 rounded-full hover:bg-white/10 transition-colors"
+                className="flex items-center justify-center p-4 rounded-full hover:bg-white/10 transition-colors relative z-40"
               >
                 <ChevronRight className="w-10 h-10 text-white" />
               </button>

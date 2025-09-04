@@ -112,9 +112,13 @@ export const dropdownOptions = {
   ],
   benefits: [
     { value: '', label: 'Seleccionar beneficio' },
-    { value: 'beneficio-1', label: 'Beneficio 1' },
-    { value: 'beneficio-2', label: 'Beneficio 2' },
-    { value: 'prefiero-no-decir', label: 'Prefiero no decir' }
+    { value: 'CAP', label: 'Capacitación' },
+    { value: 'RIE', label: 'Capital de riesgo' },
+    { value: 'CRE', label: 'Créditos' },
+    { value: 'GAR', label: 'Garantías' },
+    { value: 'MUJ', label: 'Incentivo mujeres' },
+    { value: 'OTR', label: 'Otros incentivos' },
+    { value: 'SUB', label: 'Subsidios' }
   ]
 };
 

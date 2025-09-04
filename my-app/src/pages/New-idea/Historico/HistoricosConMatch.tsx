@@ -109,6 +109,7 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [showAnimation, setShowAnimation] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [titulo, settitulo] = useState('');
 
   const [historicos, setHistoricos] = useState<ProyectoHistorico[]>([]);
   const [calces, setCalces] = useState<MatchResult[]>([]);
@@ -167,7 +168,10 @@ useEffect(() => {
       try {
         const project = JSON.parse(projectData);
         setSelectedProject(project);
-        console.log("Proyecto seleccionado: " + JSON.stringify(project));
+        console.log("Proyecto seleccionado: " + JSON.stringify(project)); 
+        const nm = project.Titulo;
+        settitulo(nm);
+
 
         if (project.ID) {
           VerProyectosHistoricos(project.ID);
@@ -220,7 +224,7 @@ useEffect(() => {
           {selectedProject ? (
             <>
               <h1 className="text-4xl font-bold text-[#505143]">Proyectos Históricos similares a</h1>
-              <h2 className="text-3xl font-semibold text-[#44624a] mt-1">"{selectedProject.nombre}"</h2>
+              <h2 className="text-3xl font-semibold text-[#44624a] mt-1">"{titulo}"</h2>
             </>
           ) : (
             <h1 className="text-4xl font-bold text-[#505143]">Explorar Proyectos Históricos Adjudicados</h1>

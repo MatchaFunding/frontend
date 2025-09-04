@@ -69,10 +69,9 @@ const CreateIdea: React.FC = () => {
 
     // Guardar en backend
     const savedIdea = CrearIdea(datos_idea);
-
+    setIsCompleted(true)
     // Guardar en localStorage
-    localStorage.setItem("userIdeas", JSON.stringify([...existingIdeas, savedIdea]));
-
+    
     // setIsCompleted(true);
   } catch (error) {
     console.error("Error al guardar la idea en localStorage:", error);

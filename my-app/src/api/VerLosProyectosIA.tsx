@@ -4,7 +4,7 @@ import MatchResult from '../models/MatchResult.tsx'
 
 export async function VerLosProyectosIAAsync(input : MatchRequest) {
   try {
-    const response = await fetch(`https://uruguay-cigarettes-advised-answering.trycloudflare.com/api/v1/projects/all`, {
+    const response = await fetch(`https://incredible-differently-forget-rx.trycloudflare.com/api/v1/projects/all`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

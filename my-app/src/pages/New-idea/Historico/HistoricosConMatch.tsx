@@ -56,8 +56,8 @@ const ProyectoCard: React.FC<ProyectoHistorico> = ({
   const defaultImage = '/sin-foto.png';
   
   return (
-    <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80">
-      <div className="relative h-52">
+    <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80 h-[560px]">
+      <div className="relative h-52 flex-shrink-0">
         <img 
           src={ImagenUrl || defaultImage} 
           alt={Titulo} 
@@ -71,18 +71,30 @@ const ProyectoCard: React.FC<ProyectoHistorico> = ({
           {Compatibilidad || 0}% compatibilidad
         </span>
       </div>
-      <div className="p-6 flex flex-col flex-grow">
-        <h2 className="text-xl font-bold text-slate-800 mb-2">{Titulo}</h2>
-        <p className="text-slate-500 text-sm flex-grow mb-2 line-clamp-3">{Descripcion}</p>
-        <p className="text-xs text-slate-400 italic mb-2">Área: {Area}</p>
-        <p className="text-xs text-slate-400 italic mb-2">Duración: {DuracionEnMesesMinimo}-{DuracionEnMesesMaximo} meses</p>
-        <p className="text-xs text-slate-400 italic mb-4">Alcance: {Alcance}</p>
-        <button
-          onClick={() => navigate(`/Matcha/My-projects/proyectos-historicos/Detalle`)}
-          className="w-full bg-[#8ba888] hover:bg-[rgba(68,98,74,0.8)] text-white font-bold py-3 px-4 rounded-xl transition-colors duration-300"
-        >
-          Ver más detalles
-        </button>
+      <div className="p-6 flex flex-col flex-grow min-h-0">
+        <h2 className="text-xl font-bold text-slate-800 mb-2 line-clamp-2 flex-shrink-0">{Titulo}</h2>
+        <p className="text-slate-500 text-sm mb-4 overflow-hidden flex-shrink-0" 
+           style={{
+             display: '-webkit-box',
+             WebkitLineClamp: 5,
+             WebkitBoxOrient: 'vertical',
+             lineHeight: '1.4',
+             maxHeight: 'calc(1.4em * 5)',
+             minHeight: 'calc(1.4em * 5)'
+           }}>
+          {Descripcion}
+        </p>
+        <div className="mt-auto flex-shrink-0">
+          <p className="text-xs text-slate-400 italic mb-2">Área: {Area}</p>
+          <p className="text-xs text-slate-400 italic mb-2">Duración: {DuracionEnMesesMinimo}-{DuracionEnMesesMaximo} meses</p>
+          <p className="text-xs text-slate-400 italic mb-4">Alcance: {Alcance}</p>
+          <button
+            onClick={() => navigate(`/Matcha/My-projects/proyectos-historicos/Detalle`)}
+            className="w-full bg-[#8ba888] hover:bg-[rgba(68,98,74,0.8)] text-white font-bold py-3 px-4 rounded-xl transition-colors duration-300"
+          >
+            Ver más detalles
+          </button>
+        </div>
       </div>
     </div>
   );

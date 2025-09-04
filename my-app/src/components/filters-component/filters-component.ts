@@ -2,6 +2,13 @@
 // Tipos para FiltersComponent
 export type OrderOption = 'none' | 'title-asc' | 'amount-desc' | 'amount-asc' | 'open-date' | 'close-date';
 export type CardsPerPageOption = 8 | 10 | 15 | 25 | 40 | 999;
+
+// Tipo para las opciones del dropdown de orden
+export interface OrderDropdownOption {
+  value: string;
+  label: string;
+  decorative?: boolean;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Estado de los filtros aplicados
 export interface FiltersValues {
@@ -99,7 +106,7 @@ export const estadoMappingInverse: Record<string, string> = {
   'CER': 'Cerrado'  // Backend devuelve "CER", mostramos "Cerrado"
 };
 
-export const orderOptions = [
+export const orderOptions: OrderDropdownOption[] = [
   { value: 'none', label: 'Sin orden' },
   { value: 'amount-desc', label: 'Monto (mayor a menor valor)' },
   { value: 'amount-asc', label: 'Monto (menor a mayor valor)' },

@@ -22,6 +22,10 @@ const NavBar: React.FC = () => {
       title: "Mi Perfil",
       subtitle: "Actualiza tu información y configuración personal",
     },
+    "/free-search": {
+      title: "Búsqueda libre",
+      subtitle: "Busca fondos libremente",
+    },
   };
 
   const currentNav = isMatchaRoute

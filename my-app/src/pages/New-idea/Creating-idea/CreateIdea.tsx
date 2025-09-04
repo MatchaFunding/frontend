@@ -150,13 +150,6 @@ const CreateIdea: React.FC = () => {
   }
   const handleConfirmAndSaveIdea = () => {
     try {
-      //const existingIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
-      //const newIdea = {
-      //  id: Date.now(),
-      //  ...previewData,
-      //  createdAt: new Date().toISOString(),
-      //};
-      //localStorage.setItem("userIdeas", JSON.stringify([...existingIdeas, newIdea]));
       const JSONidea = {
         Usuario : 20,
         Campo : previewData.field,

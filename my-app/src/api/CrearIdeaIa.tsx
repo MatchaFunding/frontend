@@ -3,7 +3,7 @@ import IdeaRespuesta from '../models/IdeaRespuesta.ts'
 
 export async function CrearIdeaIAAsync(data: Idea) {
   try {
-    const response = await fetch(`https://incredible-differently-forget-rx.trycloudflare.com/api/v1/ideas/`, {
+    const response = await fetch(`https://button-steven-approximately-sake.trycloudflare.com/api/v1/ideas/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

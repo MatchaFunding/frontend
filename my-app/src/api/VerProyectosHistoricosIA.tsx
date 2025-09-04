@@ -1,6 +1,6 @@
 export async function VerProyectosHistoricosIAAsync() {
   try {
-    const response = await fetch(`https://incredible-differently-forget-rx.trycloudflare.com/api/v1/projects/all`, {
+    const response = await fetch(`https://button-steven-approximately-sake.trycloudflare.com/api/v1/projects/all`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

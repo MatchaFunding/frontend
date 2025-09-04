@@ -1,17 +1,11 @@
 
-import MatchResult from '../models/MatchResult.tsx'
-
-export async function VerCalceProyectosIAAsync(id: number) {
+export async function VerFondosVigentesIAAsync() {
   try {
     const response = await fetch(`https://uruguay-cigarettes-advised-answering.trycloudflare.com/api/v1/ia/match/projectmatchhistoric`, {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      body : JSON.stringify({
-        'idea_id':id,
-        'top_k':5
-      }),
     });
     if (!response.ok) {
       throw new Error('Error al obtener los datos');

@@ -1,5 +1,3 @@
-
-
 class MatchRequest {
   idea_id: number;
   top_k: number;

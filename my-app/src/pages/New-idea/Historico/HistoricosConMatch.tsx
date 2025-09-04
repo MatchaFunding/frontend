@@ -3,10 +3,13 @@ import NavBar from '../../../components/NavBar/navbar';
 import { Link, useNavigate } from 'react-router-dom';
 import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
 //import { VerLosProyectosIAAsync } from '../../../api/VerLosProyectosIA';
-import LoopAnimation from '../../../components/Shared/animationFrame';
 //import type MatchRequest from '../../../models/MatchRequest';
 
 import { VerProyectosHistoricosIAAsync } from '../../../api/VerProyectosHistoricosIA';
+import { VerCalceProyectosIAAsync } from '../../../api/VerCalceProyectosIA';
+import LoopAnimation from '../../../components/Shared/animationFrame';
+//import MatchRequest from '../../../models/MatchRequest';
+//import MatchResult from '../../../models/MatchResult';
 // import { VerLosProyectosIAAsync } from '../../../api/VerCalceProyectosIA';
 
 // import Proyecto from '../../../models/Proyecto';
@@ -95,15 +98,19 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   const [historicos, setHistoricos] = useState<ProyectoHistorico[]>([]);
+  const [calces, setCalces] = useState<MatchResult[]>([]);
     
-  async function VerProyectosHistoricos() {
+  async function VerProyectosHistoricos(id: number) {
     try {
       setIsLoading(true);
       const proyectoshistoricos = await VerProyectosHistoricosIAAsync();
-      console.log("Proyectos historicos: " + JSON.stringify(proyectoshistoricos));
-      
+      console.log("Proyectos historicos: " + JSON.stringify(proyectoshistoricos.projects));
+
       if (proyectoshistoricos && proyectoshistoricos.projects) {
         setHistoricos(proyectoshistoricos.projects);
+        const calce = await VerCalceProyectosIAAsync(id);
+        console.log("Los calces fueron: " + JSON.stringify(calce));
+        setCalces(calce);
       }
     } catch (error) {
       console.error("Error al obtener proyectos históricos:", error);
@@ -123,23 +130,17 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
       try {
         const project = JSON.parse(projectData);
         setSelectedProject(project);
+        console.log("Proyecto seleccionado: " + JSON.stringify(project));
+        if (project.ID) {
+          VerProyectosHistoricos(project.ID);
+        }
       } catch (error) {
         console.error(error);
       }
     }
-    
-    // Obtener proyectos históricos al cargar el componente
-    VerProyectosHistoricos();
   }, []);
 
   const areas = useMemo(() => ['Todas', ...new Set(historicos.map(p => p.Area))], [historicos]);
-
-  const storedUser = sessionStorage.getItem("usuario");
-  if (storedUser) {
-    const datos = JSON.parse(storedUser);
-    const misproyectos = datos.Proyectos;
-    console.log("Mis proyectos: " + JSON.stringify(misproyectos));
-  }
 
   const filteredProyectos = useMemo(() => {
     let proyectos = [...historicos];

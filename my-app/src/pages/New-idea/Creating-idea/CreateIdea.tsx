@@ -158,7 +158,7 @@ const CreateIdea: React.FC = () => {
       //};
       //localStorage.setItem("userIdeas", JSON.stringify([...existingIdeas, newIdea]));
       const JSONidea = {
-        Usuario : 5,
+        Usuario : 20,
         Campo : previewData.field,
         Problema : previewData.problem,
         Publico : previewData.audience,

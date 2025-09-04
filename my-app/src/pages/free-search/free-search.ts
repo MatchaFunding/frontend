@@ -169,6 +169,44 @@ export function sortCards(
       const benefitB = b.benefit || '';
       return parseAmount(benefitA) - parseAmount(benefitB);
     });
+  } else if (order === 'open-date') {
+    // Fecha de apertura: filtrar por fecha de cierre vigente, ordenar por fecha de apertura de más antigua a más futura
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // Resetear horas para comparar solo fechas
+    
+    // Filtrar solo instrumentos que aún no han cerrado (fecha de cierre futura o de hoy)
+    const openCards = sortedCards.filter(card => {
+      if (!card.fechaCierre) return true; // Si no tiene fecha de cierre, asumimos que está abierto
+      const closeDate = new Date(card.fechaCierre);
+      closeDate.setHours(0, 0, 0, 0);
+      return closeDate >= currentDate;
+    });
+    
+    // Ordenar por fecha de apertura: desde la más antigua hasta la más futura (cronológicamente)
+    return openCards.sort((a, b) => {
+      const dateA = a.fechaApertura ? new Date(a.fechaApertura) : new Date(0);
+      const dateB = b.fechaApertura ? new Date(b.fechaApertura) : new Date(0);
+      return dateA.getTime() - dateB.getTime();
+    });
+  } else if (order === 'close-date') {
+    // Fecha de cierre: filtrar solo fechas futuras o de hoy, ordenar de más lejana a más cercana
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // Resetear horas para comparar solo fechas
+    
+    // Filtrar solo instrumentos con fecha de cierre futura o de hoy
+    const futureCards = sortedCards.filter(card => {
+      if (!card.fechaCierre) return false;
+      const cardDate = new Date(card.fechaCierre);
+      cardDate.setHours(0, 0, 0, 0);
+      return cardDate >= currentDate;
+    });
+    
+    // Ordenar de fecha más lejana a más cercana
+    return futureCards.sort((a, b) => {
+      const dateA = new Date(a.fechaCierre!);
+      const dateB = new Date(b.fechaCierre!);
+      return dateB.getTime() - dateA.getTime();
+    });
   }
   
   return sortedCards;

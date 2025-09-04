@@ -160,7 +160,7 @@ const NuevoProyecto: React.FC = () => {
   const prevStep = () => setStep((prev) => prev - 1);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ backgroundColor: colorPalette.lightGray }}>
       <NavBar />
       <main className="flex flex-col items-center justify-center px-4 py-10 mt-[5%]">
         <StepIndicator currentStep={step} totalSteps={4} />
@@ -168,13 +168,13 @@ const NuevoProyecto: React.FC = () => {
           <form onSubmit={(e) => { e.preventDefault(); if (step < 4) nextStep(); else EnviarProyecto(); }}>
             {step === 1 && (
               <CardContent className="space-y-6">
-                <h2 className="text-2xl font-semibold text-center text-slate-800">Información Básica</h2>
+                <h2 className="text-2xl font-semibold text-center" style={{ color: colorPalette.darkGreen }}>Información Básica</h2>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Título del Proyecto</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>Título del Proyecto</label>
                   <Input name="Titulo" value={formData.Titulo} onChange={handleChange} minLength={10} required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>Descripción</label>
                   <Textarea name="Descripcion" rows={5} value={formData.Descripcion} onChange={handleChange} minLength={10} required />
                 </div>
               </CardContent>
@@ -182,27 +182,27 @@ const NuevoProyecto: React.FC = () => {
 
             {step === 2 && (
               <CardContent className="space-y-6">
-                <h2 className="text-2xl font-semibold text-center text-slate-800">Detalles y Alcance</h2>
+                <h2 className="text-2xl font-semibold text-center" style={{ color: colorPalette.darkGreen }}>Detalles y Alcance</h2>
                 <div className="grid grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Duración mínima (meses)</label>
+                        <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>Duración mínima (meses)</label>
                         <Input name="DuracionEnMesesMinimo" type="number" value={formData.DuracionEnMesesMinimo} onChange={handleChange} min={1} required />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Duración máxima (meses)</label>
+                        <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>Duración máxima (meses)</label>
                         <Input name="DuracionEnMesesMaximo" type="number" value={formData.DuracionEnMesesMaximo} onChange={handleChange} min={1} required />
                     </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Alcance (Región)</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>Alcance (Región)</label>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {opcionesAlcance.map(opcion => (<button type="button" key={opcion.value} onClick={() => setFormData({...formData, Alcance: opcion.value})} className={`px-3 py-1 text-sm rounded-full border transition-colors ${formData.Alcance === opcion.value ? 'bg-green-600 text-white border-green-700' : 'bg-gray-100 text-gray-700 border-gray-300'}`}>{opcion.label}</button>))}
+                    {opcionesAlcance.map(opcion => (<button type="button" key={opcion.value} onClick={() => setFormData({...formData, Alcance: opcion.value})} className={`px-3 py-1 text-sm rounded-full border transition-colors`} style={{backgroundColor: formData.Alcance === opcion.value ? colorPalette.darkGreen : 'rgb(243 244 246)', color: formData.Alcance === opcion.value ? 'white' : 'rgb(55 65 81)', borderColor: formData.Alcance === opcion.value ? colorPalette.softGreen : 'rgb(209 213 219)'}}>{opcion.label}</button>))}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Área</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>Área</label>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {opcionesArea.map(opcion => (<button type="button" key={opcion} onClick={() => setFormData({...formData, Area: opcion})} className={`px-3 py-1 text-sm rounded-full border transition-colors ${formData.Area === opcion ? 'bg-green-600 text-white border-green-700' : 'bg-gray-100 text-gray-700 border-gray-300'}`}>{opcion}</button>))}
+                    {opcionesArea.map(opcion => (<button type="button" key={opcion} onClick={() => setFormData({...formData, Area: opcion})} className={`px-3 py-1 text-sm rounded-full border transition-colors`} style={{backgroundColor: formData.Area === opcion ? colorPalette.darkGreen : 'rgb(243 244 246)', color: formData.Area === opcion ? 'white' : 'rgb(55 65 81)', borderColor: formData.Area === opcion ? colorPalette.softGreen : 'rgb(209 213 219)'}}>{opcion}</button>))}
                   </div>
                 </div>
               </CardContent>
@@ -231,11 +231,11 @@ const NuevoProyecto: React.FC = () => {
                   <button type="button" onClick={() => setActiveTab("publico")} className="px-6 py-2 border rounded-md font-semibold transition-colors duration-200" style={{ color: activeTab === "publico" ? colorPalette.darkGreen : colorPalette.softGreen, borderColor: activeTab === "publico" ? colorPalette.softGreen : "#e2e8f0", borderWidth: "2px" }}>DETALLE</button>
                 </div>
                 {activeTab === "presentacion" && (<Card><div className="p-6 md:p-8"><h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Presentación</h3><div className="space-y-4 leading-relaxed" style={{ color: colorPalette.oliveGray }}>{formData.Titulo && <p><strong>Título:</strong> {formData.Titulo}</p>}{formData.Descripcion && <p><strong>Descripción:</strong> {formData.Descripcion}</p>}{(formData.DuracionEnMesesMinimo > 0 || formData.DuracionEnMesesMaximo > 0) && <p><strong>Duración:</strong> {formData.DuracionEnMesesMinimo || "?"} - {formData.DuracionEnMesesMaximo || "?"} meses</p>}</div></div></Card>)}
-                {activeTab === "publico" && (<Card><div className="p-6 md:p-8"><h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Detalle</h3><div className="space-y-4 leading-relaxed" style={{ color: colorPalette.oliveGray }}>{formData.Alcance && <p><strong>Alcance:</strong> {opcionesAlcance.find(o => o.value === formData.Alcance)?.label}</p>}{formData.Area && <p><strong>Área:</strong> {formData.Area}</p>}{formData.Miembros.length > 0 ? (<p><strong>Miembros:</strong> {formData.Miembros.join(", ")}</p>) : (<p className="italic text-slate-500">No hay miembros agregados</p>)}</div></div></Card>)}
+                {activeTab === "publico" && (<Card><div className="p-6 md:p-8"><h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Detalle</h3><div className="space-y-4 leading-relaxed" style={{ color: colorPalette.oliveGray }}>{formData.Alcance && <p><strong>Alcance:</strong> {opcionesAlcance.find(o => o.value === formData.Alcance)?.label}</p>}{formData.Area && <p><strong>Área:</strong> {formData.Area}</p>}{formData.Miembros.length > 0 ? (<p><strong>Miembros:</strong> {formData.Miembros.join(", ")}</p>) : (<p className="italic" style={{ color: colorPalette.softGreen }}>No hay miembros agregados</p>)}</div></div></Card>)}
               </CardContent>
             )}
 
-            <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-200">
+            <div className="flex justify-between items-center mt-8 pt-6" style={{ borderTop: `1px solid ${colorPalette.softGreen}` }}>
               <Button type="button" onClick={prevStep} disabled={step === 1} variant="outline">Anterior</Button>
               <Button type="submit">{step < 4 ? "Siguiente" : "Crear Proyecto"}</Button>
             </div>
@@ -248,26 +248,26 @@ const NuevoProyecto: React.FC = () => {
             <Card className="w-full max-w-md">
                 <form onSubmit={handleCrearNuevaPersona}>
                     <CardContent className="p-8 space-y-4">
-                        <h3 className="text-xl font-semibold text-center text-slate-800">Crear Nueva Persona</h3>
+                        <h3 className="text-xl font-semibold text-center" style={{ color: colorPalette.darkGreen }}>Crear Nueva Persona</h3>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Nombre Completo</label>
+                            <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>Nombre Completo</label>
                             <Input name="Nombre" value={nuevaPersonaData.Nombre} onChange={handleModalChange} required />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">RUT</label>
+                            <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>RUT</label>
                             <Input name="RUT" placeholder="12.345.678-9" value={nuevaPersonaData.RUT} onChange={handleModalChange} required />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Sexo</label>
-                                <select name="Sexo" value={nuevaPersonaData.Sexo} onChange={handleModalChange} required className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>Sexo</label>
+                                <select name="Sexo" value={nuevaPersonaData.Sexo} onChange={handleModalChange} required className="mt-1 block w-full pl-3 pr-10 py-2 text-base rounded-md" style={{ borderColor: colorPalette.softGreen, color: colorPalette.oliveGray }}>
                                     <option value="VAR">Varón</option>
                                     <option value="MUJ">Mujer</option>
                                     <option value="OTR">Otro</option>
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Fecha de Nacimiento</label>
+                                <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>Fecha de Nacimiento</label>
                                 <Input name="FechaDeNacimiento" type="date" value={nuevaPersonaData.FechaDeNacimiento} onChange={handleModalChange} required />
                             </div>
                         </div>

@@ -52,7 +52,7 @@ const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ title, description, top
             <span className="free-search-card__topic">{topic || 'General'}</span>
             {renderBenefit(benefit || 'Beneficio no disponible')}
           </div>
-          <a href={link}>
+          <a href={link} target="_blank" rel="noopener noreferrer">
             <button className="free-search-card__button">Ver más detalles</button>
           </a>
         </div>

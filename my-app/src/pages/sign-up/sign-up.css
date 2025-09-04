@@ -527,17 +527,18 @@
   padding: 0.5rem 1rem;
   font-size: 0.75rem;
   color: #44624a;
-  background-color: #f1ebe1;
-  border: 1px solid #E9DFD0;
+  background-color: white;
+  border: 1px solid white;
   border-radius: 0.375rem;
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 500;
+  box-shadow: 0 2px 8px 0 rgba(68, 98, 74, 0.10), 0 1.5px 4px 0 rgba(139, 168, 136, 0.10);
+  transition: transform 0.2s;
 }
 
 .generate-password-btn:hover {
-  background-color: #E9DFD0;
-  border-color: #44624a;
+  transform: scale(1.05);
 }
 
 .generate-password-btn:active {

@@ -131,8 +131,13 @@ export const getPrevStep = (currentStep: number): number => {
 export const isValidRut = (rut: string): boolean => {
   if (!rut) return false;
   
-  // Limpiar el RUT: eliminar puntos, espacios y guiones
-  let cleanRut = rut.replace(/[.\s-]/g, '');
+  // Verificar que el RUT tenga el formato correcto con puntos
+  // Formato esperado: XX.XXX.XXX-X o X.XXX.XXX-X
+  const rutFormatRegex = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
+  if (!rutFormatRegex.test(rut)) return false;
+  
+  // Limpiar el RUT: eliminar puntos y guiones para validación
+  let cleanRut = rut.replace(/[.-]/g, '');
   
   // Debe tener entre 8 y 9 caracteres
   if (cleanRut.length < 8 || cleanRut.length > 9) return false;
@@ -286,11 +291,13 @@ export const getFieldErrorMessage = (field: string, value: string): string => {
     case 'legalRepresentativeRut':
       if (!value) return '';
       if (!isValidRut(value)) {
-        // Dar un mensaje más específico sobre el formato
-        const cleanRut = value.replace(/[.\s-]/g, '');
-        if (cleanRut.length < 8) return 'RUT muy corto. Debe tener al menos 8 dígitos';
-        if (cleanRut.length > 9) return 'RUT muy largo. Máximo 9 caracteres';
-        if (!/^\d+[0-9kK]$/i.test(cleanRut)) return 'RUT debe contener solo números y dígito verificador (0-9 o K)';
+        // Verificar primero si tiene el formato correcto con puntos
+        const rutFormatRegex = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
+        if (!rutFormatRegex.test(value)) {
+          return 'RUT debe tener formato XX.XXX.XXX-X (ej: 12.345.678-9)';
+        }
+        
+        // Si tiene el formato pero el dígito verificador es incorrecto
         return 'RUT inválido. El dígito verificador no coincide. Verifica tu RUT';
       }
       return '';
@@ -341,14 +348,15 @@ export const isStepValid = (step: number, formData: FormData): boolean => {
 };
 
 // Validación del formulario inicial
-export const isInitialFormValid = (email: string, password: string): boolean => {
+export const isInitialFormValid = (email: string, password: string, termsAccepted: boolean = false): boolean => {
   // Limpiar el email para validación
   const cleanEmail = email ? email.trim().toLowerCase() : '';
   
   return isValidEmail(cleanEmail) && 
          isValidPassword(password) && 
          cleanEmail.length > 0 &&
-         password.length > 0;
+         password.length > 0 &&
+         termsAccepted;
 };
 
 // Funciones para manejo de dropdowns
@@ -394,7 +402,7 @@ export const validarCamposStep1 = (formData: FormData): { valid: boolean; errors
   if (!formData.rut?.trim()) {
     errors.push('El RUT es requerido');
   } else if (!isValidRut(formData.rut)) {
-    errors.push('El RUT debe tener un formato válido (ej: 12345678-9)');
+    errors.push('El RUT debe tener formato XX.XXX.XXX-X (ej: 12.345.678-9)');
   }
   
   if (!formData.gender?.trim()) {
@@ -418,13 +426,13 @@ export const validarCamposStep2 = (formData: FormData): { valid: boolean; errors
   if (!formData.companyRut?.trim()) {
     errors.push('El RUT de la empresa es requerido');
   } else if (formData.companyRut.length < 8) {
-    errors.push('El RUT de la empresa debe tener un formato válido (ej: 12345678-9)');
+    errors.push('El RUT de la empresa debe tener formato XX.XXX.XXX-X (ej: 12.345.678-9)');
   }
   
   if (!formData.legalRepresentativeRut?.trim()) {
     errors.push('El RUT del representante legal es requerido');
   } else if (formData.legalRepresentativeRut.length < 8) {
-    errors.push('El RUT del representante debe tener un formato válido (ej: 12345678-9)');
+    errors.push('El RUT del representante debe tener formato XX.XXX.XXX-X (ej: 12.345.678-9)');
   }
   
   return { valid: errors.length === 0, errors };
@@ -465,9 +473,13 @@ export const obtenerDatosFormulario = (formElement: HTMLFormElement): { email: s
 };
 
 // Función para validar campos básicos del formulario inicial
-export const validarFormularioInicial = (email: string, password: string): { valid: boolean; error: string } => {
+export const validarFormularioInicial = (email: string, password: string, termsAccepted: boolean = false): { valid: boolean; error: string } => {
   if (!email || !password) {
     return { valid: false, error: 'Por favor, completa todos los campos' };
+  }
+  
+  if (!termsAccepted) {
+    return { valid: false, error: 'Debes aceptar los términos y condiciones para continuar' };
   }
   
   if (password.length < 8) {

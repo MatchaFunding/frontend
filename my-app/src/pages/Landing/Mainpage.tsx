@@ -3,8 +3,15 @@ import React from 'react';
 import NavBar from '../../components/NavBar/navbar';
 import { useNavigate } from 'react-router-dom';
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLightbulb, faWrench, faEquals } from "@fortawesome/free-solid-svg-icons";
+
 const MatchaHomePage: React.FC = () => {
   const navigate = useNavigate();
+  const colors = {
+  darkGreen: "#44624a",
+  softGreen: "#8ba888",
+};
 
   /*
   useEffect(() => {
@@ -28,57 +35,89 @@ const MatchaHomePage: React.FC = () => {
     <NavBar />
    <main className="flex-grow p-4 md:p-6 lg:p-8 w-full mt-[3%] flex justify-center items-center">
   <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 w-full max-w-none px-4 py-2">
-    <div
+   <div
       onClick={() => navigate("/Matcha/Select-Idea")}
       className="lg:col-span-3 bg-white p-8 rounded-2xl shadow-lg flex flex-col justify-between cursor-pointer hover:shadow-2xl transition-shadow w-full min-h-[500px] lg:min-h-[600px]"
     >
-      <div className="flex items-center gap-6 h-full w-full">
-        <div className="w-3/5 space-y-6">
-          <div>
+      <div className="flex items-center gap-12 h-full w-full">
+        {/* Lado izquierdo */}
+        <div className="w-1/2 flex flex-col items-center justify-center">
+          <div className="text mb-6 text-center">
             <span className="text-gray-500 text-xl lg:text-2xl">Haz</span>
-            <h1 className="text-5xl lg:text-7xl xl:text-8xl font-bold text-black tracking-tighter">Match</h1>
-            <span className="text-gray-500 text-xl lg:text-2xl block">con un fondo</span>
-          </div>
-            
-          <div>
-            <span className="text-gray-500 text-lg block font-medium">
-            ¿Tienes una idea?
+            <h1 className="text-5xl lg:text-7xl xl:text-8xl font-bold text-black tracking-tighter">
+              Match
+            </h1>
+            <span className="text-gray-500 text-xl lg:text-2xl block">
+              con un fondo
             </span>
-            <p className="text-gray-600 mt-2 text-sm lg:text-base">
-                Convierte esa idea inicial en un proyecto real y estructurado a través de la 
-                Inteligencia Artificial
-            </p>
           </div>
-          
-          <div>
-            <span className="text-gray-500 text-lg block font-medium">
-            Construye tu proyecto
-            </span>
-            <p className="text-gray-600 mt-2 text-sm lg:text-base">
-                Si ya tienes una idea clara, te guiamos paso a paso para transformarla en un
-                proyecto sólido.
-            </p>
-          </div>
-          
-          <div>
-            <span className="text-gray-500 text-lg block font-medium">
-            Encuentra tu fondo ideal
-            </span>
-            <p className="text-gray-600 mt-2 text-sm lg:text-base">
-                Compara tu idea o proyecto con las distintas oportunidades de financiamiento 
-                abiertas actualmente.
-            </p>
-          </div>
-        </div>
-        <div className="w-2/5 flex justify-center items-center">
           <img
             src="./Tevolador.png"
             alt="Taza de matcha colgando"
-            className="w-full max-w-96 h-auto object-contain shadow-lg rounded-full"
+            className="w-64 h-auto object-contain shadow-lg rounded-full"
           />
+        </div>
+
+       
+        <div className="w-1/2 space-y-8">
+     
+          <div className="flex items-start gap-4">
+            <FontAwesomeIcon
+              icon={faLightbulb}
+              size="2x"
+              style={{ color: colors.softGreen }}
+              className="mt-1"
+            />
+            <div>
+              <span className="text-lg block font-semibold text-[#44624a]">
+                ¿Tienes una idea?
+              </span>
+              <p className="text-gray-600 mt-2 text-sm lg:text-base">
+                Convierte esa idea inicial en un proyecto real y estructurado a
+                través de la Inteligencia Artificial.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-4">
+            <FontAwesomeIcon
+              icon={faWrench}
+              size="2x"
+              style={{ color: colors.softGreen }}
+              className="mt-1"
+            />
+            <div>
+              <span className="text-lg block font-semibold text-[#44624a]">
+                Construye tu proyecto
+              </span>
+              <p className="text-gray-600 mt-2 text-sm lg:text-base">
+                Si ya tienes una idea clara, te guiamos paso a paso para
+                transformarla en un proyecto sólido.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-4">
+            <FontAwesomeIcon
+              icon={faEquals}
+              size="2x"
+              style={{ color: colors.softGreen }}
+              className="mt-1"
+            />
+            <div>
+              <span className="text-lg block font-semibold text-[#44624a]">
+                Encuentra tu fondo ideal
+              </span>
+              <p className="text-gray-600 mt-2 text-sm lg:text-base">
+                Compara tu idea o proyecto con las distintas oportunidades de
+                financiamiento abiertas actualmente.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
     <div 
       className="lg:col-span-2 flex flex-col gap-12 w-full"
       >
@@ -97,9 +136,8 @@ const MatchaHomePage: React.FC = () => {
             <span className="text-gray-500 text-lg">Mejora tu</span>
             <h2 className="text-3xl lg:text-4xl xl:text-5xl font-semibold text-black">Perfil</h2>
             <p className="text-gray-600 mt-3 text-sm lg:text-base leading-relaxed">
-              Optimiza tus posibilidades de éxito con ayuda de inteligencia artificial. Esta herramienta analiza tu perfil y te entrega
-              recomendaciones personalizadas para potenciar tus puntos fuertes y mejorar los débiles. Así, aumentas las probabilidades de
-              adjudicarte un fondo o beneficio cuando postules.
+             Con IA, recibe recomendaciones personalizadas que fortalecen tu perfil y aumentan tus chances de adjudicarte un fondo o beneficio.
+
             </p>
           </div>
         </div>
@@ -112,9 +150,8 @@ const MatchaHomePage: React.FC = () => {
           <h2 className="text-3xl lg:text-4xl xl:text-5xl font-semibold text-black">Fondos</h2>
           <span className="text-gray-500 text-lg">en un mismo lugar</span>
           <p className="text-gray-600 mt-3 text-sm lg:text-base leading-relaxed">
-            Accede a una base de datos completa y siempre actualizada de fondos públicos y privados disponibles en Chile,
-            incluyendo CORFO, ANID y fondos.gob. Aquí puedes explorar y filtrar libremente todas las convocatorias abiertas
-            sin tener que visitar múltiples plataformas.
+          Explora en un solo lugar fondos públicos y privados en Chile (CORFO, ANID, fondos.gob), siempre actualizados y listos para filtrar sin recorrer varias plataformas.
+
           </p>
         </div>
         <div className="flex-shrink-0">

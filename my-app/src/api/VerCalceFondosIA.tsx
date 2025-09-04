@@ -5,7 +5,7 @@ import MatchResult from '../models/MatchResult.tsx'
 export async function VerCalceFondosIAAsync(ide : number) {
   try {
     const response = await fetch(`https://button-steven-approximately-sake.trycloudflare.com/api/v1/ia/match`, {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },

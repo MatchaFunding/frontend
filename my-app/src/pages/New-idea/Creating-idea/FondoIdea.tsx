@@ -1,13 +1,8 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import NavBar from '../../../components/NavBar/navbar';
 import { useNavigate } from 'react-router-dom';
 import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
 import LoopAnimation from '../../../components/Shared/animationFrame';
-
-// --- APIS ---
-import { VerTodosLosFondosIAAsync } from '../../../api/VerTodosLosFondos';
-import { VerCalceFondosIAAsync } from '../../../api/VerCalceFondosIA';
-
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -16,41 +11,68 @@ const colorPalette = {
   lightGray: '#f1f5f9',
 };
 
-// --- INTERFACES ---
 
-// Interfaz para el objeto de "calce" que devuelve tu API
-interface CalceFondo {
-  name: string;
-  affinity: number;
-  call_id?: number;
-}
-
-// Interfaz para un Fondo individual
 interface Fondo {
   id: number;
   nombre: string;
   descripcion: string;
+  compatibilidad?: number; 
   presupuesto: string;
   categoria: string;
   imagenUrl: string;
-  compatibilidad?: number; // Se añade dinámicamente
 }
 
-// Interfaz para la Idea. El ID es opcional porque puede que no lo tenga al inicio.
 interface Idea {
-  id?: number; // <-- ID es opcional ahora
+  id: number;
   field: string;
   problem: string;
   audience: string;
   uniqueness: string;
 }
 
-// --- COMPONENTES DE UI (Sin cambios) ---
+
+const mockFondosData: Omit<Fondo, 'compatibilidad'>[] = [
+    { id: 1, nombre: 'Fondo de Innovación Educativa', descripcion: 'Financia proyectos que mejoren el aprendizaje con tecnología y metodologías innovadoras.', presupuesto: '$150.000.000 CLP', categoria: 'Educación', imagenUrl: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=60' },
+    { id: 2, nombre: 'Fondo de Desarrollo Sostenible', descripcion: 'Apoyo a iniciativas que promuevan la ecología y el uso de energías limpias en la comunidad.', presupuesto: '$200.000.000 CLP', categoria: 'Sostenibilidad', imagenUrl: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=800&q=60' },
+    { id: 3, nombre: 'Fondo de Emprendimiento Digital', descripcion: 'Impulso para startups tecnológicas con alto potencial de crecimiento y escalabilidad.', presupuesto: '$120.000.000 CLP', categoria: 'Tecnología', imagenUrl: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&w=800&q=60' },
+    { id: 5, nombre: 'Fondo de Innovación en Salud', descripcion: 'Proyectos que utilizan la tecnología para mejorar el acceso y la calidad de la atención médica.', presupuesto: '$250.000.000 CLP', categoria: 'Salud', imagenUrl: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=800&q=60' },
+    { id: 6, nombre: 'Fondo de Inclusión Social', descripcion: 'Apoyo a iniciativas que promuevan la igualdad de oportunidades para grupos vulnerables.', presupuesto: '$110.000.000 CLP', categoria: 'Social', imagenUrl: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=800&q=60' },
+];
+
+const calculateCompatibility = (idea: Idea, fondo: Omit<Fondo, 'compatibilidad'>): number => {
+  let score = 50; 
+  const ideaField = idea.field.toLowerCase();
+  const fondoCategoria = fondo.categoria.toLowerCase();
+
+
+  if (ideaField.includes(fondoCategoria) || fondoCategoria.includes(ideaField)) {
+    score += 40;
+  }
+  
+  if (idea.problem.toLowerCase().includes('tecnología') && fondo.nombre.toLowerCase().includes('digital')) {
+      score += 15;
+  }
+  if (idea.audience.toLowerCase().includes('vulnerable') && fondo.nombre.toLowerCase().includes('social')) {
+      score += 20;
+  }
+
+  return Math.min(Math.max(score, 50), 99); 
+};
+
+
 const SearchIcon: React.FC = () => ( <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={colorPalette.oliveGray} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg> );
 const GraduationCapIcon: React.FC = () => ( <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={colorPalette.darkGreen} className="w-6 h-6"><path d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0l-.07.002z" /></svg> );
 
+
 const FondoCard: React.FC<{ fondo: Fondo }> = ({ fondo }) => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
+  
+  /*
+  const handleViewDetails = () => {
+    navigate(`/Matcha/fondos/${fondo.id}`, { state: { fondo } });
+  };
+  */
+
   return (
     <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80">
       <div className="relative h-52">
@@ -70,7 +92,7 @@ const FondoCard: React.FC<{ fondo: Fondo }> = ({ fondo }) => {
           <span className="font-bold text-slate-700">{fondo.presupuesto}</span>
         </div>
         <button
-          onClick={() => navigate("detalle")} // Considera pasar el ID: navigate(`detalle/${fondo.id}`)
+          onClick={() => navigate("detalle")}
           className="w-full bg-[#8ba888] hover:bg-[rgba(68,98,74,0.8)] text-white font-bold py-3 px-4 rounded-xl transition-colors duration-300"
         >
           Ver más detalles
@@ -83,134 +105,46 @@ const FondoCard: React.FC<{ fondo: Fondo }> = ({ fondo }) => {
 
 const FondosIdea: React.FC = () => {
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null);
-  const [fondos, setFondos] = useState<Fondo[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Estados de UI (sin cambios)
   const [searchTerm, setSearchTerm] = useState('');
   const [categoriaFilter, setCategoriaFilter] = useState('Todas');
   const [sortBy, setSortBy] = useState<'compatibilidad' | 'alfabetico' | 'presupuesto'>('compatibilidad');
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
+  const [showAnimation, setShowAnimation] = useState(true);
+   useEffect(() => {
+      const timer = setTimeout(() => setShowAnimation(false), 5000);
+      return () => clearTimeout(timer);
+    }, []);
 
-  // **PASO 1: LÓGICA REFACTORIZADA PARA CARGAR Y GUARDAR LA IDEA**
   useEffect(() => {
-    const guardarIdeaYObtenerId = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        const ideaData = localStorage.getItem('selectedIdea');
-        if (!ideaData) {
-          throw new Error("No hay una idea seleccionada en localStorage.");
-        }
-        
 
-        const idea = JSON.parse(localStorage.getItem("userIdeas") || "[]").slice(-1)[0];
-        idea.id = 130
-
-
-        console.log("idea :", idea)
-   
-
-
-
-        // Si la idea NO tiene un ID, la guardamos en el backend para obtener uno.
-        if (!idea.id) {
-          console.log("Idea sin ID encontrada. Guardando en el backend...");
-          // **¡ACCIÓN REQUERIDA!** Debes implementar esta llamada a la API.
-          // Debería tomar el objeto 'idea' y devolver el mismo objeto con el 'id' asignado por la base de datos.
-          const ideaGuardada = JSON.parse(localStorage.getItem("userIdeas") || "[]").slice(-1)[0];
-          
-        
-          
-          if (!ideaGuardada || !ideaGuardada.id) {
-              throw new Error("La API no devolvió una idea con ID después de guardarla.");
-          }
-          
-         
-          
-          // Actualizamos localStorage para futuras visitas a la página.
-          localStorage.setItem('selectedIdea', JSON.stringify(idea));
-          console.log("Idea guardada exitosamente. Nuevo ID:", idea.id);
-        }
-
-        setSelectedIdea(idea); // Establecemos la idea (con ID) en el estado.
-
-      } catch (err: any) {
-        console.error("Error al procesar la idea:", err);
-        setError(err.message || "No se pudo cargar o guardar la idea seleccionada.");
-        setIsLoading(false); // Detenemos la carga si hay un error aquí.
+    const ideaData = localStorage.getItem('selectedIdea');
+    if (ideaData) {
+      setSelectedIdea(JSON.parse(ideaData));
+    } else {
+      const allIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
+      if (allIdeas.length > 0) {
+        setSelectedIdea(allIdeas[allIdeas.length - 1]); 
       }
-    };
-
-    guardarIdeaYObtenerId();
-  }, []); // Se ejecuta solo una vez al montar el componente.
-
-
-  // **PASO 2: LÓGICA REFACTORIZADA PARA OBTENER FONDOS Y CALCES**
-  // Esta función es ahora casi idéntica a la del componente de Proyectos.
-  const fetchFondosYCalce = useCallback(async (ideaId= 130) => {
-    // Ya no se gestiona setIsLoading aquí, se hace en el flujo principal.
-    setError(null);
-
-    try {
-      console.log(`Iniciando búsqueda de fondos y calces para la idea ID: ${ideaId}`);
-      // Hacemos ambas llamadas en paralelo para mayor eficiencia.
-      const [todosLosFondosResponse, calcesResponse] = await Promise.all([
-        VerTodosLosFondosIAAsync(),
-        VerCalceFondosIAAsync(ideaId)
-      ]);
-
-      // Verificación robusta de las respuestas de la API
-      const listaDeFondos: Fondo[] = Array.isArray(todosLosFondosResponse?.funds) ? todosLosFondosResponse.funds : [];
-      const calces: CalceFondo[] = Array.isArray(calcesResponse) ? calcesResponse : [];
-
-      if (listaDeFondos.length === 0) console.warn("La API de todos los fondos devolvió una lista vacía.");
-      if (calces.length === 0) console.warn("La API de calces no encontró afinidades para esta idea.");
-
-      // Combinamos los datos: filtramos los fondos que tienen un calce y les añadimos la compatibilidad.
-      const fondosConCompatibilidad = listaDeFondos
-        .filter(fondo => calces.some(calce => calce.name === fondo.nombre))
-        .map(fondo => {
-          const match = calces.find(calce => calce.name === fondo.nombre);
-          return {
-            ...fondo,
-            compatibilidad: Math.floor((match?.affinity || 0) * 100),
-          };
-        });
-      
-      console.log("Fondos finales con compatibilidad:", fondosConCompatibilidad);
-      setFondos(fondosConCompatibilidad);
-
-    } catch (err: any) {
-      console.error("Error al obtener los fondos y su calce:", err);
-      setError(err.message || "No se pudieron cargar los fondos. Por favor, intenta de nuevo más tarde.");
-    } finally {
-      setIsLoading(false); // Finaliza la carga, ya sea con éxito o con error.
     }
   }, []);
 
-  // **PASO 3: EFECTO QUE DISPARA LA BÚSQUEDA CUANDO LA IDEA ESTÁ LISTA**
-  useEffect(() => {
-    // Este efecto se activa DESPUÉS de que el primer useEffect haya establecido 'selectedIdea' con un ID.
-    if (selectedIdea && selectedIdea.id) {
-      fetchFondosYCalce(selectedIdea.id);
-    }
-    // Si no hay idea, isLoading se mantendrá en true hasta que el primer useEffect falle o termine.
-  }, [selectedIdea, fetchFondosYCalce]);
-
-
-  // --- LÓGICA DE FILTRADO Y ORDENACIÓN (Sin cambios) ---
-  const categorias = useMemo(() => ['Todas', ...new Set(fondos.map(f => f.categoria))], [fondos]);
+  const categorias = useMemo(() => ['Todas', ...new Set(mockFondosData.map(f => f.categoria))], []);
 
   const matchedAndFilteredFondos = useMemo(() => {
-    let fondosFiltrados = [...fondos];
-    if (searchTerm) fondosFiltrados = fondosFiltrados.filter(f => f.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
-    if (categoriaFilter !== 'Todas') fondosFiltrados = fondosFiltrados.filter(f => f.categoria === categoriaFilter);
+    if (!selectedIdea) return [];
+    
 
-    fondosFiltrados.sort((a, b) => {
+    let fondosConMatch: Fondo[] = mockFondosData.map(fondo => ({
+      ...fondo,
+      compatibilidad: calculateCompatibility(selectedIdea, fondo),
+    }));
+
+
+    if (searchTerm) fondosConMatch = fondosConMatch.filter(f => f.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (categoriaFilter !== 'Todas') fondosConMatch = fondosConMatch.filter(f => f.categoria === categoriaFilter);
+
+    fondosConMatch.sort((a, b) => {
       switch (sortBy) {
         case 'alfabetico': return a.nombre.localeCompare(b.nombre);
         case 'compatibilidad': return (b.compatibilidad ?? 0) - (a.compatibilidad ?? 0);
@@ -221,51 +155,38 @@ const FondosIdea: React.FC = () => {
         default: return 0;
       }
     });
-    return fondosFiltrados;
-  }, [fondos, searchTerm, categoriaFilter, sortBy]);
 
+    return fondosConMatch;
+  }, [selectedIdea, searchTerm, categoriaFilter, sortBy]);
 
-  // --- RENDERIZADO CONDICIONAL (Mejorado) ---
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#f1f5f9] flex flex-col">
-        <NavBar />
-        <div className="flex flex-col items-center justify-center flex-1 space-y-6">
-          <LoopAnimation />
-          <p className="text-xl sm:text-2xl font-semibold text-gray-700 animate-pulse">
-            Buscando los mejores fondos para tu idea...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-        <div className="min-h-screen bg-[#f1f5f9]">
-            <NavBar />
-            <main className="flex-grow p-10 max-w-screen-2xl mx-auto text-center">
-                <h1 className="text-3xl font-bold text-red-600">Ocurrió un Error</h1>
-                <p className="text-slate-500 mt-2">{error}</p>
-            </main>
-        </div>
-    )
-  }
 
   if (!selectedIdea) {
     return (
       <div className="min-h-screen bg-[#f1f5f9]">
         <NavBar />
         <main className="flex-grow p-10 max-w-screen-2xl mx-auto text-center">
-            <h1 className="text-3xl font-bold text-slate-700">No se ha encontrado una idea.</h1>
-            <p className="text-slate-500 mt-2">Por favor, <a href="/Matcha/generate-idea" className="text-blue-600 underline">genera una idea</a> primero para poder encontrar fondos compatibles.</p>
+            <h1 className="text-3xl font-bold text-slate-700">No se ha seleccionado una idea.</h1>
+            <p className="text-slate-500 mt-2">Por favor, <a href="/Matcha/Select-Idea" className="text-blue-600 underline">selecciona una idea</a> para encontrar fondos compatibles.</p>
         </main>
       </div>
     );
   }
+   if (showAnimation) {
+  return (
+    <div className="min-h-screen bg-[#f1f5f9] flex flex-col">
+      <NavBar />
+      <div className="flex flex-col items-center justify-center flex-1 space-y-6">
+        <LoopAnimation />
+        <p className="text-xl sm:text-2xl font-semibold text-gray-700 animate-pulse">
+          Cargando...
+        </p>
+      </div>
+    </div>
+  );
+}
 
-  // --- RENDERIZADO PRINCIPAL (Sin cambios) ---
+  
+
   return (
     <div className="min-h-screen bg-[#f1f5f9]">
       <NavBar />
@@ -299,17 +220,10 @@ const FondosIdea: React.FC = () => {
                 </div>
             </div>
         </header>
-        
-        {matchedAndFilteredFondos.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {matchedAndFilteredFondos.map(fondo => <FondoCard key={fondo.id} fondo={fondo} />)}
-            </div>
-        ) : (
-            <div className="text-center py-10">
-                <h3 className="text-2xl font-semibold text-slate-700">No se encontraron fondos compatibles</h3>
-                <p className="text-slate-500 mt-2">Prueba a ajustar los filtros o a generar una idea diferente.</p>
-            </div>
-        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {matchedAndFilteredFondos.map(fondo => <FondoCard key={fondo.id} fondo={fondo} />)}
+        </div>
 
       </main>
     </div>

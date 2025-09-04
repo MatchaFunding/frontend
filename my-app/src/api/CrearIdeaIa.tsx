@@ -1,12 +1,13 @@
 import Idea from '../models/Idea.tsx'
-import { useEffect, useState } from 'react';
+import IdeaRespuesta from '../models/IdeaRespuesta.ts'
 
 
 
 
-export async function CrearIdeaAsync(data: Idea) {
+
+export async function CrearIdeaIAAsync(data: Idea) {
   try {
-    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearidea/`, {
+    const response = await fetch(`https://representatives-shopzilla-system-recreational.trycloudflare.com/api/v1/ideas/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -18,26 +19,18 @@ export async function CrearIdeaAsync(data: Idea) {
         'Problema':data.Problema,
         'Publico':data.Publico,
         'Innovacion':data.Innovacion,
+        'ID': data.ID
       }),
     });
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const result: Idea = await response.json();
+    const result: IdeaRespuesta = await response.json();
     return result;
   }
   catch (error) {
     throw new Error('Error al obtener los datos');
   }
 }
-export function CrearIdea(data: Idea) {
-  const [Idea, setIdea] = useState<Idea>();
 
-  useEffect(() => {
-      CrearIdeaAsync(data).then((out) => {
-      setIdea(out);
-      });
-  }, );
-  return Idea;
-}
-export default CrearIdea;
+export default CrearIdeaIAAsync;

@@ -1,6 +1,11 @@
 import React, { useState } from "react"; 
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/NavBar/navbar";
+import { CrearIdeaAsync } from "../../../api/CrearIdea";
+import { CrearIdeaIAAsync } from "../../../api/CrearIdeaIa";
+import Idea from '../../../models/Idea.tsx';
+//import IdeaRespuesta from '../../../models/IdeaRespuesta'
+
 
 const colorPalette = {
   primary: "#4c7500",
@@ -108,7 +113,21 @@ const CreateIdea: React.FC = () => {
   };
 
   const handleCancelPreview = () => setShowPreview(false);
+  async function handleCreateIdea(IdeaDato:Idea) {
+    try {
+      const ideaBackend = await CrearIdeaAsync(IdeaDato);
+      console.log(ideaBackend)
 
+      if (ideaBackend && ideaBackend.ID) {
+        IdeaDato.ID = ideaBackend.ID;
+        const ideaRespuesta =  CrearIdeaIAAsync(IdeaDato)
+        console.log(ideaRespuesta)
+        return ideaRespuesta
+      }
+    } catch (error) {
+      console.error("Error creating idea:", error);
+    }
+  }
   const handleConfirmAndSaveIdea = () => {
     try {
       const existingIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
@@ -118,7 +137,23 @@ const CreateIdea: React.FC = () => {
         createdAt: new Date().toISOString(),
       };
       localStorage.setItem("userIdeas", JSON.stringify([...existingIdeas, newIdea]));
+      const JSONidea = {
+        Usuario : 5,
+        Campo : previewData.field,
+        Problema : previewData.problem,
+        Publico : previewData.audience,
+        Innovacion : previewData.uniqueness,
+        FechaDeCreacion : "2000-07-01"
 
+      }
+      const IdeaDato = new Idea(JSONidea)
+      
+      
+
+      handleCreateIdea(IdeaDato)
+      
+      
+      console.log("me voy a matar")
       setAnswers([previewData.field, previewData.problem, previewData.audience, previewData.uniqueness]);
       setIsCompleted(true);
       setShowPreview(false);

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CrearColaboradorAsync(data: Colaborador) {
   try {
-    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearcolaborador/`, {
+    const response = await fetch(`https://struggle-smooth-earnings-girlfriend.trycloudflare.com/crearcolaborador/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

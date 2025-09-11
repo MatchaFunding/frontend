@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CrearFinanciadorAsync(data: Financiador) {
   try {
-    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearfinanciador/`, {
+    const response = await fetch(`https://struggle-smooth-earnings-girlfriend.trycloudflare.com/crearfinanciador/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

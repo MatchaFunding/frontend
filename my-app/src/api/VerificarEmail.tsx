@@ -2,7 +2,7 @@ export async function VerificarEmailExiste(email: string) {
   try {
     console.log('Verificando email:', email);
     
-    const url = `https://referral-charlotte-fee-powers.trycloudflare.com/validarsiexistecorreo/`;
+    const url = `https://struggle-smooth-earnings-girlfriend.trycloudflare.com/validarsiexistecorreo/`;
     console.log('URL completa:', url);
     
     const payload = {

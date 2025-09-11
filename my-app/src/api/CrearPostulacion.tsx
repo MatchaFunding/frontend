@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CrearPostulacionAsync(data: Postulacion) {
   try {
-    const response = await fetch(`https://referral-charlotte-fee-powers.trycloudflare.com/crearpostulacion/`, {
+    const response = await fetch(`https://struggle-smooth-earnings-girlfriend.trycloudflare.com/crearpostulacion/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

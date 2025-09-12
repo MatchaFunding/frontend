@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CrearPersonaAsync(data: Persona) {
   try {
-    const response = await fetch(`https://struggle-smooth-earnings-girlfriend.trycloudflare.com/crearpersona/`, {
+    const response = await fetch(`https://chat-resorts-builders-calculators.trycloudflare.com/crearpersona/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

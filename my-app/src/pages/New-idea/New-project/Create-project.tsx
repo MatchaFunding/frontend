@@ -88,7 +88,7 @@ const NuevoProyecto: React.FC = () => {
         return;
     }
     try {
-        const resPersona = await fetch("https://struggle-smooth-earnings-girlfriend.trycloudflare.com/crearpersona/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevaPersonaData) });
+        const resPersona = await fetch("https://chat-resorts-builders-calculators.trycloudflare.com/crearpersona/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevaPersonaData) });
         if (!resPersona.ok) throw new Error("No se pudo crear la persona. Verifique los datos.");
         const personaCreada = await resPersona.json();
         setFormData(prev => ({ ...prev, Miembros: [...prev.Miembros, personaCreada.Nombre] }));

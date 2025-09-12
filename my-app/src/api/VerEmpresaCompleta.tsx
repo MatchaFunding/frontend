@@ -1,6 +1,6 @@
 export async function VerEmpresaCompletaAsync(id: number) {
   try {
-    const response = await fetch(`https://struggle-smooth-earnings-girlfriend.trycloudflare.com/verempresacompleta/${id}/`, {
+    const response = await fetch(`https://chat-resorts-builders-calculators.trycloudflare.com/verempresacompleta/${id}/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CambiarIdeaAsync(id: number, data: Idea) {
   try {
-    const response = await fetch(`https://struggle-smooth-earnings-girlfriend.trycloudflare.com/cambiaridea/${id}`, {
+    const response = await fetch(`https://chat-resorts-builders-calculators.trycloudflare.com/cambiaridea/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

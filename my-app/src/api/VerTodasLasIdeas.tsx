@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function VerTodasLasIdeasAsync(): Promise<Idea[]> {
   try {
-    const response = await fetch(`https://struggle-smooth-earnings-girlfriend.trycloudflare.com/vertodaslasideas/`, {
+    const response = await fetch(`https://chat-resorts-builders-calculators.trycloudflare.com/vertodaslasideas/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

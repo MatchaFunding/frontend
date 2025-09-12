@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CambiarMiembroAsync(id: number, data: Miembro) {
   try {
-    const response = await fetch(`https://struggle-smooth-earnings-girlfriend.trycloudflare.com/cambiarmiembro/${id}`, {
+    const response = await fetch(`https://chat-resorts-builders-calculators.trycloudflare.com/cambiarmiembro/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

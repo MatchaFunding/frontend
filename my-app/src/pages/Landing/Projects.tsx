@@ -111,7 +111,7 @@ const MisPostulaciones: React.FC = () => {
         }
         setLoadingProyectos(true);
         setErrorProyectos(null);
-        const response = await fetch(`https://struggle-smooth-earnings-girlfriend.trycloudflare.com/verproyectosdeempresa/${empresaId}`);
+        const response = await fetch(`https://chat-resorts-builders-calculators.trycloudflare.com/verproyectosdeempresa/${empresaId}`);
         if (!response.ok) {
           throw new Error(`Error ${response.status}: No se pudo obtener la lista de proyectos.`);
         }

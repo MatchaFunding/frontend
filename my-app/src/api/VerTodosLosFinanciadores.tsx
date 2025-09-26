@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function VerTodosLosFinanciadoresAsync(): Promise<Financiador[]> {
   try {
-    const response = await fetch(`https://chat-resorts-builders-calculators.trycloudflare.com/vertodoslosfinanciadores/`, {
+    const response = await fetch(`https://backend.matchafunding.com/vertodoslosfinanciadores/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function VerMiembrosDeEmpresaAsync(id: number): Promise<Miembro[]> {
   try {
-    const response = await fetch(`https://chat-resorts-builders-calculators.trycloudflare.com/vermiembrosdeempresa/${id}`, {
+    const response = await fetch(`https://backend.matchafunding.com/vermiembrosdeempresa/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

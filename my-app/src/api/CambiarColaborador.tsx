@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CambiarColaboradorAsync(id: number, data: Colaborador) {
   try {
-    const response = await fetch(`https://chat-resorts-builders-calculators.trycloudflare.com/cambiarcolaborador/${id}`, {
+    const response = await fetch(`https://backend.matchafunding.com/cambiarcolaborador/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

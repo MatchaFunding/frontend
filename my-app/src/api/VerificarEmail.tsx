@@ -2,7 +2,7 @@ export async function VerificarEmailExiste(email: string) {
   try {
     console.log('Verificando email:', email);
     
-    const url = `https://chat-resorts-builders-calculators.trycloudflare.com/validarsiexistecorreo/`;
+    const url = `https://backend.matchafunding.com/validarsiexistecorreo/`;
     console.log('URL completa:', url);
     
     const payload = {

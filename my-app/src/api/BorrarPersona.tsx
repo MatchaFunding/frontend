@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function BorrarPersonaAsync(id: number) {
   try {
-    const response = await fetch(`https://chat-resorts-builders-calculators.trycloudflare.com/borrarpersona/${id}`, {
+    const response = await fetch(`https://backend.matchafunding.com/borrarpersona/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

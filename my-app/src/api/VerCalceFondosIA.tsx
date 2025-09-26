@@ -4,7 +4,7 @@ import MatchResult from '../models/MatchResult.tsx'
 
 export async function VerCalceFondosIAAsync(ide : number) {
   try {
-    const response = await fetch(`https://vote-coupon-medical-aged.trycloudflare.com/api/v1/ia/match`, {
+    const response = await fetch(`https://api.matchafunding.com/api/v1/ia/match`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

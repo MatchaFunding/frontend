@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 
 export async function CrearIdeaAsync(data: Idea) {
   try {
-    const response = await fetch(`https://chat-resorts-builders-calculators.trycloudflare.com/crearidea/`, {
+    const response = await fetch(`https://backend.matchafunding.com/crearidea/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

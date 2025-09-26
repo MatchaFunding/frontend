@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CambiarPostulacionAsync(id: number, data: Postulacion) {
   try {
-    const response = await fetch(`https://chat-resorts-builders-calculators.trycloudflare.com/cambiarpostulacion/${id}`, {
+    const response = await fetch(`https://backend.matchafunding.com/cambiarpostulacion/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

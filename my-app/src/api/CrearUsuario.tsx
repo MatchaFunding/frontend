@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CrearUsuarioAsync(data: Usuario) {
   try {
-    const response = await fetch(`https://chat-resorts-builders-calculators.trycloudflare.com/crearusuario/`, {
+    const response = await fetch(`https://backend.matchafunding.com/crearusuario/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

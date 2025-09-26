@@ -141,7 +141,7 @@ const CrearProyectoMatch: React.FC = () => {
         return;
     }
     try {
-        const resPersona = await fetch("https://chat-resorts-builders-calculators.trycloudflare.com/crearpersona/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevaPersonaData) });
+        const resPersona = await fetch("https://backend.matchafunding.com/crearpersona/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevaPersonaData) });
         if (!resPersona.ok) throw new Error("No se pudo crear la persona. Verifique los datos.");
         
         const personaCreada = await resPersona.json();
@@ -165,7 +165,7 @@ const CrearProyectoMatch: React.FC = () => {
     if (!formData.Alcance || !formData.Area) { alert("Debes seleccionar un Alcance y un Área."); return; }
     try {
       const proyectoData = { ...formData };
-      const resProyecto = await fetch("https://chat-resorts-builders-calculators.trycloudflare.com/crearproyecto/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(proyectoData) });
+      const resProyecto = await fetch("https://backend.matchafunding.com/crearproyecto/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(proyectoData) });
       if (!resProyecto.ok) {
         if (resProyecto.status === 400) throw new Error("Los datos enviados no son válidos. Por favor, revise todos los campos.");
         throw new Error(`Error del servidor: ${resProyecto.status}`);
@@ -176,7 +176,7 @@ const CrearProyectoMatch: React.FC = () => {
           let persona = personas.find((p) => p.Nombre === nombreMiembro);
           if (!persona) throw new Error(`No se encontró la persona ${nombreMiembro}.`);
           const colaboradorPayload = { Persona: persona.ID, Proyecto: proyectoCreado.ID };
-          const resColaborador = await fetch("https://chat-resorts-builders-calculators.trycloudflare.com/crearcolaborador/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(colaboradorPayload) });
+          const resColaborador = await fetch("https://backend.matchafunding.com/crearcolaborador/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(colaboradorPayload) });
           if (!resColaborador.ok) throw new Error(`Error al crear el colaborador para ${nombreMiembro}`);
         }
       }

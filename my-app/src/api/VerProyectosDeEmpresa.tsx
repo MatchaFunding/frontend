@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function VerProyectosDeEmpresaAsync(id: number): Promise<Proyecto[]> {
   try {
-    const response = await fetch(`https://chat-resorts-builders-calculators.trycloudflare.com/verproyectosdeempresa/${id}`, {
+    const response = await fetch(`https://backend.matchafunding.com/verproyectosdeempresa/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

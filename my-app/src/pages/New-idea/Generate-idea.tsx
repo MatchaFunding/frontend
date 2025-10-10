@@ -19,13 +19,13 @@ const SelectIdea: React.FC = () => {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: colorPalette.lightGray }}>
       <NavBar />
 
-      <main className="flex-grow p-6 md:p-10 flex items-center justify-center mt-[5%]">
+      <main className="flex-grow p-6 md:p-10 flex items-center justify-center pt-20 md:pt-24">
       
         <div className="flex flex-col lg:flex-row gap-8">
 
           <Card className="flex flex-col items-center p-8 max-w-sm text-center">
             <div className="flex-grow">
-              <img src="/ideamatchito.png" alt="Ilustración de taza de té" className="w-30 h-auto mb-4 mx-auto" />
+              <img src="/ideamatchito.png" alt="Ilustración de taza de té" className="hidden md:block w-30 h-auto mb-4 mx-auto" />
               <h2 className="text-2xl font-bold" style={{ color: colorPalette.oliveGray }}>
                 ¿Tienes una idea?
               </h2>
@@ -44,7 +44,7 @@ const SelectIdea: React.FC = () => {
 
           <Card className="flex flex-col items-center p-8 max-w-sm text-center">
             <div className="flex-grow">
-              <img src="/Tevolador.png" alt="Ilustración de taza de té" className="w-30 h-auto mb-4 mx-auto" />
+              <img src="/Tevolador.png" alt="Ilustración de taza de té" className="hidden md:block w-30 h-auto mb-4 mx-auto" />
               <h2 className="text-2xl font-bold" style={{ color: colorPalette.oliveGray }}>
                 Construye tu proyecto
               </h2>
@@ -62,7 +62,7 @@ const SelectIdea: React.FC = () => {
           </Card>
             <Card className="flex flex-col items-center p-8 max-w-sm text-center">
             <div className="flex-grow">
-              <img src="/Matchitograduado.png" alt="Ilustración de taza de té" className="w-30 h-auto mb-4 mx-auto" />
+              <img src="/Matchitograduado.png" alt="Ilustración de taza de té" className="hidden md:block w-30 h-auto mb-4 mx-auto" />
               <h2 className="text-2xl font-bold" style={{ color: colorPalette.oliveGray }}>
                 Encuentra los proyectos históricos
               </h2>
@@ -84,7 +84,7 @@ const SelectIdea: React.FC = () => {
              <div   
       className=" flex-grow"
     >
-                <img src="/matchachoro.png" alt="Ilustración de taza de té" className="mt-1 w-30 h-auto mb-4 mx-auto" />
+                <img src="/matchachoro.png" alt="Ilustración de taza de té" className="hidden md:block mt-1 w-30 h-auto mb-4 mx-auto" />
                 <h2 className="text-2xl font-bold" style={{ color: colorPalette.oliveGray }}>
                   Encuentra tu fondo ideal
                 </h2>

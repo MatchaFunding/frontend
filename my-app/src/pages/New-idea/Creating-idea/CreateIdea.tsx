@@ -186,9 +186,9 @@ const CreateIdea: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen" style={{ backgroundColor: colorPalette.background }}>
       <Navbar />
-      <div className="flex-grow flex flex-col lg:flex-row justify-center items-center p-6 lg:p-12 gap-8 mt-[5%]">
-        {/* Imagen */}
-        <div className="w-full lg:w-[40%] flex justify-center items-center">
+      <div className="flex-grow flex flex-col lg:flex-row justify-center items-center p-4 lg:p-12 gap-8 mt-[5%]">
+        {/* Imagen - Hidden on mobile */}
+        <div className="hidden lg:flex w-full lg:w-[40%] justify-center items-center">
           <img
             src="/ideamatch.png"
             alt="Idea creativa"
@@ -197,7 +197,7 @@ const CreateIdea: React.FC = () => {
         </div>
 
         {/* Chat y Inputs */}
-        <div className="w-full lg:w-[60%] h-[70vh] bg-white p-6 rounded-2xl shadow-xl flex flex-col">
+        <div className="w-full lg:w-[60%] h-[70vh] lg:h-[70vh] bg-white p-4 lg:p-6 rounded-2xl shadow-xl flex flex-col">
           {!isCompleted ? (
             <>
               <h1 className="text-2xl font-bold text-center mb-4" style={{ color: colorPalette.primary }}>

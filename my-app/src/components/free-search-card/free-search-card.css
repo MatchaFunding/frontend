@@ -14,6 +14,16 @@
   border: 1px solid rgba(226, 232, 240, 0.8); /* border-slate-200/80 */
 }
 
+/* Mobile responsive: sm (640px) */
+@media (max-width: 640px) {
+  .free-search-card {
+    width: 100%;
+    max-width: 20rem;
+    height: auto;
+    min-height: 16rem;
+  }
+}
+
 .free-search-card__content {
   padding: 1.5rem; /* p-6 */
   display: flex;
@@ -24,12 +34,26 @@
   box-sizing: border-box;
   flex: 1;
 }
+
+/* Mobile responsive: Adjust content padding */
+@media (max-width: 640px) {
+  .free-search-card__content {
+    padding: 1rem; /* Reduce padding on mobile */
+  }
+}
 .free-search-card__image-container {
   position: relative;
   height: 9rem; /* Reducido de 13rem a 9rem */
   width: 100%;
   overflow: hidden;
   flex-shrink: 0; /* Evita que el contenedor se reduzca */
+}
+
+/* Mobile responsive: Hide image on mobile */
+@media (max-width: 640px) {
+  .free-search-card__image-container {
+    display: none;
+  }
 }
 
 .free-search-card__image {
@@ -59,6 +83,18 @@
   width: 100%;
   min-height: 3rem; /* Altura fija para 2 líneas: 1.25rem * 1.2 * 2 = ~3rem */
 }
+
+/* Mobile responsive: Adjust title on mobile */
+@media (max-width: 640px) {
+  .free-search-card__title {
+    font-size: 1.125rem; /* Slightly smaller on mobile */
+    margin-bottom: 0.75rem; /* More margin since no description */
+    -webkit-line-clamp: 2; /* Fixed to exactly 2 lines */
+    line-clamp: 2;
+    min-height: 2.7rem; /* Fixed height for exactly 2 lines: 1.125rem * 1.2 * 2 = 2.7rem */
+    max-height: 2.7rem; /* Ensure it never exceeds 2 lines */
+  }
+}
 .free-search-card__description {
   color: #64748b; /* text-slate-500 */
   font-size: 0.875rem; /* text-sm */
@@ -78,6 +114,13 @@
   hyphens: auto;
 }
 
+/* Mobile responsive: Hide description on mobile */
+@media (max-width: 640px) {
+  .free-search-card__description {
+    display: none;
+  }
+}
+
 .free-search-card__dates {
   margin-bottom: 0.5rem; /* Reducido de 0.75rem a 0.5rem */
   display: flex;
@@ -86,12 +129,31 @@
   padding-top: 0.5rem; /* Reducido de 1rem a 0.5rem */
 }
 
+/* Mobile responsive: Adjust dates layout */
+@media (max-width: 640px) {
+  .free-search-card__dates {
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
 .free-search-card__date {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   width: 50%; /* Cada fecha ocupa exactamente el 50% del ancho */
   min-width: 0; /* Permite que el contenido se ajuste */
+}
+
+/* Mobile responsive: Full width dates on mobile */
+@media (max-width: 640px) {
+  .free-search-card__date {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 .free-search-card__date:last-child {

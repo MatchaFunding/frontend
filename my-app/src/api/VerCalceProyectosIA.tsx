@@ -3,7 +3,7 @@ import MatchResult from '../models/MatchResult.tsx'
 
 export async function VerCalceProyectosIAAsync(id: number) {
   try {
-    const response = await fetch(`https://api.matchafunding.com/api/v1/ia/match/projectmatchhistoric`, {
+    const response = await fetch(`https://ai.matchafunding.com/api/v1/ia/match/projectmatchhistoric`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

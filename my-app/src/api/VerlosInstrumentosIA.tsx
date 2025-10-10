@@ -5,7 +5,7 @@ import MatchResult from '../models/MatchResult.tsx'
 
 export async function VerTodosLosInstrumentosIAAsync(input : MatchRequest) {
   try {
-    const response = await fetch(`https://api.matchafunding.com/api/v1/ia/match`, {
+    const response = await fetch(`https://ai.matchafunding.com/api/v1/ia/match`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

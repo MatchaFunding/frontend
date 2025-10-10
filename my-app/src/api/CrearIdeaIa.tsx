@@ -3,7 +3,7 @@ import IdeaRespuesta from '../models/IdeaRespuesta.ts'
 
 export async function CrearIdeaIAAsync(data: Idea) {
   try {
-    const response = await fetch(`https://api.matchafunding.com/api/v1/ideas/`, {
+    const response = await fetch(`https://ai.matchafunding.com/api/v1/ideas/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

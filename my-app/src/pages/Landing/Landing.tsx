@@ -1,35 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const GlobeIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    xmlns="matchito.png"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className || "w-5 h-5"}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A11.978 11.978 0 0112 16.5c-3.34 0-6.296-1.336-8.447-3.523m16.894 0H3.284"
-    />
-  </svg>
-);
-
-
 const MenuIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    fill="none" 
-    viewBox="0 0 24 24" 
-    strokeWidth={1.5} 
-    stroke="currentColor" 
-    className={className || "w-6 h-6"}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-  </svg>
+  <img 
+    src="/svgs/menu-line.svg" 
+    alt="Menu"
+    className={`${className || "w-6 h-6"} filter brightness-0 invert`}
+  />
 );
 
 const CloseIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -111,9 +88,10 @@ const Navbar: React.FC = () => {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 transition-colors focus:outline-none focus:ring-0 focus:border-0 focus:shadow-none outline-none border-none"
               aria-controls="mobile-menu"
               aria-expanded={isMobileMenuOpen}
+              style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
             >
               <span className="sr-only">Abrir menú principal</span>
               {isMobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
@@ -123,42 +101,22 @@ const Navbar: React.FC = () => {
       </div>
 
       {isMobileMenuOpen && (
-        <div className="md:hidden" id="mobile-menu">
-          {/*<div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)} 
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>*/}
-          <div className="pt-4 pb-3 border-t border-gray-700">
-            <div className="flex items-center px-5">
-              <button className="w-full flex items-center justify-start px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
-                <GlobeIcon className="w-5 h-5 mr-2" />
-                Idioma
-              </button>
-            </div>
-            <div className="mt-3 px-2 space-y-1">
-              <Link
-                to="/signup"
-                className="block w-full text-left bg-gray-100 text-gray-900 px-4 py-2 rounded-md text-base font-semibold hover:bg-gray-200 transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Registrarse
-              </Link>
-              <Link
-                to="/login"
-                className="block w-full text-left border border-gray-300 text-gray-300 px-4 py-2 rounded-md text-base font-semibold hover:bg-white hover:bg-opacity-20 hover:text-white transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Iniciar sesión
-              </Link>
-            </div>
+        <div className="md:hidden bg-[#44624a] shadow-lg" id="mobile-menu">
+          <div className="px-4 py-3 space-y-3">
+            <Link
+              to="/signup"
+              className="block w-full text-center bg-white text-gray-900 px-4 py-3 rounded-full text-base font-semibold hover:bg-gray-200 transition-colors"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Registrarse
+            </Link>
+            <Link
+              to="/login"
+              className="block w-full text-center border-2 border-white text-white px-4 py-3 rounded-full text-base font-semibold hover:bg-white hover:text-gray-900 transition-colors"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Iniciar sesión
+            </Link>
           </div>
         </div>
       )}

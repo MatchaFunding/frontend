@@ -33,40 +33,46 @@ const MatchaHomePage: React.FC = () => {
   return (
   <div className="bg-slate-50 min-h-screen flex flex-col">
     <NavBar />
-   <main className="flex-grow p-4 md:p-6 lg:p-8 w-full mt-[3%] flex justify-center items-center">
-  <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 w-full max-w-none px-4 py-2">
+   <main className="flex-grow p-2 md:p-4 lg:p-8 w-full pt-28 sm:pt-32 md:pt-20 lg:pt-20 xl:pt-24 flex justify-center items-center">
+  <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8 lg:gap-12 w-full max-w-none px-4 py-2">
    <div
       onClick={() => navigate("/Matcha/Select-Idea")}
-      className="lg:col-span-3 bg-white p-8 rounded-2xl shadow-lg flex flex-col justify-between cursor-pointer hover:shadow-2xl transition-shadow w-full min-h-[500px] lg:min-h-[600px]"
+      className="lg:col-span-3 bg-white p-4 lg:p-8 rounded-2xl shadow-lg flex flex-col justify-between cursor-pointer hover:shadow-2xl transition-shadow w-full min-h-[400px] lg:min-h-[600px]"
     >
-      <div className="flex items-center gap-12 h-full w-full">
+      <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-12 h-full w-full">
     
-        <div className="w-1/2 flex flex-col items-center justify-center">
-          <div className="text mb-6 text-center">
-            <span className="text-gray-500 text-xl lg:text-2xl">Haz</span>
-            <h1 className="text-5xl lg:text-7xl xl:text-8xl font-bold text-black tracking-tighter">
+        <div className="w-full lg:w-1/2 flex flex-row md:flex-col items-center justify-between md:justify-center gap-4 md:gap-6">
+          <div className="text flex-1 md:flex-none text-left md:text-center px-2 mb-0 md:mb-2 lg:mb-6">
+            <span className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl text-gray-500">Haz</span>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-black tracking-tighter">
               Match
             </h1>
-            <span className="text-gray-500 text-xl lg:text-2xl block">
+            <span className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl text-gray-500 block">
               con un fondo
             </span>
           </div>
           <img
             src="./Tevolador.png"
             alt="Taza de matcha colgando"
-            className="w-64 h-auto object-contain shadow-lg rounded-full"
+            className="w-24 sm:w-28 md:w-36 lg:w-52 h-auto object-contain shadow-lg rounded-full flex-shrink-0 mt-0 md:mt-1 lg:mt-0"
           />
         </div>
 
        
-        <div className="w-1/2 space-y-8">
+        <div className="w-full lg:w-1/2 space-y-3 lg:space-y-8 mt-3 lg:mt-0">
      
           <div className="flex items-start gap-4">
             <FontAwesomeIcon
               icon={faLightbulb}
-              size="2x"
+              size="lg"
+              className="mt-1 md:hidden"
               style={{ color: colors.softGreen }}
-              className="mt-1"
+            />
+            <FontAwesomeIcon
+              icon={faLightbulb}
+              size="2x"
+              className="mt-1 hidden md:block"
+              style={{ color: colors.softGreen }}
             />
             <div>
               <span className="text-lg block font-semibold text-[#44624a]">
@@ -82,9 +88,15 @@ const MatchaHomePage: React.FC = () => {
           <div className="flex items-start gap-4">
             <FontAwesomeIcon
               icon={faWrench}
-              size="2x"
+              size="lg"
+              className="mt-1 md:hidden"
               style={{ color: colors.softGreen }}
-              className="mt-1"
+            />
+            <FontAwesomeIcon
+              icon={faWrench}
+              size="2x"
+              className="mt-1 hidden md:block"
+              style={{ color: colors.softGreen }}
             />
             <div>
               <span className="text-lg block font-semibold text-[#44624a]">
@@ -100,9 +112,15 @@ const MatchaHomePage: React.FC = () => {
           <div className="flex items-start gap-4">
             <FontAwesomeIcon
               icon={faEquals}
-              size="2x"
+              size="lg"
+              className="mt-1 md:hidden"
               style={{ color: colors.softGreen }}
-              className="mt-1"
+            />
+            <FontAwesomeIcon
+              icon={faEquals}
+              size="2x"
+              className="mt-1 hidden md:block"
+              style={{ color: colors.softGreen }}
             />
             <div>
               <span className="text-lg block font-semibold text-[#44624a]">
@@ -119,7 +137,7 @@ const MatchaHomePage: React.FC = () => {
     </div>
 
     <div 
-      className="lg:col-span-2 flex flex-col gap-12 w-full"
+      className="lg:col-span-2 flex flex-col gap-6 md:gap-8 lg:gap-12 w-full"
       >
       <div 
         className="bg-white p-6 rounded-2xl shadow-lg flex items-center cursor-pointer hover:shadow-2xl transition-shadow min-h-[240px] lg:min-h-[280px] w-full"

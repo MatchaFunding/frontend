@@ -21,6 +21,8 @@ import CrearProyectoMatch from './pages/New-idea/Creating-idea/Proyecto-idea.tsx
 import MisProyectosH from './pages/New-idea/Historico/SelectProjectH.tsx';
 import ProyectosHistoricosConPorcentaje from './pages/New-idea/Historico/HistoricosConMatch.tsx';
 import DetalleProyecto from './pages/New-idea/Historico/HistoricoDetalle.tsx';
+import SelectChange from './pages/edit-profile/ChooseToEdit.tsx';
+import EditmyProfile from './pages/edit-profile/EditMyprofile.tsx';
 
 function App() {
   return (
@@ -28,7 +30,9 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPageTailwind />} />
         <Route path="/free-search" element={<FreeSearch />} />
-        <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/edit?" element={<SelectChange />} />
+        <Route path="/edit-profileE" element={<EditProfile />} />
+        <Route path="/edit-Myprofile" element={<EditmyProfile />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
         <Route path="/Home-i" element={<MatchaHomePage />} />

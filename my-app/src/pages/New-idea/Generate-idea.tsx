@@ -64,10 +64,10 @@ const SelectIdea: React.FC = () => {
             <div className="flex-grow">
               <img src="/Matchitograduado.png" alt="Ilustración de taza de té" className="hidden md:block w-30 h-auto mb-4 mx-auto" />
               <h2 className="text-2xl font-bold" style={{ color: colorPalette.oliveGray }}>
-                Encuentra los proyectos históricos
+                Compara tu proyecto
               </h2>
               <p className="text-slate-600 mt-2 text-base mt-5">
-               Compara con ideas anteriores para saber tu compatibilidad con fondos y mejorar tus posibilidades de exito con los proyectos ganadores.
+                Revisa cómo se alinea tu idea o proyecto con iniciativas previas exitosas y aprende de ellas para fortalecer tu postulación.
               </p>
             </div>
             <button

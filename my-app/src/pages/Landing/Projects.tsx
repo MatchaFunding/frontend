@@ -7,6 +7,14 @@ import { applyFiltersAndSorting } from '../../components/filters-ideas/filters-i
 import type { FiltersIdeaValues } from '../../components/filters-ideas/filters-idea';
 import Idea from "../../models/Idea";
 import Postulacion from "../../models/Postulacion"; 
+import IdeaRefinadaModal from '../../components/IdeaRefinadaModal/IdeaRefinadaModal';
+import VerPropuestasDeEmpresaAsync from '../../api/VerPropuestasDeEmpresa';
+
+// Definir el tipo aquí ya que el archivo VerIdeasConRefinamiento no se usa
+export interface IdeaConRefinamiento extends Idea {
+  ResumenLLM?: string;
+  FechaRefinamiento?: string;
+} 
 
 interface PostulacionData {
   name: string;
@@ -47,16 +55,17 @@ const CustomTooltip = ({ active, payload }: any) => { if (active && payload && p
 
 
 const MisPostulaciones: React.FC = () => {
-  const [ideas, setIdeas] = useState<Idea[]>([]);
-  const [filteredIdeas, setFilteredIdeas] = useState<Idea[]>([]);
+  const [ideas, setIdeas] = useState<IdeaConRefinamiento[]>([]);
+  const [filteredIdeas, setFilteredIdeas] = useState<IdeaConRefinamiento[]>([]);
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [activeSection, setActiveSection] = useState('ideas');
+  const [selectedIdea, setSelectedIdea] = useState<IdeaConRefinamiento | null>(null);
+  const [showIdeaModal, setShowIdeaModal] = useState(false);
   const navigate = useNavigate();
 
   const [radarChartData, setRadarChartData] = useState<any[]>([]);
   const [loadingProyectos, setLoadingProyectos] = useState<boolean>(false);
   const [errorProyectos, setErrorProyectos] = useState<string | null>(null);
-
 
   const [pieChartData, setPieChartData] = useState<PostulacionData[]>([]);
   
@@ -64,6 +73,63 @@ const MisPostulaciones: React.FC = () => {
   const [errorEstadisticas, setErrorEstadisticas] = useState<string | null>(null);
 
   const [filtersIdea, setFiltersIdea] = useState<FiltersIdeaValues>({ campo: '', publico: '', orderBy: 'none', searchIdea: '', searchCampo: '', fecha: '' });
+  
+  // Función para truncar texto largo
+  const truncateText = (text: string, maxLength: number = 120): string => {
+    if (!text) return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength).trim() + '...';
+  };
+  
+  // Función para recargar ideas (útil cuando se vuelve de crear una nueva idea)
+  const reloadIdeas = async () => {
+    const storedUser = sessionStorage.getItem("usuario");
+    if (storedUser) {
+      const datos = JSON.parse(storedUser);
+      const usuarioId = datos.Usuario?.ID;
+      
+      console.log('Recargando ideas para usuario:', usuarioId);
+      
+      // Mapear las ideas existentes al nuevo formato
+      const ideasConRefinamiento: IdeaConRefinamiento[] = (datos.Ideas || []).map((idea: Idea) => ({
+        ...idea,
+        ResumenLLM: undefined,
+      }));
+      
+      // Cargar propuestas desde el backend usando ID del usuario
+      if (usuarioId) {
+        try {
+          const propuestas = await VerPropuestasDeEmpresaAsync(usuarioId);
+          console.log('Propuestas recargadas para usuario:', usuarioId, propuestas);
+          // Usar la misma heurística de ordenamiento
+          const ideasOrdenadas = [...ideasConRefinamiento].sort((a, b) => b.ID - a.ID);
+          const propuestasOrdenadas = [...propuestas].sort((a, b) => b.ID - a.ID);
+          
+          propuestasOrdenadas.forEach((propuesta, index) => {
+            if (index < ideasOrdenadas.length) {
+              const ideaIndex = ideasConRefinamiento.findIndex(idea => idea.ID === ideasOrdenadas[index].ID);
+              if (ideaIndex !== -1) {
+                ideasConRefinamiento[ideaIndex].ResumenLLM = propuesta.ResumenLLM;
+                console.log(`Reasignada propuesta ${propuesta.ID} a idea ${ideasOrdenadas[index].ID}`);
+              }
+            }
+          });
+        } catch (error) {
+          console.error('Error al recargar propuestas:', error);
+        }
+      } else {
+        console.warn('No se pudo obtener usuarioId para recargar');
+      }
+      
+      setIdeas(ideasConRefinamiento);
+      setFilteredIdeas(ideasConRefinamiento);
+    } else {
+      console.warn('No se encontraron datos de usuario para recargar');
+      setIdeas([]);
+      setFilteredIdeas([]);
+    }
+  };
+  
   const processRadarChartData = (postulaciones: Postulacion[]) => {
   if (postulaciones.length === 0) return [];
 
@@ -111,18 +177,103 @@ const MisPostulaciones: React.FC = () => {
 };
   
   useEffect(() => {
-    const storedUser = sessionStorage.getItem("usuario");
-    if (storedUser) {
-      const datos = JSON.parse(storedUser);
-      setIdeas(datos.Ideas || []);
-      setFilteredIdeas(datos.Ideas || []);
-    }
+    const loadIdeasWithRefinement = async () => {
+      const storedUser = sessionStorage.getItem("usuario");
+      if (storedUser) {
+        const datos = JSON.parse(storedUser);
+        const usuarioId = datos.Usuario?.ID;
+        
+        console.log('Cargando ideas para usuario:', usuarioId);
+        console.log('Datos del usuario:', datos.Usuario);
+        
+        // Mapear las ideas existentes al nuevo formato
+        const ideasConRefinamiento: IdeaConRefinamiento[] = (datos.Ideas || []).map((idea: Idea) => ({
+          ...idea,
+          ResumenLLM: undefined, // Se cargará desde el backend
+        }));
+        
+        // Cargar propuestas del usuario desde el backend
+        if (usuarioId) {
+          try {
+            const propuestas = await VerPropuestasDeEmpresaAsync(usuarioId);
+            console.log('Propuestas cargadas para usuario:', usuarioId, propuestas);
+            
+            // Como no hay relación directa por ID, usamos una heurística:
+            // Asignar propuestas a ideas basándose en el orden (las más recientes primero)
+            const ideasOrdenadas = [...ideasConRefinamiento].sort((a, b) => {
+              // Ordenar por ID descendente (más recientes primero)
+              return b.ID - a.ID;
+            });
+            
+            const propuestasOrdenadas = [...propuestas].sort((a, b) => {
+              // Ordenar por ID descendente (más recientes primero) 
+              return b.ID - a.ID;
+            });
+            
+            // Asignar propuestas a ideas en el mismo orden
+            propuestasOrdenadas.forEach((propuesta, index) => {
+              if (index < ideasOrdenadas.length) {
+                const ideaIndex = ideasConRefinamiento.findIndex(idea => idea.ID === ideasOrdenadas[index].ID);
+                if (ideaIndex !== -1) {
+                  ideasConRefinamiento[ideaIndex].ResumenLLM = propuesta.ResumenLLM;
+                  console.log(`Asignada propuesta ${propuesta.ID} a idea ${ideasOrdenadas[index].ID}`);
+                }
+              }
+            });
+          } catch (error) {
+            console.error('Error al cargar propuestas:', error);
+            // Fallback: usar OpinionesIAdeIdea del sessionStorage
+            if (datos.OpinionesIAdeIdea && Array.isArray(datos.OpinionesIAdeIdea)) {
+              datos.OpinionesIAdeIdea.forEach((opinion: any) => {
+                const ideaIndex = ideasConRefinamiento.findIndex(idea => idea.ID === opinion.ID);
+                if (ideaIndex !== -1) {
+                  ideasConRefinamiento[ideaIndex].ResumenLLM = opinion.ResumenLLM;
+                }
+              });
+            }
+          }
+        } else {
+          console.warn('No se pudo obtener usuarioId del sessionStorage');
+          // Fallback: usar OpinionesIAdeIdea del sessionStorage si no hay usuarioId
+          if (datos.OpinionesIAdeIdea && Array.isArray(datos.OpinionesIAdeIdea)) {
+            datos.OpinionesIAdeIdea.forEach((opinion: any) => {
+              const ideaIndex = ideasConRefinamiento.findIndex(idea => idea.ID === opinion.ID);
+              if (ideaIndex !== -1) {
+                ideasConRefinamiento[ideaIndex].ResumenLLM = opinion.ResumenLLM;
+              }
+            });
+          }
+        }
+        
+        setIdeas(ideasConRefinamiento);
+        setFilteredIdeas(ideasConRefinamiento);
+      } else {
+        console.warn('No se encontraron datos de usuario en sessionStorage');
+        setIdeas([]);
+        setFilteredIdeas([]);
+      }
+    };
+
+    loadIdeasWithRefinement();
   }, []);
 
   useEffect(() => {
     const filtered = applyFiltersAndSorting(ideas, filtersIdea);
     setFilteredIdeas(filtered);
   }, [ideas, filtersIdea]);
+
+  // Listener para detectar cuando se regresa de crear una idea
+  useEffect(() => {
+    const handleFocus = () => {
+      // Recargar ideas cuando la ventana recupera el foco (usuario regresa de otra página)
+      if (activeSection === 'ideas') {
+        reloadIdeas();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [activeSection]);
 
   
 
@@ -131,7 +282,6 @@ const MisPostulaciones: React.FC = () => {
         const storedUser = sessionStorage.getItem("usuario");
         if (!storedUser) { setErrorProyectos("No se encontró información del usuario."); return; }
         const userData = JSON.parse(storedUser);
-        console.log(userData)
         const empresaId = userData?.Beneficiario?.ID;
         if (!empresaId) { setErrorProyectos("No se pudo obtener el ID de la empresa."); return; }
 
@@ -162,7 +312,6 @@ const MisPostulaciones: React.FC = () => {
         return;
       }
 
-      const parsedUser = JSON.parse(storedUser);
       const beneficiarioId = 112;
       if (!beneficiarioId) {
         setErrorEstadisticas("No se pudo obtener el ID del beneficiario.");
@@ -236,41 +385,13 @@ const colorPalette = {
     }));
   };
   
-  const processLineChartData = (postulaciones: Postulacion[]) => {
-    const statusMap: { [key: string]: string } = {
-        'ADJ': 'Adjudicadas', 'PEN': 'Pendientes', 'REC': 'Rechazadas', 'APR': 'Aprobadas'
-    };
-    const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-
-    const monthlyData = postulaciones.reduce((acc, post) => {
-        const date = new Date(post.FechaDePostulacion);
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth()).padStart(2, '0')}`;
-        
-        if (!acc[monthKey]) {
-            acc[monthKey] = {
-                mes: `${monthNames[date.getMonth()]} '${String(date.getFullYear()).slice(2)}`,
-                originalDate: date,
-                Adjudicadas: 0,
-                Pendientes: 0,
-                Rechazadas: 0,
-                Aprobadas: 0
-            };
-        }
-        
-        const statusName = statusMap[post.Resultado.trim()];
-        if (statusName) {
-            acc[monthKey][statusName]++;
-        }
-        
-        return acc;
-    }, {} as any);
-
-    return Object.values(monthlyData).sort((a: any, b: any) => a.originalDate - b.originalDate);
-  };
-
   const handleFiltersIdeaChange = (newFilters: FiltersIdeaValues) => { setFiltersIdea(newFilters); };
   const handleDeleteIdea = (idToDelete: number) => { if (window.confirm("¿Seguro que quieres eliminar esta idea?")) { const updated = ideas.filter(i => i.ID !== idToDelete); setIdeas(updated); } };
-  const handleRetakeIdea = (idea: Idea) => { alert(`Retomando la idea: "${idea.Campo}".`); };
+  const handleRetakeIdea = (idea: IdeaConRefinamiento) => { alert(`Retomando la idea: "${idea.Campo}".`); };
+  const handleViewIdeaDetails = (idea: IdeaConRefinamiento) => {
+    setSelectedIdea(idea);
+    setShowIdeaModal(true);
+  };
   const handleEditProyecto = (proyecto: Proyecto) => { alert(`Funcionalidad para editar el proyecto "${proyecto.Titulo}" no implementada.`); };
   const handleDeleteProyecto = (proyectoId: number) => { if (window.confirm("¿Seguro que quieres eliminar este proyecto?")) { alert(`Funcionalidad para eliminar el proyecto con ID ${proyectoId} no implementada.`); } };
   const postulacionesHistoricas: any[] = [];
@@ -297,6 +418,16 @@ const colorPalette = {
                   <h1 className="text-3xl font-bold" style={{ color: colorPalette.darkGreen }}>Mis Ideas Guardadas</h1>
                 
                   <div className="flex items-center gap-4">
+                    <button
+                      onClick={reloadIdeas}
+                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                      title="Refrescar ideas"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      <span className="hidden sm:inline">Refrescar</span>
+                    </button>
                     <FiltersIdea 
                       filters={filtersIdea}
                       onApplyFilters={handleFiltersIdeaChange}
@@ -312,27 +443,29 @@ const colorPalette = {
                   </div>
                 </div>
                 
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                  <div className="flex gap-2 px-6 py-4 border-b border-slate-200 bg-slate-50" style={{ minWidth: '100%' }}>
-                    <div className="text-sm font-semibold flex-shrink-0" style={{ color: colorPalette.oliveGray, width: '50%', minWidth: '50%', maxWidth: '50%' }}>Idea / Problema</div>
-                    <div className="text-sm font-semibold flex-shrink-0" style={{ color: colorPalette.oliveGray, width: '25%', minWidth: '25%', maxWidth: '25%' }}>Campo</div>
-                    <div className="text-sm font-semibold flex-shrink-0" style={{ color: colorPalette.oliveGray, width: '15%', minWidth: '15%', maxWidth: '15%' }}>Fecha</div>
-                    <div className="text-sm font-semibold text-center flex-shrink-0" style={{ color: colorPalette.oliveGray, width: '10%', minWidth: '10%', maxWidth: '10%' }}>Acciones</div>
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                  <div className="flex gap-2 px-6 py-4 border-b border-slate-200 bg-slate-50" style={{ minWidth: '1200px' }}>
+                    <div className="text-sm font-semibold flex-shrink-0" style={{ color: colorPalette.oliveGray, width: '25%', minWidth: '300px' }}>Idea / Problema</div>
+                    <div className="text-sm font-semibold flex-shrink-0" style={{ color: colorPalette.oliveGray, width: '15%', minWidth: '180px' }}>Campo</div>
+                    <div className="text-sm font-semibold flex-shrink-0" style={{ color: colorPalette.oliveGray, width: '10%', minWidth: '120px' }}>Fecha</div>
+                    <div className="text-sm font-semibold flex-shrink-0" style={{ color: colorPalette.oliveGray, width: '5%', minWidth: '60px' }}>IA</div>
+                    <div className="text-sm font-semibold flex-shrink-0" style={{ color: colorPalette.oliveGray, width: '30%', minWidth: '360px' }}>Propuesta Refinada</div>
+                    <div className="text-sm font-semibold text-center flex-shrink-0" style={{ color: colorPalette.oliveGray, width: '15%', minWidth: '180px' }}>Acciones</div>
                   </div>
                   
                   {filteredIdeas.length > 0 ? (
                     filteredIdeas.map((idea) => (
                       <div key={idea.ID} className="flex gap-2 px-6 py-4 border-b border-slate-200 items-center last:border-b-0 hover:bg-slate-50 transition-colors" style={{ minWidth: '100%' }}>
-                        <div className="flex-shrink-0" style={{ width: '50%', minWidth: '50%', maxWidth: '50%' }}>
+                        <div className="flex-shrink-0" style={{ width: '25%', minWidth: '25%', maxWidth: '25%' }}>
                           <p className="font-medium text-ellipsis overflow-hidden" style={{ color: colorPalette.darkGreen, whiteSpace: 'nowrap' }}>{idea.Problema}</p>
                           <p className="text-sm text-ellipsis overflow-hidden" style={{ color: colorPalette.oliveGray, whiteSpace: 'nowrap' }}>{idea.Innovacion}</p>
                         </div>
-                        <div className="flex-shrink-0" style={{ width: '25%', minWidth: '25%', maxWidth: '25%' }}>
+                        <div className="flex-shrink-0" style={{ width: '15%', minWidth: '15%', maxWidth: '15%' }}>
                           <span className="inline-block px-3 py-1 text-sm font-semibold rounded-full text-ellipsis overflow-hidden" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen, whiteSpace: 'nowrap', maxWidth: '100%' }}>
                             {idea.Campo}
                           </span>
                         </div>
-                        <div className="flex-shrink-0" style={{ width: '15%', minWidth: '15%', maxWidth: '15%' }}>
+                        <div className="flex-shrink-0" style={{ width: '10%', minWidth: '10%', maxWidth: '10%' }}>
                           <span className="text-sm text-ellipsis overflow-hidden" style={{ color: colorPalette.oliveGray, whiteSpace: 'nowrap' }}>
                             {idea.FechaDeCreacion ? (() => {
                               const [year, month, day] = idea.FechaDeCreacion.split('-');
@@ -341,7 +474,53 @@ const colorPalette = {
                             })() : 'Sin fecha'}
                           </span>
                         </div>
-                        <div className="flex justify-center items-center space-x-1 flex-shrink-0" style={{ width: '10%', minWidth: '10%', maxWidth: '10%' }}>
+                        <div className="flex justify-center items-center flex-shrink-0" style={{ width: '5%', minWidth: '5%', maxWidth: '5%' }}>
+                          {idea.ResumenLLM ? (
+                            <div title="Idea refinada por IA" className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                              </svg>
+                            </div>
+                          ) : (
+                            <div title="Idea sin refinar" className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
+                              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-shrink-0" style={{ width: '30%', minWidth: '30%', maxWidth: '30%' }}>
+                          {idea.ResumenLLM ? (
+                            <div className="relative">
+                              <p className="text-sm leading-relaxed" style={{ color: colorPalette.oliveGray }}>
+                                {truncateText(idea.ResumenLLM, 120)}
+                              </p>
+                              {idea.ResumenLLM.length > 120 && (
+                              <button
+                                onClick={() => handleViewIdeaDetails(idea)}
+                                className="text-xs mt-1 font-medium hover:underline"
+                                style={{ color: colorPalette.darkGreen }}
+                              >
+                                Leer más →
+                              </button>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex items-center space-x-2 text-sm" style={{ color: colorPalette.oliveGray }}>
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span className="italic">Sin refinamiento IA</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex justify-center items-center space-x-1 flex-shrink-0" style={{ width: '15%', minWidth: '15%', maxWidth: '15%' }}>
+                          <button onClick={() => handleViewIdeaDetails(idea)} title="Ver Detalles" className="p-1 rounded-full hover:bg-blue-100 transition-colors">
+                            <svg className="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                          </button>
                           <button onClick={() => handleRetakeIdea(idea)} title="Retomar Idea" className="p-1 rounded-full hover:bg-slate-200 transition-colors">
                             <PencilIcon className="h-4 w-4 text-[#505143]" />
                           </button>
@@ -362,6 +541,11 @@ const colorPalette = {
                       </p>
                     </div>
                   )}
+                </div>
+                
+                {/* Indicador de scroll horizontal para pantallas pequeñas */}
+                <div className="lg:hidden text-xs text-center mt-2" style={{ color: colorPalette.oliveGray }}>
+                  📱 Desliza horizontalmente para ver todas las columnas
                 </div>
               </div>
             )}
@@ -485,6 +669,15 @@ const colorPalette = {
             )}
           </div>
         </div>
+        
+        {/* Modal para mostrar detalles de la idea */}
+        {selectedIdea && (
+          <IdeaRefinadaModal
+            idea={selectedIdea}
+            isOpen={showIdeaModal}
+            onClose={() => setShowIdeaModal(false)}
+          />
+        )}
       </main>
     </div>
   );

@@ -4,6 +4,7 @@ import Navbar from "../../../components/NavBar/navbar";
 import { CrearIdeaAsync } from "../../../api/CrearIdea";
 import { CrearIdeaIAAsync } from "../../../api/CrearIdeaIa";
 import { VerEmpresaCompletaAsync } from "../../../api/VerEmpresaCompleta";
+import CrearOpinionIAdeIdeaAsync from "../../../api/CrearOpinionIAdeIdea";
 import Idea from '../../../models/Idea.tsx';
 //import IdeaRespuesta from '../../../models/IdeaRespuesta'
 
@@ -60,6 +61,9 @@ const CreateIdea: React.FC = () => {
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [refinedIdea, setRefinedIdea] = useState<string>("");
+  const [showRefinedIdea, setShowRefinedIdea] = useState(false);
   const navigate = useNavigate();
 
   const [showPreview, setShowPreview] = useState(false);
@@ -73,7 +77,7 @@ const CreateIdea: React.FC = () => {
   // Maneja el input principal con límite
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value.length > MAX_CHARS) {
-      setError(`⚠️ Máximo ${MAX_CHARS} caracteres`);
+      setError(`Máximo ${MAX_CHARS} caracteres`);
       return;
     }
     setInput(e.target.value);
@@ -116,18 +120,51 @@ const CreateIdea: React.FC = () => {
   const handleCancelPreview = () => setShowPreview(false);
   async function handleCreateIdea(IdeaDato:Idea) {
     try {
+      setIsProcessing(true);
       const ideaBackend = await CrearIdeaAsync(IdeaDato);
       console.log(ideaBackend)
 
       if (ideaBackend && ideaBackend.ID) {
         IdeaDato.ID = ideaBackend.ID;
         const ideaRespuesta = await CrearIdeaIAAsync(IdeaDato);
-         const storedUser = sessionStorage.getItem("usuario");
-         if (storedUser) {
+        
+        if (ideaRespuesta && ideaRespuesta.ResumenLLM) {
+          // Guardar la opinión de IA en el backend usando el ID del usuario, no de la idea
+          try {
+            const storedUser = sessionStorage.getItem("usuario");
+            if (storedUser) {
+              const datos = JSON.parse(storedUser);
+              const usuarioId = datos.Usuario?.ID;
+              console.log('Datos del usuario desde sessionStorage:', datos.Usuario);
+              console.log('ID del usuario para guardar opinión IA:', usuarioId);
+              
+              if (usuarioId) {
+                await CrearOpinionIAdeIdeaAsync(usuarioId, ideaRespuesta.ResumenLLM);
+                console.log('Opinión de IA guardada correctamente para usuario:', usuarioId);
+              } else {
+                console.error('No se pudo obtener el ID del usuario del sessionStorage');
+              }
+            }
+          } catch (error) {
+            console.error('Error al guardar opinión de IA:', error);
+            // Continuar aunque falle el guardado de la opinión
+          }
+        }
+        
+        // Actualizar sessionStorage de forma segura (mantener como backup)
+        const storedUser = sessionStorage.getItem("usuario");
+        if (storedUser) {
           const datos = JSON.parse(storedUser);
           const usuario = datos.Usuario;
-          const opiniones = datos.OpinionesIAdeIdea;
-          opiniones.push(ideaRespuesta);;
+          let opiniones = datos.OpinionesIAdeIdea;
+          
+          // Inicializar opiniones si no existe
+          if (!opiniones || !Array.isArray(opiniones)) {
+            opiniones = [];
+          }
+          
+          opiniones.push(ideaRespuesta);
+          
           if (usuario.ID) {
             const resultado = await VerEmpresaCompletaAsync(usuario.ID);
             resultado.OpinionesIAdeIdea = opiniones;
@@ -136,37 +173,69 @@ const CreateIdea: React.FC = () => {
               console.log(resultado);
             }
           }
-        }
-        else {
+        } else {
           console.log('No se encontraron datos de usuario en sessionStorage');
         }
-        console.log(ideaRespuesta)
         
-        return ideaRespuesta
+        console.log(ideaRespuesta);
+        setIsProcessing(false);
+        return ideaRespuesta;
       }
     } catch (error) {
       console.error("Error creating idea:", error);
+      setIsProcessing(false);
+      throw error;
     }
   }
-  const handleConfirmAndSaveIdea = () => {
+  const handleConfirmAndSaveIdea = async () => {
     try {
+      // Obtener el ID del usuario actual desde sessionStorage
+      const storedUser = sessionStorage.getItem("usuario");
+      let usuarioId = null;
+      
+      if (storedUser) {
+        const datos = JSON.parse(storedUser);
+        usuarioId = datos.Usuario?.ID;
+        console.log('Datos completos del usuario:', datos.Usuario);
+        console.log('ID del usuario para crear idea:', usuarioId);
+      }
+      
+      if (!usuarioId) {
+        throw new Error('No se pudo obtener el ID del usuario. Por favor, inicia sesión nuevamente.');
+      }
+      
+      const fechaActual = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+      
       const JSONidea = {
-        Usuario : 20,
+        Usuario : usuarioId,
         Campo : previewData.field,
         Problema : previewData.problem,
         Publico : previewData.audience,
         Innovacion : previewData.uniqueness,
-        FechaDeCreacion : "2000-07-01"
-
+        FechaDeCreacion : fechaActual
       }
+      
+      console.log('Datos de la idea a crear:', JSONidea);
+      
       const IdeaDato = new Idea(JSONidea);
-      handleCreateIdea(IdeaDato);
+      const ideaRefinada = await handleCreateIdea(IdeaDato);
+      
+      if (ideaRefinada && ideaRefinada.ResumenLLM) {
+        setRefinedIdea(ideaRefinada.ResumenLLM);
+        setShowRefinedIdea(true);
+        // Ya no hay timeout automático, solo avanza cuando el usuario hace clic en "Continuar"
+      } else {
+        // Si no hay idea refinada, completar inmediatamente
+        setIsCompleted(true);
+      }
+      
       setAnswers([previewData.field, previewData.problem, previewData.audience, previewData.uniqueness]);
-      setIsCompleted(true);
       setShowPreview(false);
+      
     } catch (error) {
-      console.error("Error al guardar la idea en localStorage:", error);
-      alert("Hubo un error al guardar tu idea.");
+      console.error("Error al guardar la idea:", error);
+      alert("Hubo un error al procesar tu idea. Por favor, inténtalo de nuevo.");
+      setIsProcessing(false);
     }
   };
 
@@ -175,6 +244,10 @@ const CreateIdea: React.FC = () => {
     setAnswers([]);
     setInput("");
     setIsCompleted(false);
+    setIsProcessing(false);
+    setRefinedIdea("");
+    setShowRefinedIdea(false);
+    setShowPreview(false);
   };
 
   const handleNavigateToFondos = () => {
@@ -215,9 +288,51 @@ const CreateIdea: React.FC = () => {
                     </div>
                   </div>
                 ))}
-                {step < questions.length && (
+                
+                {/* Mostrar pregunta actual */}
+                {step < questions.length && !showPreview && !isProcessing && !showRefinedIdea && (
                   <div className="p-3 rounded-lg w-fit max-w-[80%]" style={{ backgroundColor: colorPalette.bubbleBot, color: colorPalette.textPrimary }}>
                     {questions[step]}
+                  </div>
+                )}
+                
+                {/* Mostrar mensaje de procesamiento */}
+                {isProcessing && (
+                  <div className="p-3 rounded-lg w-fit max-w-[80%]" style={{ backgroundColor: colorPalette.bubbleBot, color: colorPalette.textPrimary }}>
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-blue-600 rounded-full"></div>
+                      <span>Estoy refinando tu idea con IA... Esto puede tomar unos momentos ⚡</span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Mostrar idea refinada */}
+                {showRefinedIdea && refinedIdea && (
+                  <div className="space-y-2">
+                    <div className="p-3 rounded-lg w-fit max-w-[80%]" style={{ backgroundColor: colorPalette.bubbleBot, color: colorPalette.textPrimary }}>
+                      ¡Excelente! He refinado tu idea. Aquí tienes una versión mejorada: 🚀
+                    </div>
+                    <div className="p-4 rounded-lg border-l-4 max-w-[90%]" style={{ 
+                      backgroundColor: '#f0f9ff', 
+                      borderLeftColor: colorPalette.primary,
+                      color: colorPalette.textPrimary 
+                    }}>
+                      <div className="font-semibold mb-2" style={{ color: colorPalette.primary }}>
+                        💡 Idea Refinada por IA:
+                      </div>
+                      <div className="whitespace-pre-wrap leading-relaxed mb-4">
+                        {refinedIdea}
+                      </div>
+                      <div className="flex justify-end">
+                        <button
+                          onClick={() => setIsCompleted(true)}
+                          className="px-4 py-2 text-sm font-semibold text-white rounded-lg hover:scale-105 transition-transform"
+                          style={{ backgroundColor: colorPalette.primary }}
+                        >
+                          Continuar ✓
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -235,15 +350,15 @@ const CreateIdea: React.FC = () => {
                       error ? "border-red-500" : "border-gray-300"
                     }`}
                     style={{ "--tw-ring-color": colorPalette.primary } as React.CSSProperties}
-                    disabled={showPreview}
+                    disabled={showPreview || isProcessing}
                   />
                   <button
                     onClick={handleSend}
-                    className="text-white px-5 py-2 rounded-r-md transition-colors duration-300"
+                    className="text-white px-5 py-2 rounded-r-md transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ backgroundColor: colorPalette.secondary }}
-                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = colorPalette.primary)}
-                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = colorPalette.secondary)}
-                    disabled={showPreview}
+                    onMouseOver={(e) => !isProcessing && !showPreview && (e.currentTarget.style.backgroundColor = colorPalette.primary)}
+                    onMouseOut={(e) => !isProcessing && !showPreview && (e.currentTarget.style.backgroundColor = colorPalette.secondary)}
+                    disabled={showPreview || isProcessing}
                   >
                     Enviar
                   </button>
@@ -340,17 +455,26 @@ const CreateIdea: React.FC = () => {
             <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3">
               <button
                 onClick={handleCancelPreview}
-                className="px-6 py-2 font-semibold border rounded-lg transition-colors"
+                className="px-6 py-2 font-semibold border rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ color: colorPalette.textSecondary, borderColor: '#cbd5e1' }}
+                disabled={isProcessing}
               >
                 Cancelar
               </button>
               <button
                 onClick={handleConfirmAndSaveIdea}
-                className="px-6 py-2 font-semibold text-white rounded-lg hover:scale-105 transition-transform"
+                className="px-6 py-2 font-semibold text-white rounded-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 style={{ backgroundColor: colorPalette.primary }}
+                disabled={isProcessing}
               >
-                Confirmar y Guardar
+                {isProcessing ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                    <span>Procesando...</span>
+                  </div>
+                ) : (
+                  "Confirmar y Guardar"
+                )}
               </button>
             </div>
           </div>

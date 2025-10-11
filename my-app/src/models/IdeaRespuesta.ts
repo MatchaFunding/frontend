@@ -6,7 +6,7 @@ class IdeaRespuesta {
     constructor(json: any) {
         this.ID = json.ID;
         this.Usuario = json.Usuario;
-        this.ResumenLLM = json.Campo;
+        this.ResumenLLM = json.ResumenLLM;
         
     }
 }

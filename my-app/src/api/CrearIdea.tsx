@@ -1,9 +1,6 @@
 import Idea from '../models/Idea.tsx'
 import { useEffect, useState } from 'react';
 
-
-
-
 export async function CrearIdeaAsync(data: Idea) {
   try {
     const response = await fetch(`https://backend.matchafunding.com/crearidea/`, {

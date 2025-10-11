@@ -5,7 +5,9 @@ class Idea {
     Problema: string;
     Publico: string;
     Innovacion: string;
-    FechaDeCreacion: string;
+    Oculta: boolean;
+    FechaDeCreacion: string | null;
+    Propuesta: string | null;
     constructor(json: any) {
         this.ID = json.ID;
         this.Usuario = json.Usuario;
@@ -13,7 +15,9 @@ class Idea {
         this.Problema = json.Problema;
         this.Publico = json.Publico;
         this.Innovacion = json.Innovacion;
-        this.FechaDeCreacion = json.FechaDeCreacion;
+        this.Oculta = json.Oculta || false;
+        this.FechaDeCreacion = json.FechaDeCreacion || null;
+        this.Propuesta = json.Propuesta || null;
     }
 }
 export default Idea;

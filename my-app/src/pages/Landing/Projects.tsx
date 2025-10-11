@@ -8,13 +8,9 @@ import type { FiltersIdeaValues } from '../../components/filters-ideas/filters-i
 import Idea from "../../models/Idea";
 import Postulacion from "../../models/Postulacion"; 
 import IdeaRefinadaModal from '../../components/IdeaRefinadaModal/IdeaRefinadaModal';
-import VerPropuestasDeEmpresaAsync from '../../api/VerPropuestasDeEmpresa';
+import { VerIdeasDeUsuarioAsync } from '../../api/VerIdeasDeUsuario';
 
-// Definir el tipo aquí ya que el archivo VerIdeasConRefinamiento no se usa
-export interface IdeaConRefinamiento extends Idea {
-  ResumenLLM?: string;
-  FechaRefinamiento?: string;
-} 
+// Ya no necesitamos un tipo separado, usaremos Idea directamente 
 
 interface PostulacionData {
   name: string;
@@ -55,11 +51,11 @@ const CustomTooltip = ({ active, payload }: any) => { if (active && payload && p
 
 
 const MisPostulaciones: React.FC = () => {
-  const [ideas, setIdeas] = useState<IdeaConRefinamiento[]>([]);
-  const [filteredIdeas, setFilteredIdeas] = useState<IdeaConRefinamiento[]>([]);
+  const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [filteredIdeas, setFilteredIdeas] = useState<Idea[]>([]);
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [activeSection, setActiveSection] = useState('ideas');
-  const [selectedIdea, setSelectedIdea] = useState<IdeaConRefinamiento | null>(null);
+  const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null);
   const [showIdeaModal, setShowIdeaModal] = useState(false);
   const navigate = useNavigate();
 
@@ -81,48 +77,33 @@ const MisPostulaciones: React.FC = () => {
     return text.substring(0, maxLength).trim() + '...';
   };
   
-  // Función para recargar ideas (útil cuando se vuelve de crear una nueva idea)
+  // Función para recargar ideas desde el backend
   const reloadIdeas = async () => {
     const storedUser = sessionStorage.getItem("usuario");
     if (storedUser) {
       const datos = JSON.parse(storedUser);
       const usuarioId = datos.Usuario?.ID;
       
-      console.log('Recargando ideas para usuario:', usuarioId);
-      
-      // Mapear las ideas existentes al nuevo formato
-      const ideasConRefinamiento: IdeaConRefinamiento[] = (datos.Ideas || []).map((idea: Idea) => ({
-        ...idea,
-        ResumenLLM: undefined,
-      }));
-      
-      // Cargar propuestas desde el backend usando ID del usuario
       if (usuarioId) {
         try {
-          const propuestas = await VerPropuestasDeEmpresaAsync(usuarioId);
-          console.log('Propuestas recargadas para usuario:', usuarioId, propuestas);
-          // Usar la misma heurística de ordenamiento
-          const ideasOrdenadas = [...ideasConRefinamiento].sort((a, b) => b.ID - a.ID);
-          const propuestasOrdenadas = [...propuestas].sort((a, b) => b.ID - a.ID);
-          
-          propuestasOrdenadas.forEach((propuesta, index) => {
-            if (index < ideasOrdenadas.length) {
-              const ideaIndex = ideasConRefinamiento.findIndex(idea => idea.ID === ideasOrdenadas[index].ID);
-              if (ideaIndex !== -1) {
-                ideasConRefinamiento[ideaIndex].ResumenLLM = propuesta.ResumenLLM;
-                console.log(`Reasignada propuesta ${propuesta.ID} a idea ${ideasOrdenadas[index].ID}`);
-              }
-            }
-          });
+          console.log('Recargando ideas desde backend para usuario:', usuarioId);
+          const ideas = await VerIdeasDeUsuarioAsync(usuarioId);
+          setIdeas(ideas);
+          setFilteredIdeas(ideas);
+          console.log('Ideas cargadas desde backend:', ideas);
         } catch (error) {
-          console.error('Error al recargar propuestas:', error);
+          console.error('Error al cargar ideas desde backend:', error);
+          // Fallback: usar sessionStorage
+          const ideas: Idea[] = (datos.Ideas || []).map((idea: any) => new Idea(idea));
+          setIdeas(ideas);
+          setFilteredIdeas(ideas);
+          console.log('Usando ideas del sessionStorage como fallback');
         }
       } else {
         console.warn('No se pudo obtener usuarioId para recargar');
+        setIdeas([]);
+        setFilteredIdeas([]);
       }
-      
-      setIdeas(ideasConRefinamiento);
-      setFilteredIdeas(ideasConRefinamiento);
     } else {
       console.warn('No se encontraron datos de usuario para recargar');
       setIdeas([]);
@@ -177,76 +158,32 @@ const MisPostulaciones: React.FC = () => {
 };
   
   useEffect(() => {
-    const loadIdeasWithRefinement = async () => {
+    const loadIdeasFromBackend = async () => {
       const storedUser = sessionStorage.getItem("usuario");
       if (storedUser) {
         const datos = JSON.parse(storedUser);
         const usuarioId = datos.Usuario?.ID;
         
-        console.log('Cargando ideas para usuario:', usuarioId);
-        console.log('Datos del usuario:', datos.Usuario);
-        
-        // Mapear las ideas existentes al nuevo formato
-        const ideasConRefinamiento: IdeaConRefinamiento[] = (datos.Ideas || []).map((idea: Idea) => ({
-          ...idea,
-          ResumenLLM: undefined, // Se cargará desde el backend
-        }));
-        
-        // Cargar propuestas del usuario desde el backend
         if (usuarioId) {
           try {
-            const propuestas = await VerPropuestasDeEmpresaAsync(usuarioId);
-            console.log('Propuestas cargadas para usuario:', usuarioId, propuestas);
-            
-            // Como no hay relación directa por ID, usamos una heurística:
-            // Asignar propuestas a ideas basándose en el orden (las más recientes primero)
-            const ideasOrdenadas = [...ideasConRefinamiento].sort((a, b) => {
-              // Ordenar por ID descendente (más recientes primero)
-              return b.ID - a.ID;
-            });
-            
-            const propuestasOrdenadas = [...propuestas].sort((a, b) => {
-              // Ordenar por ID descendente (más recientes primero) 
-              return b.ID - a.ID;
-            });
-            
-            // Asignar propuestas a ideas en el mismo orden
-            propuestasOrdenadas.forEach((propuesta, index) => {
-              if (index < ideasOrdenadas.length) {
-                const ideaIndex = ideasConRefinamiento.findIndex(idea => idea.ID === ideasOrdenadas[index].ID);
-                if (ideaIndex !== -1) {
-                  ideasConRefinamiento[ideaIndex].ResumenLLM = propuesta.ResumenLLM;
-                  console.log(`Asignada propuesta ${propuesta.ID} a idea ${ideasOrdenadas[index].ID}`);
-                }
-              }
-            });
+            console.log('Cargando ideas desde backend para usuario:', usuarioId);
+            const ideas = await VerIdeasDeUsuarioAsync(usuarioId);
+            setIdeas(ideas);
+            setFilteredIdeas(ideas);
+            console.log('Ideas cargadas exitosamente desde backend:', ideas.length, 'ideas');
           } catch (error) {
-            console.error('Error al cargar propuestas:', error);
-            // Fallback: usar OpinionesIAdeIdea del sessionStorage
-            if (datos.OpinionesIAdeIdea && Array.isArray(datos.OpinionesIAdeIdea)) {
-              datos.OpinionesIAdeIdea.forEach((opinion: any) => {
-                const ideaIndex = ideasConRefinamiento.findIndex(idea => idea.ID === opinion.ID);
-                if (ideaIndex !== -1) {
-                  ideasConRefinamiento[ideaIndex].ResumenLLM = opinion.ResumenLLM;
-                }
-              });
-            }
+            console.error('Error al cargar ideas desde backend:', error);
+            // Fallback: usar sessionStorage
+            const ideas: Idea[] = (datos.Ideas || []).map((idea: any) => new Idea(idea));
+            setIdeas(ideas);
+            setFilteredIdeas(ideas);
+            console.log('Usando ideas del sessionStorage como fallback:', ideas.length, 'ideas');
           }
         } else {
           console.warn('No se pudo obtener usuarioId del sessionStorage');
-          // Fallback: usar OpinionesIAdeIdea del sessionStorage si no hay usuarioId
-          if (datos.OpinionesIAdeIdea && Array.isArray(datos.OpinionesIAdeIdea)) {
-            datos.OpinionesIAdeIdea.forEach((opinion: any) => {
-              const ideaIndex = ideasConRefinamiento.findIndex(idea => idea.ID === opinion.ID);
-              if (ideaIndex !== -1) {
-                ideasConRefinamiento[ideaIndex].ResumenLLM = opinion.ResumenLLM;
-              }
-            });
-          }
+          setIdeas([]);
+          setFilteredIdeas([]);
         }
-        
-        setIdeas(ideasConRefinamiento);
-        setFilteredIdeas(ideasConRefinamiento);
       } else {
         console.warn('No se encontraron datos de usuario en sessionStorage');
         setIdeas([]);
@@ -254,7 +191,7 @@ const MisPostulaciones: React.FC = () => {
       }
     };
 
-    loadIdeasWithRefinement();
+    loadIdeasFromBackend();
   }, []);
 
   useEffect(() => {
@@ -387,8 +324,8 @@ const colorPalette = {
   
   const handleFiltersIdeaChange = (newFilters: FiltersIdeaValues) => { setFiltersIdea(newFilters); };
   const handleDeleteIdea = (idToDelete: number) => { if (window.confirm("¿Seguro que quieres eliminar esta idea?")) { const updated = ideas.filter(i => i.ID !== idToDelete); setIdeas(updated); } };
-  const handleRetakeIdea = (idea: IdeaConRefinamiento) => { alert(`Retomando la idea: "${idea.Campo}".`); };
-  const handleViewIdeaDetails = (idea: IdeaConRefinamiento) => {
+  const handleRetakeIdea = (idea: Idea) => { alert(`Retomando la idea: "${idea.Campo}".`); };
+  const handleViewIdeaDetails = (idea: Idea) => {
     setSelectedIdea(idea);
     setShowIdeaModal(true);
   };
@@ -475,7 +412,7 @@ const colorPalette = {
                           </span>
                         </div>
                         <div className="flex justify-center items-center flex-shrink-0" style={{ width: '5%', minWidth: '5%', maxWidth: '5%' }}>
-                          {idea.ResumenLLM ? (
+                          {idea.Propuesta ? (
                             <div title="Idea refinada por IA" className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
                               <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -490,12 +427,12 @@ const colorPalette = {
                           )}
                         </div>
                         <div className="flex-shrink-0" style={{ width: '30%', minWidth: '30%', maxWidth: '30%' }}>
-                          {idea.ResumenLLM ? (
+                          {idea.Propuesta ? (
                             <div className="relative">
                               <p className="text-sm leading-relaxed" style={{ color: colorPalette.oliveGray }}>
-                                {truncateText(idea.ResumenLLM, 120)}
+                                {truncateText(idea.Propuesta, 120)}
                               </p>
-                              {idea.ResumenLLM.length > 120 && (
+                              {idea.Propuesta.length > 120 && (
                               <button
                                 onClick={() => handleViewIdeaDetails(idea)}
                                 className="text-xs mt-1 font-medium hover:underline"

@@ -3,10 +3,9 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/NavBar/navbar";
 import { CrearIdeaAsync } from "../../../api/CrearIdea";
 import { CrearIdeaIAAsync } from "../../../api/CrearIdeaIa";
+import { CambiarIdeaAsync } from "../../../api/CambiarIdea";
 import { VerEmpresaCompletaAsync } from "../../../api/VerEmpresaCompleta";
-import CrearOpinionIAdeIdeaAsync from "../../../api/CrearOpinionIAdeIdea";
 import Idea from '../../../models/Idea.tsx';
-//import IdeaRespuesta from '../../../models/IdeaRespuesta'
 
 
 const colorPalette = {
@@ -121,60 +120,74 @@ const CreateIdea: React.FC = () => {
   async function handleCreateIdea(IdeaDato:Idea) {
     try {
       setIsProcessing(true);
+      console.log('Creando idea con datos:', IdeaDato);
       const ideaBackend = await CrearIdeaAsync(IdeaDato);
-      console.log(ideaBackend)
+      console.log('Idea creada en backend:', ideaBackend);
 
       if (ideaBackend && ideaBackend.ID) {
         IdeaDato.ID = ideaBackend.ID;
+        
+        // Obtener el refinamiento de IA
+        console.log('Solicitando refinamiento de IA para idea:', IdeaDato);
         const ideaRespuesta = await CrearIdeaIAAsync(IdeaDato);
+        console.log('Respuesta de IA recibida:', ideaRespuesta);
         
         if (ideaRespuesta && ideaRespuesta.ResumenLLM) {
-          // Guardar la opinión de IA en el backend usando el ID del usuario, no de la idea
           try {
+            // Obtener el usuario actual para crear el objeto Idea completo
             const storedUser = sessionStorage.getItem("usuario");
             if (storedUser) {
               const datos = JSON.parse(storedUser);
               const usuarioId = datos.Usuario?.ID;
-              console.log('Datos del usuario desde sessionStorage:', datos.Usuario);
-              console.log('ID del usuario para guardar opinión IA:', usuarioId);
               
-              if (usuarioId) {
-                await CrearOpinionIAdeIdeaAsync(usuarioId, ideaRespuesta.ResumenLLM);
-                console.log('Opinión de IA guardada correctamente para usuario:', usuarioId);
+              // Crear una idea completa con todos los campos necesarios
+              const ideaCompleta = new Idea({
+                ID: ideaBackend.ID,
+                Usuario: usuarioId,
+                Campo: ideaBackend.Campo,
+                Problema: ideaBackend.Problema,
+                Publico: ideaBackend.Publico,
+                Innovacion: ideaBackend.Innovacion,
+                Oculta: ideaBackend.Oculta || false,
+                FechaDeCreacion: ideaBackend.FechaDeCreacion,
+                Propuesta: ideaRespuesta.ResumenLLM
+              });
+              
+              console.log('Datos de la idea que se enviará al backend:');
+              console.log('- ID:', ideaCompleta.ID);
+              console.log('- Usuario:', ideaCompleta.Usuario);
+              console.log('- Campo:', ideaCompleta.Campo);
+              console.log('- Problema:', ideaCompleta.Problema);
+              console.log('- Publico:', ideaCompleta.Publico);
+              console.log('- Innovacion:', ideaCompleta.Innovacion);
+              console.log('- Oculta:', ideaCompleta.Oculta);
+              console.log('- FechaDeCreacion:', ideaCompleta.FechaDeCreacion);
+              console.log('- Propuesta:', ideaCompleta.Propuesta?.substring(0, 100) + '...');
+              
+              console.log('Actualizando idea completa con propuesta IA:', ideaCompleta);
+              const resultadoActualizacion = await CambiarIdeaAsync(ideaBackend.ID, ideaCompleta);
+              console.log('Resultado de actualización:', resultadoActualizacion);
+              
+              if (resultadoActualizacion) {
+                console.log('Propuesta IA guardada correctamente en la idea:', ideaBackend.ID);
+                
+                // Actualizar el sessionStorage
+                const resultado = await VerEmpresaCompletaAsync(usuarioId);
+                if (resultado) {
+                  sessionStorage.setItem('usuario', JSON.stringify(resultado));
+                  console.log('SessionStorage actualizado con nueva idea');
+                }
               } else {
-                console.error('No se pudo obtener el ID del usuario del sessionStorage');
+                console.error('No se recibió respuesta de la actualización de propuesta');
               }
             }
+            
           } catch (error) {
-            console.error('Error al guardar opinión de IA:', error);
-            // Continuar aunque falle el guardado de la opinión
-          }
-        }
-        
-        // Actualizar sessionStorage de forma segura (mantener como backup)
-        const storedUser = sessionStorage.getItem("usuario");
-        if (storedUser) {
-          const datos = JSON.parse(storedUser);
-          const usuario = datos.Usuario;
-          let opiniones = datos.OpinionesIAdeIdea;
-          
-          // Inicializar opiniones si no existe
-          if (!opiniones || !Array.isArray(opiniones)) {
-            opiniones = [];
-          }
-          
-          opiniones.push(ideaRespuesta);
-          
-          if (usuario.ID) {
-            const resultado = await VerEmpresaCompletaAsync(usuario.ID);
-            resultado.OpinionesIAdeIdea = opiniones;
-            if (resultado) {
-              sessionStorage.setItem('usuario', JSON.stringify(resultado));
-              console.log(resultado);
-            }
+            console.error('Error al guardar la propuesta IA:', error);
+            // Continuar aunque falle el guardado de la propuesta
           }
         } else {
-          console.log('No se encontraron datos de usuario en sessionStorage');
+          console.log('No se recibió refinamiento de IA o ResumenLLM está vacío');
         }
         
         console.log(ideaRespuesta);
@@ -212,7 +225,9 @@ const CreateIdea: React.FC = () => {
         Problema : previewData.problem,
         Publico : previewData.audience,
         Innovacion : previewData.uniqueness,
-        FechaDeCreacion : fechaActual
+        Oculta : false,
+        FechaDeCreacion : fechaActual,
+        Propuesta : null // Se llenará después con la IA
       }
       
       console.log('Datos de la idea a crear:', JSONidea);

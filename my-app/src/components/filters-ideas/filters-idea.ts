@@ -101,7 +101,9 @@ export interface IdeaItem {
   Problema: string;
   Publico: string;
   Innovacion: string;
-  FechaDeCreacion: string;
+  Oculta: boolean;
+  FechaDeCreacion: string | null;
+  Propuesta: string | null;
 }
 
 // Función principal de ordenamiento

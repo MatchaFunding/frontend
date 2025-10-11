@@ -1,14 +1,8 @@
 import React from 'react';
 import Idea from '../../models/Idea';
 
-// Definir el tipo aquí
-interface IdeaConRefinamiento extends Idea {
-  ResumenLLM?: string;
-  FechaRefinamiento?: string;
-}
-
 interface IdeaRefinadaModalProps {
-  idea: IdeaConRefinamiento;
+  idea: Idea;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -82,25 +76,20 @@ const IdeaRefinadaModal: React.FC<IdeaRefinadaModalProps> = ({ idea, isOpen, onC
           </div>
 
           {/* Idea Refinada */}
-          {idea.ResumenLLM && (
+          {idea.Propuesta && (
             <div className="bg-blue-50 rounded-lg p-4 border-l-4" style={{ borderLeftColor: colorPalette.primary }}>
               <h3 className="text-lg font-semibold mb-3" style={{ color: colorPalette.primary }}>
                 🚀 Idea Refinada por IA
               </h3>
               <div className="bg-white rounded-lg p-4 shadow-sm">
                 <p className="whitespace-pre-wrap leading-relaxed text-gray-800">
-                  {idea.ResumenLLM}
+                  {idea.Propuesta}
                 </p>
               </div>
-              {idea.FechaRefinamiento && (
-                <p className="text-sm mt-2" style={{ color: colorPalette.oliveGray }}>
-                  Refinada el: {new Date(idea.FechaRefinamiento).toLocaleDateString()}
-                </p>
-              )}
             </div>
           )}
 
-          {!idea.ResumenLLM && (
+          {!idea.Propuesta && (
             <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
               <div className="flex items-center space-x-2">
                 <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,14 +115,20 @@ const IdeaRefinadaModal: React.FC<IdeaRefinadaModalProps> = ({ idea, isOpen, onC
                 <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>
                   Fecha de Creación
                 </label>
-                <p className="text-sm">{new Date(idea.FechaDeCreacion).toLocaleDateString()}</p>
+                <p className="text-sm">
+                  {idea.FechaDeCreacion ? (() => {
+                    const [year, month, day] = idea.FechaDeCreacion.split('-');
+                    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                    return date.toLocaleDateString();
+                  })() : 'Sin fecha'}
+                </p>
               </div>
-              <div>
+{/*               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>
                   ID de la Idea
                 </label>
                 <p className="text-sm font-mono">#{idea.ID}</p>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

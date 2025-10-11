@@ -15,6 +15,9 @@ export async function CrearIdeaAsync(data: Idea) {
         'Problema':data.Problema,
         'Publico':data.Publico,
         'Innovacion':data.Innovacion,
+        'Oculta':data.Oculta,
+        'FechaDeCreacion':data.FechaDeCreacion,
+        'Propuesta':data.Propuesta,
       }),
     });
     if (!response.ok) {

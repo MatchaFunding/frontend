@@ -3,6 +3,7 @@ import NavBar from '../../../components/NavBar/navbar';
 import { useNavigate } from 'react-router-dom';
 import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
 import LoopAnimation from '../../../components/Shared/animationFrame';
+import { getMatchFondosAsync, processIdeaAsync, checkCollectionsHealth, type ProcessIdeaRequest } from '../../../api/MatchFondos';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -20,45 +21,17 @@ interface Fondo {
   presupuesto: string;
   categoria: string;
   imagenUrl: string;
+  agency?: string;
 }
 
-interface Idea {
+interface IdeaLocal {
   id: number;
   field: string;
   problem: string;
   audience: string;
   uniqueness: string;
+  propuesta?: string;
 }
-
-
-const mockFondosData: Omit<Fondo, 'compatibilidad'>[] = [
-    { id: 1, nombre: 'Fondo de Innovación Educativa', descripcion: 'Financia proyectos que mejoren el aprendizaje con tecnología y metodologías innovadoras.', presupuesto: '$150.000.000 CLP', categoria: 'Educación', imagenUrl: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=60' },
-    { id: 2, nombre: 'Fondo de Desarrollo Sostenible', descripcion: 'Apoyo a iniciativas que promuevan la ecología y el uso de energías limpias en la comunidad.', presupuesto: '$200.000.000 CLP', categoria: 'Sostenibilidad', imagenUrl: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=800&q=60' },
-    { id: 3, nombre: 'Fondo de Emprendimiento Digital', descripcion: 'Impulso para startups tecnológicas con alto potencial de crecimiento y escalabilidad.', presupuesto: '$120.000.000 CLP', categoria: 'Tecnología', imagenUrl: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&w=800&q=60' },
-    { id: 5, nombre: 'Fondo de Innovación en Salud', descripcion: 'Proyectos que utilizan la tecnología para mejorar el acceso y la calidad de la atención médica.', presupuesto: '$250.000.000 CLP', categoria: 'Salud', imagenUrl: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=800&q=60' },
-    { id: 6, nombre: 'Fondo de Inclusión Social', descripcion: 'Apoyo a iniciativas que promuevan la igualdad de oportunidades para grupos vulnerables.', presupuesto: '$110.000.000 CLP', categoria: 'Social', imagenUrl: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=800&q=60' },
-];
-
-const calculateCompatibility = (idea: Idea, fondo: Omit<Fondo, 'compatibilidad'>): number => {
-  let score = 50; 
-  const ideaField = idea.field.toLowerCase();
-  const fondoCategoria = fondo.categoria.toLowerCase();
-
-
-  if (ideaField.includes(fondoCategoria) || fondoCategoria.includes(ideaField)) {
-    score += 40;
-  }
-  
-  if (idea.problem.toLowerCase().includes('tecnología') && fondo.nombre.toLowerCase().includes('digital')) {
-      score += 15;
-  }
-  if (idea.audience.toLowerCase().includes('vulnerable') && fondo.nombre.toLowerCase().includes('social')) {
-      score += 20;
-  }
-
-  return Math.min(Math.max(score, 50), 99); 
-};
-
 
 const SearchIcon: React.FC = () => ( <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={colorPalette.oliveGray} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg> );
 const GraduationCapIcon: React.FC = () => ( <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={colorPalette.darkGreen} className="w-6 h-6"><path d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0l-.07.002z" /></svg> );
@@ -104,7 +77,10 @@ const FondoCard: React.FC<{ fondo: Fondo }> = ({ fondo }) => {
 
 
 const FondosIdea: React.FC = () => {
-  const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null);
+  const [selectedIdea, setSelectedIdea] = useState<IdeaLocal | null>(null);
+  const [matchedFondos, setMatchedFondos] = useState<Fondo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoriaFilter, setCategoriaFilter] = useState('Todas');
   const [sortBy, setSortBy] = useState<'compatibilidad' | 'alfabetico' | 'presupuesto'>('compatibilidad');
@@ -117,29 +93,178 @@ const FondosIdea: React.FC = () => {
     }, []);
 
   useEffect(() => {
-
-    const ideaData = localStorage.getItem('selectedIdea');
-    if (ideaData) {
-      setSelectedIdea(JSON.parse(ideaData));
-    } else {
-      const allIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
-      if (allIdeas.length > 0) {
-        setSelectedIdea(allIdeas[allIdeas.length - 1]); 
+    const loadIdeaAndMatch = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Cargar la idea seleccionada con manejo seguro
+        let ideaData: IdeaLocal | null = null;
+        
+        try {
+          const selectedIdeaData = localStorage.getItem('selectedIdea');
+          console.log('Raw selectedIdea data:', selectedIdeaData);
+          
+          if (selectedIdeaData && selectedIdeaData !== 'undefined' && selectedIdeaData.trim() !== '') {
+            const parsed = JSON.parse(selectedIdeaData);
+            // Validar que sea un objeto válido y normalizarlo
+            if (parsed && typeof parsed === 'object') {
+              ideaData = {
+                id: parsed.ID || parsed.id,
+                field: parsed.Campo || parsed.field,
+                problem: parsed.Problema || parsed.problem,
+                audience: parsed.Publico || parsed.audience,
+                uniqueness: parsed.Innovacion || parsed.uniqueness,
+                propuesta: parsed.Propuesta || parsed.propuesta
+              };
+            }
+          }
+        } catch (parseError) {
+          console.error('Error parsing selectedIdea from localStorage:', parseError);
+        }
+        
+        // Fallback: usar la última idea del localStorage
+        if (!ideaData) {
+          try {
+            const allIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
+            if (allIdeas.length > 0) {
+              const lastIdea = allIdeas[allIdeas.length - 1];
+              ideaData = {
+                id: lastIdea.ID || lastIdea.id,
+                field: lastIdea.Campo || lastIdea.field,
+                problem: lastIdea.Problema || lastIdea.problem,
+                audience: lastIdea.Publico || lastIdea.audience,
+                uniqueness: lastIdea.Innovacion || lastIdea.uniqueness,
+                propuesta: lastIdea.Propuesta || lastIdea.propuesta
+              };
+            }
+          } catch (fallbackError) {
+            console.error('Error parsing userIdeas from localStorage:', fallbackError);
+          }
+        }
+        
+        if (!ideaData) {
+          setError('No se pudo cargar la idea seleccionada');
+          setLoading(false);
+          return;
+        }
+        
+        setSelectedIdea(ideaData);
+        
+        console.log('Iniciando match para idea ID:', ideaData.id);
+        
+        // Hacer match con la API de IA
+        if (ideaData.id) {
+          try {
+            console.log('Haciendo match para idea ID:', ideaData.id);
+            
+            // Primero procesar la idea en la API de IA para guardarla en Qdrant
+            console.log('Procesando idea...');
+            
+            // Obtener el ID del usuario desde sessionStorage
+            let usuarioId = 1; // fallback
+            try {
+              const storedUser = sessionStorage.getItem("usuario");
+              if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                usuarioId = userData.Usuario?.ID || 1;
+              }
+            } catch (userError) {
+              console.error('Error al obtener usuario:', userError);
+            }
+            
+            const processRequest: ProcessIdeaRequest = {
+              ID: ideaData.id,
+              Usuario: usuarioId,
+              Campo: ideaData.field,
+              Problema: ideaData.problem,
+              Publico: ideaData.audience,
+              Innovacion: ideaData.uniqueness
+            };
+            
+            try {
+              await processIdeaAsync(processRequest);
+              console.log('Idea procesada exitosamente');
+            } catch (processError) {
+              console.error('Error al procesar idea:', processError);
+            console.log('Continuando con match aunque falló el procesamiento (puede que ya esté procesada)');
+              // Continuar con el match aunque falle el procesamiento
+              // En caso de que la idea ya esté procesada
+            }
+            
+            // Ahora hacer el match
+            const matches = await getMatchFondosAsync({
+              idea_id: ideaData.id,
+              top_k: 10,
+              estado: "abierto"
+            });
+            
+            console.log('Matches recibidos:', matches);
+            
+            if (!matches || matches.length === 0) {
+              console.log('No se recibieron matches de la API');
+              console.warn('API de IA: Puede que las colecciones de fondos no estén cargadas.');
+              
+              // Verificar estado de colecciones
+              try {
+                const healthStatus = await checkCollectionsHealth();
+                console.log('Estado de colecciones verificado:', healthStatus);
+                if (healthStatus.collections.funds === 0) {
+                  console.log('Para cargar fondos: Ejecutar await subir_instrumentos_del_backend(provider) en la API de IA');
+                }
+              } catch (healthError) {
+                console.error('No se pudo verificar estado de colecciones:', healthError);
+              }
+              
+              setError('No se encontraron fondos compatibles');
+              setLoading(false);
+              return;
+            }
+            
+            // Convertir MatchResult a Fondo (usando datos reales de la API)
+            const fondosFromMatch: Fondo[] = matches.map((match, index) => ({
+              id: match.call_id,
+              nombre: match.name,
+              descripcion: match.explanations.length > 0 
+                ? `${match.explanations.join(', ')}. Compatibilidad: ${(match.affinity * 100).toFixed(1)}%`
+                : `Compatibilidad: ${(match.affinity * 100).toFixed(1)}% (Semántico: ${(match.semantic_score * 100).toFixed(1)}%, Temático: ${(match.topic_score * 100).toFixed(1)}%)`,
+              compatibilidad: Math.round(match.affinity * 100),
+              presupuesto: 'Consultar detalles en la institución',
+              categoria: match.agency || 'Sin categoría',
+              imagenUrl: `https://images.unsplash.com/photo-${1542744173000 + index}?auto=format&fit=crop&w=800&q=60`,
+              agency: match.agency
+            }));
+            
+            console.log('Fondos convertidos exitosamente:', fondosFromMatch.length, 'fondos');
+            setMatchedFondos(fondosFromMatch);
+          } catch (matchError) {
+            console.error('Error al hacer match con la API:', matchError);
+            setError(`Error al conectar con la API de matching: ${matchError}`);
+          }
+        }
+        
+      } catch (generalError) {
+        console.error('Error general al cargar idea y match:', generalError);
+        setError(`Error general: ${generalError}`);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    loadIdeaAndMatch();
   }, []);
 
-  const categorias = useMemo(() => ['Todas', ...new Set(mockFondosData.map(f => f.categoria))], []);
+  const categorias = useMemo(() => {
+    const allCategorias = matchedFondos.map(f => f.categoria).filter(Boolean);
+    return ['Todas', ...new Set(allCategorias)];
+  }, [matchedFondos]);
 
   const matchedAndFilteredFondos = useMemo(() => {
-    if (!selectedIdea) return [];
-    
+    if (!selectedIdea || matchedFondos.length === 0) {
+      return [];
+    }
 
-    let fondosConMatch: Fondo[] = mockFondosData.map(fondo => ({
-      ...fondo,
-      compatibilidad: calculateCompatibility(selectedIdea, fondo),
-    }));
-
+    let fondosConMatch: Fondo[] = [...matchedFondos];
 
     if (searchTerm) fondosConMatch = fondosConMatch.filter(f => f.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
     if (categoriaFilter !== 'Todas') fondosConMatch = fondosConMatch.filter(f => f.categoria === categoriaFilter);
@@ -149,41 +274,61 @@ const FondosIdea: React.FC = () => {
         case 'alfabetico': return a.nombre.localeCompare(b.nombre);
         case 'compatibilidad': return (b.compatibilidad ?? 0) - (a.compatibilidad ?? 0);
         case 'presupuesto':
-          const aPresupuesto = parseInt(a.presupuesto.replace(/[^0-9]/g, ''), 10);
-          const bPresupuesto = parseInt(b.presupuesto.replace(/[^0-9]/g, ''), 10);
+          // Para presupuestos de API que son "Consultar en detalle", mantener el orden actual
+          const aPresupuesto = parseInt(a.presupuesto.replace(/[^0-9]/g, ''), 10) || 0;
+          const bPresupuesto = parseInt(b.presupuesto.replace(/[^0-9]/g, ''), 10) || 0;
           return bPresupuesto - aPresupuesto;
         default: return 0;
       }
     });
 
     return fondosConMatch;
-  }, [selectedIdea, searchTerm, categoriaFilter, sortBy]);
+  }, [selectedIdea, matchedFondos, searchTerm, categoriaFilter, sortBy]);
 
+
+  if (loading || showAnimation) {
+    return (
+      <div className="min-h-screen bg-[#f1f5f9] flex flex-col">
+        <NavBar />
+        <div className="flex flex-col items-center justify-center flex-1 space-y-6">
+          <LoopAnimation />
+          <p className="text-xl sm:text-2xl font-semibold text-gray-700 animate-pulse">
+            {loading ? 'Buscando fondos compatibles...' : 'Cargando...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#f1f5f9]">
+        <NavBar />
+        <main className="flex-grow p-10 max-w-screen-2xl mx-auto text-center">
+          <h1 className="text-3xl font-bold text-red-600">Error al cargar fondos</h1>
+          <p className="text-slate-500 mt-2">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Reintentar
+          </button>
+        </main>
+      </div>
+    );
+  }
 
   if (!selectedIdea) {
     return (
       <div className="min-h-screen bg-[#f1f5f9]">
         <NavBar />
         <main className="flex-grow p-10 max-w-screen-2xl mx-auto text-center">
-            <h1 className="text-3xl font-bold text-slate-700">No se ha seleccionado una idea.</h1>
-            <p className="text-slate-500 mt-2">Por favor, <a href="/Matcha/Select-Idea" className="text-blue-600 underline">selecciona una idea</a> para encontrar fondos compatibles.</p>
+          <h1 className="text-3xl font-bold text-slate-700">No se ha seleccionado una idea.</h1>
+          <p className="text-slate-500 mt-2">Por favor, <a href="/Matcha/New-idea" className="text-blue-600 underline">crea una nueva idea</a> para encontrar fondos compatibles.</p>
         </main>
       </div>
     );
   }
-   if (showAnimation) {
-  return (
-    <div className="min-h-screen bg-[#f1f5f9] flex flex-col">
-      <NavBar />
-      <div className="flex flex-col items-center justify-center flex-1 space-y-6">
-        <LoopAnimation />
-        <p className="text-xl sm:text-2xl font-semibold text-gray-700 animate-pulse">
-          Cargando...
-        </p>
-      </div>
-    </div>
-  );
-}
 
   
 

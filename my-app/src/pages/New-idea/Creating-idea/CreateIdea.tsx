@@ -177,6 +177,17 @@ const CreateIdea: React.FC = () => {
                   sessionStorage.setItem('usuario', JSON.stringify(resultado));
                   console.log('SessionStorage actualizado con nueva idea');
                 }
+
+                // Actualizar localStorage con la idea completa
+                try {
+                  const existingIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
+                  existingIdeas.push(resultadoActualizacion);
+                  localStorage.setItem("userIdeas", JSON.stringify(existingIdeas));
+                  console.log('Idea guardada en localStorage userIdeas:', resultadoActualizacion.ID);
+                } catch (localStorageError) {
+                  console.error('Error al guardar en localStorage:', localStorageError);
+                }
+                
               } else {
                 console.error('No se recibió respuesta de la actualización de propuesta');
               }
@@ -266,9 +277,20 @@ const CreateIdea: React.FC = () => {
   };
 
   const handleNavigateToFondos = () => {
-    const lastIdea = JSON.parse(localStorage.getItem("userIdeas") || "[]").slice(-1)[0];
-    localStorage.setItem("selectedIdea", JSON.stringify(lastIdea));
-    navigate("/Matcha/New-idea/Fondo-idea");
+    try {
+      const userIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
+      if (userIdeas.length > 0) {
+        const lastIdea = userIdeas[userIdeas.length - 1];
+        console.log('Navegando a fondos con idea:', lastIdea);
+        localStorage.setItem("selectedIdea", JSON.stringify(lastIdea));
+        navigate("/Matcha/New-idea/Fondo-idea");
+      } else {
+        console.error('No hay ideas guardadas para hacer match');
+        // Opcionalmente mostrar un mensaje de error al usuario
+      }
+    } catch (error) {
+      console.error('Error al acceder a userIdeas:', error);
+    }
   };
 
   return (

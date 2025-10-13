@@ -21,7 +21,7 @@ QR_COLOR = "#919C2B"  # Verde esmeralda (similar al matcha)
 BACKGROUND_COLOR = "white"
 
 # Factor de tamaño del área central de padding/silencio.
-PADDING_SIZE_FACTOR = 0.25 
+PADDING_SIZE_FACTOR = 0.243
 
 # --- FUNCIÓN PRINCIPAL ---
 def generar_qr_con_padding_y_logo():

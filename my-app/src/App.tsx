@@ -18,6 +18,7 @@ import NuevoProyecto from './pages/New-idea/New-project/Create-project.tsx';
 import FondosIdea from './pages/New-idea/Creating-idea/FondoIdea.tsx';
 import DetalleF from './pages/New-idea/Creating-idea/detalle.tsx';
 import CrearProyectoMatch from './pages/New-idea/Creating-idea/Proyecto-idea.tsx';
+import RetomarIdea from './pages/New-idea/Creating-idea/RetomarIdea.tsx';
 import MisProyectosH from './pages/New-idea/Historico/SelectProjectH.tsx';
 import ProyectosHistoricosConPorcentaje from './pages/New-idea/Historico/HistoricosConMatch.tsx';
 import DetalleProyecto from './pages/New-idea/Historico/HistoricoDetalle.tsx';
@@ -44,6 +45,9 @@ function App() {
         <Route path="/Matcha/Select-Project/fondos/detalle" element={<DetalleFondo />} />
         <Route path="/Matcha/New-Match" element={<Newmatch />} />
         <Route path="/Matcha/New-idea" element={<CreateIdea />} />
+        <Route path="/Matcha/retomar-idea" element={<RetomarIdea />} />
+        <Route path="/Matcha/Nuevo-proyecto" element={<CrearProyectoMatch />} />
+        <Route path="/Matcha/New-idea/Creating-idea/FondoIdea" element={<FondosIdea />} />
         <Route path="/Matcha/New-idea/Fondo-idea" element={<FondosIdea />} />
         <Route path="/Matcha/New-idea/Fondo-idea/detalle" element={<DetalleF/>} />
         <Route path="/Matcha/New-idea/Fondo-idea/detalle/Nuevo-proyecto" element={<CrearProyectoMatch />} />

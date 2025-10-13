@@ -10,6 +10,7 @@ import Idea from "../../models/Idea";
 import Postulacion from "../../models/Postulacion"; 
 import IdeaRefinadaModal from '../../components/IdeaRefinadaModal/IdeaRefinadaModal';
 import { VerIdeasDeUsuarioAsync } from '../../api/VerIdeasDeUsuario';
+import { BorrarIdeaAsync } from '../../api/BorrarIdea';
 
 import { VerTodasLasPostulacionesAsync } from "../../api/VerTodasLasPostulaciones";
 import { VerTodosLosInstrumentosAsync } from "../../api/VerTodosLosInstrumentos"; 
@@ -73,6 +74,7 @@ const MisPostulaciones: React.FC = () => {
   const [radarChartData, setRadarChartData] = useState<any[]>([]);
   const [loadingProyectos, setLoadingProyectos] = useState<boolean>(false);
   const [errorProyectos, setErrorProyectos] = useState<string | null>(null);
+  const [deletingIdeaId, setDeletingIdeaId] = useState<number | null>(null);
 
   const [pieChartData, setPieChartData] = useState<PostulacionData[]>([]);
   const [loadingEstadisticas, setLoadingEstadisticas] = useState<boolean>(true);
@@ -377,8 +379,60 @@ const colorPalette = {
     }));
   };
   const handleFiltersIdeaChange = (newFilters: FiltersIdeaValues) => { setFiltersIdea(newFilters); };
-  const handleDeleteIdea = (idToDelete: number) => { if (window.confirm("¿Seguro que quieres eliminar esta idea?")) { const updated = ideas.filter(i => i.ID !== idToDelete); setIdeas(updated); } };
-  const handleRetakeIdea = (idea: Idea) => { alert(`Retomando la idea: "${idea.Campo}".`); };
+  const handleDeleteIdea = async (idToDelete: number) => {
+    if (window.confirm("¿Seguro que quieres eliminar esta idea?")) {
+      try {
+        setDeletingIdeaId(idToDelete);
+        await BorrarIdeaAsync(idToDelete);
+        
+        const updated = ideas.filter(i => i.ID !== idToDelete);
+        setIdeas(updated);
+        setFilteredIdeas(prev => prev.filter(i => i.ID !== idToDelete));
+        
+        alert("Idea eliminada exitosamente");
+      } catch (error) {
+        alert("Error al eliminar la idea");
+      } finally {
+        setDeletingIdeaId(null);
+      }
+    }
+  };
+  const handleConvertToProject = (idea: Idea) => {
+    // Guardar la idea para convertir en proyecto
+    const ideaData = {
+      ID: idea.ID,
+      Campo: idea.Campo,
+      Problema: idea.Problema,
+      Publico: idea.Publico,
+      Innovacion: idea.Innovacion,
+      Propuesta: idea.Propuesta
+    };
+    
+    console.log('GUARDANDO IDEA PARA CONVERSION:', ideaData);
+    localStorage.setItem('convertirAProyecto', JSON.stringify(ideaData));
+    
+    // También guardar en sessionStorage como respaldo
+    sessionStorage.setItem('convertirAProyecto', JSON.stringify(ideaData));
+    
+    // Navegar a la página de construir proyecto
+    navigate('/Matcha/Nuevo-proyecto');
+  };
+
+  const handleRetakeIdea = (idea: Idea) => {
+    // Guardar la idea seleccionada en localStorage para retomar
+    localStorage.setItem('retomarIdea', JSON.stringify({
+      ID: idea.ID,
+      Campo: idea.Campo,
+      Problema: idea.Problema,
+      Publico: idea.Publico,
+      Innovacion: idea.Innovacion,
+      Propuesta: idea.Propuesta,
+      FechaDeCreacion: idea.FechaDeCreacion
+    }));
+    
+    // Navegar a la página de editar idea
+    navigate('/Matcha/retomar-idea');
+  };
   const handleViewIdeaDetails = (idea: Idea) => {
     setSelectedIdea(idea);
     setShowIdeaModal(true);
@@ -512,11 +566,28 @@ const colorPalette = {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
                           </button>
-                          <button onClick={() => handleRetakeIdea(idea)} title="Retomar Idea" className="p-1 rounded-full hover:bg-slate-200 transition-colors">
+                          <button onClick={() => handleRetakeIdea(idea)} title="Retomar y Editar Idea" className="p-1 rounded-full hover:bg-slate-200 transition-colors">
                             <PencilIcon className="h-4 w-4 text-[#505143]" />
                           </button>
-                          <button onClick={() => handleDeleteIdea(idea.ID)} title="Eliminar Idea" className="p-1 rounded-full hover:bg-red-100 transition-colors">
-                            <TrashIcon className="h-4 w-4"  />
+                          <button onClick={() => handleConvertToProject(idea)} title="Convertir a Proyecto" className="p-1 rounded-full hover:bg-green-100 transition-colors">
+                            <svg className="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteIdea(idea.ID)} 
+                            title="Eliminar Idea" 
+                            className="p-1 rounded-full hover:bg-red-100 transition-colors"
+                            disabled={deletingIdeaId === idea.ID}
+                          >
+                            {deletingIdeaId === idea.ID ? (
+                              <svg className="animate-spin h-4 w-4 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                            ) : (
+                              <TrashIcon className="h-4 w-4 text-red-600" />
+                            )}
                           </button>
                         </div>
                       </div>

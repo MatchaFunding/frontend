@@ -9,18 +9,24 @@ export async function BorrarIdeaAsync(id: number) {
         'Content-Type': 'application/json',
       },
     });
+    
     if (!response.ok) {
-      throw new Error('Error al obtener los datos');
+      throw new Error(`Error HTTP ${response.status}`);
     }
-    const data: Idea = await response.json();
-    return data;
-  }
-  catch (error) {
-    console.error('Error en BorrarIdea:', error);
+    
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      const data: Idea = await response.json();
+      return data;
+    }
+    
+    return null;
+  } catch (error) {
+    throw error;
   }
 }
 export function BorrarIdea(id: number) {
-  const [Idea, setIdea] = useState<Idea>();
+  const [Idea, setIdea] = useState<Idea | null>();
 
   useEffect(() => {
       BorrarIdeaAsync(id).then((data) => {

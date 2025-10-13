@@ -19,6 +19,7 @@ interface ProyectoForm {
   Alcance: string;
   Area: string;
   Miembros: string[];
+  isFromConvertedIdea?: boolean; // Agregar bandera en el formData
 }
 interface Idea { id: number; field: string; problem: string; audience: string; uniqueness: string; }
 interface Fondo { id: number; nombre: string; categoria: string; }
@@ -44,16 +45,16 @@ const opcionesArea = [ "Salud", "Innovación", "Tecnología", "Construcción", "
 
 const defaultIdea: Idea = {
     id: 1,
-    field: "Tecnología",
-    problem: "Falta de digitalización en PYMES",
-    audience: "Emprendedores",
-    uniqueness: "Uso de IA para procesos automatizados",
+    field: "",
+    problem: "",
+    audience: "",
+    uniqueness: "",
 };
 
 const defaultFondo: Fondo = {
     id: 101,
-    nombre: "Fondo de Innovación Nacional",
-    categoria: "Tecnología e Innovación",
+    nombre: "",
+    categoria: "",
 };
 
 
@@ -65,9 +66,13 @@ const CrearProyectoMatch: React.FC = () => {
 
   const { idea = defaultIdea, fondo = defaultFondo } = (location.state as { idea: Idea; fondo: Fondo }) || {};
 
-  const [formData, setFormData] = useState<ProyectoForm>({
-    Beneficiario: 0, Titulo: "", Descripcion: "", DuracionEnMesesMinimo: 6,
-    DuracionEnMesesMaximo: 12, Alcance: "", Area: "", Miembros: [],
+  const [formData, setFormData] = useState<ProyectoForm>(() => {
+    // Inicialización lazy para evitar reinicios
+    return {
+      Beneficiario: 0, Titulo: "", Descripcion: "", DuracionEnMesesMinimo: 6,
+      DuracionEnMesesMaximo: 12, Alcance: "", Area: "", Miembros: [],
+      isFromConvertedIdea: false
+    };
   });
   
 
@@ -76,23 +81,94 @@ const CrearProyectoMatch: React.FC = () => {
   const [nuevaPersonaData, setNuevaPersonaData] = useState<PersonaPayload>({
     Nombre: "", Sexo: "OTR", RUT: "", FechaDeNacimiento: ""
   });
+  const [isFromConvertedIdea, setIsFromConvertedIdea] = useState(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  
   const storedUser = sessionStorage.getItem("usuario");
 
 
 
+  // useEffect para manejar conversión de ideas - solo se ejecuta una vez
   useEffect(() => {
-  
+    console.log('INICIO CARGA DE DATOS - CONVERSION');
+    
+    // Verificar si viene una idea para convertir en proyecto
+    const ideaAConvertir = localStorage.getItem('convertirAProyecto') || 
+                          sessionStorage.getItem('convertirAProyecto');
+    console.log('localStorage convertirAProyecto:', localStorage.getItem('convertirAProyecto'));
+    console.log('sessionStorage convertirAProyecto:', sessionStorage.getItem('convertirAProyecto'));
+    console.log('ideaAConvertir final:', ideaAConvertir);
+    
+    if (ideaAConvertir) {
+      try {
+        const ideaParsed = JSON.parse(ideaAConvertir);
+        console.log('IDEA PARSEADA:', ideaParsed);
+        
+        // Para ideas convertidas, usar la propuesta LLM como descripción
+        const resumenLLM = ideaParsed.Propuesta || 
+                          ideaParsed.ResumenLLM || 
+                          ideaParsed.propuesta || 
+                          ideaParsed.resumenLLM ||
+                          "";
+        
+        const descripcionDeIdea = resumenLLM || 
+          `Proyecto basado en la idea que resuelve: ${ideaParsed.Problema || 'problema no especificado'}`;
+        
+        console.log('DESCRIPCION A ESTABLECER:', descripcionDeIdea);
+        
+        const formDataToSet = {
+          Beneficiario: 0,
+          Titulo: "", 
+          Descripcion: descripcionDeIdea, 
+          DuracionEnMesesMinimo: 6,
+          DuracionEnMesesMaximo: 12,
+          Alcance: "", 
+          Area: ideaParsed.Campo || "", 
+          Miembros: [],
+          isFromConvertedIdea: true
+        };
+        
+        console.log('FORMDATA A ESTABLECER:', formDataToSet);
+        setFormData(formDataToSet);
+        setIsFromConvertedIdea(true);
+        
+        // Limpiar ambos storage después de usar la idea
+        localStorage.removeItem('convertirAProyecto');
+        sessionStorage.removeItem('convertirAProyecto');
+        
+        // Marcar que los datos se han cargado
+        setIsDataLoaded(true);
+        
+        console.log('CONVERSION COMPLETADA');
+        return;
+      } catch (e) {
+        console.error('Error al parsear idea para convertir:', e);
+        setIsFromConvertedIdea(false);
+      }
+    }
+    
+    // Si no hay conversión, marcar como cargado para permitir flujo normal
+    setIsDataLoaded(true);
+  }, []); // SIN DEPENDENCIAS - solo se ejecuta una vez al montar
+
+  // useEffect separado para flujo normal (cuando NO hay conversión)
+  useEffect(() => {
+    // Solo ejecutar si ya se verificó conversión y no hay conversión pendiente
+    if (!isDataLoaded || formData.isFromConvertedIdea) return;
+    
+    console.log('INICIO FLUJO NORMAL');
+    
+    // Procesamiento normal para ideas que vienen del flujo estándar
     const ideaActiva = idea || JSON.parse(localStorage.getItem("selectedIdea") || JSON.stringify(defaultIdea));
 
-
+    // Solo usar descripción sugerida si hay respuesta de IA guardada
+    let descripcionSugerida = "";
     const storedApiResponse = localStorage.getItem('ideaRespuestaIA');
-    let descripcionSugerida = `Basado en la idea que resuelve el problema de "${ideaActiva.problem}" para el público "${ideaActiva.audience}", este proyecto busca financiamiento del fondo ${fondo.nombre}. La propuesta se diferencia por lo siguiente: "${ideaActiva.uniqueness}".`;
 
     if (storedApiResponse) {
       try {
         const respuestaParseada = JSON.parse(storedApiResponse);
         if (respuestaParseada && respuestaParseada.ResumenLLM) {
-    
           descripcionSugerida = respuestaParseada.ResumenLLM;
         }
       } catch (e) {
@@ -100,28 +176,50 @@ const CrearProyectoMatch: React.FC = () => {
       }
     }
 
+    // Solo precargar datos si tenemos información válida de la idea y fondo
+    const tituloSugerido = (ideaActiva.field && fondo.nombre) ? 
+      `Proyecto de ${ideaActiva.field}: Aplicación a ${fondo.nombre}` : "";
 
     setFormData((prevData) => ({
       ...prevData,
-      Titulo: `Proyecto de ${ideaActiva.field}: Aplicación a ${fondo.nombre}`,
+      Titulo: tituloSugerido,
       Descripcion: descripcionSugerida,
-      Area: ideaActiva.field,
+      Area: ideaActiva.field || "",
+      isFromConvertedIdea: false
     }));
     
-
+    // Limpiar localStorage de respuesta IA
     localStorage.removeItem('ideaRespuestaIA');
 
-  }, [idea, fondo]);
+  }, [idea, fondo, isDataLoaded]); // Solo depende de idea/fondo para flujo normal
 
 
 
   useEffect(() => {
-    if (storedUser) {
+    // Solo actualizar datos de usuario si NO viene de conversión de idea
+    if (storedUser && !isFromConvertedIdea) {
+      const usuario = JSON.parse(storedUser);
+      setFormData((prev) => ({ ...prev, Beneficiario: usuario.Beneficiario.ID }));
+      setPersonas(usuario.Miembros.map((m: any) => new PersonaClass(m)));
+    } else if (storedUser && isFromConvertedIdea) {
+      // Si viene de conversión, solo actualizar el Beneficiario sin tocar otros campos
       const usuario = JSON.parse(storedUser);
       setFormData((prev) => ({ ...prev, Beneficiario: usuario.Beneficiario.ID }));
       setPersonas(usuario.Miembros.map((m: any) => new PersonaClass(m)));
     }
-  }, [storedUser]);
+  }, [storedUser, isFromConvertedIdea]);
+
+  // useEffect adicional para debuggear el estado del formData (temporal)
+  useEffect(() => {
+    if (formData.isFromConvertedIdea) {
+      console.log('CONVERSION DEBUG - Descripción:', formData.Descripcion.length > 0 ? 'Cargada correctamente' : 'VACÍA');
+    }
+  }, [formData]);
+
+  // Log del render para verificar el estado
+  if (formData.isFromConvertedIdea) {
+    console.log('RENDER - Conversión detectada, descripción:', formData.Descripcion ? 'presente' : 'FALTA');
+  }
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -198,19 +296,97 @@ const CrearProyectoMatch: React.FC = () => {
     <div className="min-h-screen bg-slate-50">
       <NavBar />
       <main className="flex flex-col items-center justify-center px-4 py-10 mt-[5%]">
+        {formData.isFromConvertedIdea && (
+          <div className="w-full max-w-3xl mb-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h4 className="text-blue-800 font-semibold">Proyecto creado desde tu idea</h4>
+                <p className="text-blue-700 text-sm">La descripción se ha pre-cargado con tu propuesta refinada por IA. Completa los demás campos según necesites.</p>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <StepIndicator currentStep={step} totalSteps={4} />
         <Card className="w-full max-w-3xl px-9 py-8">
           <form onSubmit={(e) => { e.preventDefault(); if (step < 4) nextStep(); else crearProyecto(); }}>
             {step === 1 && (
               <CardContent className="space-y-6">
-                <h2 className="text-2xl font-semibold text-center text-slate-800">Información Básica (Sugerida)</h2>
+                <h2 className="text-2xl font-semibold text-center text-slate-800">
+                  {formData.isFromConvertedIdea ? "Información Básica (Pre-cargada desde tu Idea)" : "Información Básica (Sugerida)"}
+                </h2>
+                {formData.isFromConvertedIdea && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-start space-x-2">
+                      <div className="text-green-600 mt-0.5">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-green-800 text-sm font-medium mb-1">
+                          💡 <strong>Información importante:</strong>
+                        </p>
+                        <ul className="text-green-700 text-sm space-y-1">
+                          <li>• <strong>Título:</strong> Está en blanco para que puedas personalizarlo completamente</li>
+                          <li>• <strong>Descripción:</strong> Contiene tu propuesta refinada por IA - puedes editarla o mantenerla</li>
+                          <li>• Todos los demás campos están listos para que los completes según tu proyecto</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Título del Proyecto</label>
-                  <Input name="Titulo" value={formData.Titulo} onChange={handleChange} minLength={10} required />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Título del Proyecto
+                    {formData.isFromConvertedIdea && <span className="text-green-600 text-xs ml-2">(Personalízalo como desees)</span>}
+                  </label>
+                  <Input name="Titulo" value={formData.Titulo} onChange={handleChange} minLength={10} required 
+                    placeholder={formData.isFromConvertedIdea ? "Ingresa un título descriptivo para tu proyecto..." : "Título del proyecto"}
+                  />
+                  {formData.isFromConvertedIdea && formData.Titulo === "" && (
+                    <p className="text-xs text-gray-500 mt-1">💡 Sugerencia: Incluye el área y objetivo principal de tu proyecto</p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
-                  <Textarea name="Descripcion" rows={6} value={formData.Descripcion} onChange={handleChange} minLength={10} required />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Descripción del Proyecto
+                    {formData.isFromConvertedIdea && <span className="text-green-600 text-xs ml-2">(Pre-cargada con IA - puedes editarla)</span>}
+                  </label>
+                  {formData.isFromConvertedIdea && (
+                    <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-2">
+                      <p className="text-blue-800 text-xs">
+                        📝 <strong>Esta descripción fue generada por IA</strong> basada en tu idea original. 
+                        Puedes mantenerla, editarla o reescribirla completamente según tus necesidades.
+                      </p>
+                    </div>
+                  )}
+                  <Textarea 
+                    name="Descripcion" 
+                    rows={6} 
+                    value={formData.Descripcion} 
+                    onChange={handleChange} 
+                    minLength={10} 
+                    required 
+                    placeholder={formData.isFromConvertedIdea ? "Descripción generada por IA - edítala si es necesario..." : "Descripción del proyecto"}
+                    onFocus={() => console.log('TEXTAREA FOCUS - Valor actual:', formData.Descripcion)}
+                  />
+                  {/* Debug temporal */}
+                  {formData.isFromConvertedIdea && (
+                    <div className="bg-red-50 border border-red-200 rounded p-2 mt-1">
+                      <p className="text-red-800 text-xs">
+                        <strong>DEBUG:</strong> Valor en formData.Descripcion: "{formData.Descripcion}" (Longitud: {formData.Descripcion.length})
+                      </p>
+                    </div>
+                  )}
+                  {formData.isFromConvertedIdea && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      💡 Tip: Revisa que la descripción refleje exactamente lo que quieres lograr con tu proyecto
+                    </p>
+                  )}
                 </div>
               </CardContent>
             )}

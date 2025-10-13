@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function BorrarIdeaAsync(id: number) {
   try {
-    const response = await fetch(`https://backend.matchafunding.com/borraridea/${id}`, {
+    const response = await fetch(`https://backend.matchafunding.com/borraridea/${id}/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -11,18 +11,24 @@ export async function BorrarIdeaAsync(id: number) {
     });
     
     if (!response.ok) {
-      throw new Error(`Error HTTP ${response.status}`);
+      throw new Error(`Error al eliminar idea: ${response.status} ${response.statusText}`);
     }
     
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      const data: Idea = await response.json();
+    // Similar a BorrarPostulacion: manejar respuestas vacías (204 No Content)
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+      return { success: true, message: 'Idea eliminada exitosamente' };
+    }
+    
+    try {
+      const data = await response.json();
       return data;
+    } catch (jsonError) {
+      // Si no hay JSON válido pero la respuesta fue exitosa
+      return { success: true, message: 'Idea eliminada exitosamente' };
     }
-    
-    return null;
   } catch (error) {
-    throw error;
+    console.error('Error en BorrarIdea:', error);
+    throw error; 
   }
 }
 export function BorrarIdea(id: number) {

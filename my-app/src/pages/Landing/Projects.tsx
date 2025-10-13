@@ -380,21 +380,37 @@ const colorPalette = {
   };
   const handleFiltersIdeaChange = (newFilters: FiltersIdeaValues) => { setFiltersIdea(newFilters); };
   const handleDeleteIdea = async (idToDelete: number) => {
-    if (window.confirm("¿Seguro que quieres eliminar esta idea?")) {
-      try {
-        setDeletingIdeaId(idToDelete);
-        await BorrarIdeaAsync(idToDelete);
-        
-        const updated = ideas.filter(i => i.ID !== idToDelete);
-        setIdeas(updated);
-        setFilteredIdeas(prev => prev.filter(i => i.ID !== idToDelete));
-        
-        alert("Idea eliminada exitosamente");
-      } catch (error) {
-        alert("Error al eliminar la idea");
-      } finally {
-        setDeletingIdeaId(null);
-      }
+    // Encontrar la idea para mostrar detalles en la confirmación
+    const ideaToDelete = ideas.find(idea => idea.ID === idToDelete);
+    const ideaTitulo = ideaToDelete ? ideaToDelete.Problema : `Idea #${idToDelete}`;
+
+    const confirmacion = window.confirm(
+      `¿Estás seguro de que quieres eliminar la idea "${ideaTitulo}"?\n\nEsta acción no se puede deshacer.`
+    );
+
+    if (!confirmacion) {
+      return;
+    }
+
+    setDeletingIdeaId(idToDelete);
+
+    try {
+      console.log('Intentando eliminar idea con ID:', idToDelete);
+      const result = await BorrarIdeaAsync(idToDelete);
+      console.log('Resultado de eliminar idea:', result);
+      
+      // Actualizar el estado local
+      const updated = ideas.filter(i => i.ID !== idToDelete);
+      setIdeas(updated);
+      setFilteredIdeas(prev => prev.filter(i => i.ID !== idToDelete));
+      
+      alert(`¡Idea eliminada exitosamente!\n\n"${ideaTitulo}" ha sido eliminada de tu lista de ideas.`);
+      
+    } catch (error: any) {
+      console.error('Error al eliminar idea:', error);
+      alert(`Error al eliminar la idea: ${error.message || 'Error desconocido'}`);
+    } finally {
+      setDeletingIdeaId(null);
     }
   };
   const handleConvertToProject = (idea: Idea) => {

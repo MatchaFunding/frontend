@@ -5,6 +5,7 @@
 Propongo expandir esta carta para incluir mas informacion respecto a los fondos
 */
 export interface FreeSearchCard {
+  id?: number; // ID del instrumento
   title?: string;
   description?: string;
   topic?: string;

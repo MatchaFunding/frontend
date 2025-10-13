@@ -1,0 +1,327 @@
+
+.select-project-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+/* Modal container */
+.select-project-modal {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Header */
+.select-project-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.select-project-modal__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.select-project-modal__close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #64748b;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.select-project-modal__close:hover {
+  background-color: #e2e8f0;
+}
+
+/* Content */
+.select-project-modal__content {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.select-project-modal__fondo-info {
+  background-color: #f1f5f9;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #8ba888;
+}
+
+.select-project-modal__fondo-info p {
+  margin: 0;
+  color: #334155;
+}
+
+.select-project-modal__projects-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.select-project-modal__loading,
+.select-project-modal__error {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+}
+
+.select-project-modal__error {
+  color: #e53e3e;
+}
+
+/* Projects */
+.select-project-modal__projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.select-project-modal__project-item {
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.select-project-modal__project-item:hover {
+  border-color: #8ba888;
+  background-color: #f8fafc;
+}
+
+.select-project-modal__project-item.selected {
+  border-color: #8ba888;
+  background-color: rgba(139, 168, 136, 0.1);
+}
+
+.select-project-modal__project-item input[type="radio"] {
+  margin-top: 0.25rem;
+  accent-color: #8ba888;
+}
+
+.select-project-modal__project-info {
+  flex: 1;
+}
+
+.select-project-modal__project-info h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.select-project-modal__project-description {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.select-project-modal__project-metadata {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.select-project-modal__project-fondo {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: rgba(139, 168, 136, 0.2);
+  color: rgba(68, 98, 74, 1);
+}
+
+.select-project-modal__project-status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.select-project-modal__project-status.activo,
+.select-project-modal__project-status.en_preparacion {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #15803d;
+}
+
+.select-project-modal__project-status.en_desarrollo {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.select-project-modal__project-status.completado {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+}
+
+.select-project-modal__project-status.pausado {
+  background-color: rgba(156, 163, 175, 0.1);
+  color: #6b7280;
+}
+
+/* No projects */
+.select-project-modal__no-projects {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Footer */
+.select-project-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.select-project-modal__button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.select-project-modal__button--cancel {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+.select-project-modal__button--cancel:hover {
+  background-color: #e2e8f0;
+}
+
+.select-project-modal__button--assign {
+  background-color: #8ba888;
+  color: white;
+}
+
+.select-project-modal__button--assign:hover:not(:disabled) {
+  background-color: rgba(68, 98, 74, 0.8);
+}
+
+.select-project-modal__button--assign:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.select-project-modal__button--unlink {
+  background-color: #dc2626;
+  color: white;
+}
+
+.select-project-modal__button--unlink:hover:not(:disabled) {
+  background-color: #b91c1c; 
+}
+
+.select-project-modal__button--unlink:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .select-project-modal {
+    margin: 1rem;
+    max-height: 90vh;
+  }
+  
+  .select-project-modal__header,
+  .select-project-modal__content,
+  .select-project-modal__footer {
+    padding: 1rem;
+  }
+  
+  .select-project-modal__footer {
+    flex-direction: column;
+  }
+  
+  .select-project-modal__button {
+    width: 100%;
+  }
+}
+
+/* Estilos para la vista de desvinculación */
+.select-project-modal__unlink-section {
+  padding: 1rem 0;
+}
+
+.select-project-modal__current-postulacion h3 {
+  color: #1f2937;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.select-project-modal__postulacion-info {
+  background-color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid #8ba888;
+  margin-bottom: 1rem;
+}
+
+.select-project-modal__postulacion-info p {
+  margin: 0.5rem 0;
+  color: #374151;
+}
+
+.select-project-modal__postulacion-info strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.select-project-modal__unlink-warning {
+  background-color: #fef2f2;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid #dc2626;
+  font-weight: 500;
+  margin-top: 1rem;
+}

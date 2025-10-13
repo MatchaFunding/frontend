@@ -6,7 +6,9 @@ import FiltersIdea from '../../components/filters-ideas/filters-idea.tsx';
 import { applyFiltersAndSorting } from '../../components/filters-ideas/filters-idea';
 import type { FiltersIdeaValues } from '../../components/filters-ideas/filters-idea';
 import Idea from "../../models/Idea";
-import Postulacion from "../../models/Postulacion"; 
+import Postulacion from "../../models/Postulacion";
+import { VerTodasLasPostulacionesAsync } from "../../api/VerTodasLasPostulaciones";
+import { VerTodosLosInstrumentosAsync } from "../../api/VerTodosLosInstrumentos"; 
 
 interface PostulacionData {
   name: string;
@@ -20,6 +22,15 @@ interface Proyecto {
   Descripcion: string;
   estado?: string; 
   fondo_seleccionado?: string; 
+}
+interface FondoAsignado {
+  nombreFondo: string;
+  estado: string;
+  instrumentoId: number;
+}
+
+interface ProyectoConFondo extends Proyecto {
+  fondosAsignados: FondoAsignado[];
 }
 
 const colorPalette = {
@@ -49,7 +60,7 @@ const CustomTooltip = ({ active, payload }: any) => { if (active && payload && p
 const MisPostulaciones: React.FC = () => {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [filteredIdeas, setFilteredIdeas] = useState<Idea[]>([]);
-  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
+  const [proyectos, setProyectos] = useState<ProyectoConFondo[]>([]);
   const [activeSection, setActiveSection] = useState('ideas');
   const navigate = useNavigate();
 
@@ -57,13 +68,48 @@ const MisPostulaciones: React.FC = () => {
   const [loadingProyectos, setLoadingProyectos] = useState<boolean>(false);
   const [errorProyectos, setErrorProyectos] = useState<string | null>(null);
 
-
   const [pieChartData, setPieChartData] = useState<PostulacionData[]>([]);
-  
   const [loadingEstadisticas, setLoadingEstadisticas] = useState<boolean>(true);
   const [errorEstadisticas, setErrorEstadisticas] = useState<string | null>(null);
 
   const [filtersIdea, setFiltersIdea] = useState<FiltersIdeaValues>({ campo: '', publico: '', orderBy: 'none', searchIdea: '', searchCampo: '', fecha: '' });
+
+  // Convertir el estado de la postulación a texto legible
+  const obtenerEstadoTexto = (estado: string): string => {
+    const estadosMap: { [key: string]: string } = {
+      'ADJ': 'Adjudicado',
+      'PEN': 'Pendiente',
+      'REC': 'Rechazado',
+      'APR': 'Aprobado',
+      'REV': 'En Revisión'
+    };
+    return estadosMap[estado] || estado;
+  };
+
+  // Obtener todos los fondos de un proyecto
+  const obtenerFondosProyecto = async (proyectoId: number): Promise<FondoAsignado[]> => {
+    try {
+      const postulaciones = await VerTodasLasPostulacionesAsync();
+      const postulacionesProyecto = postulaciones.filter(postulacion => postulacion.Proyecto === proyectoId);
+      if (postulacionesProyecto.length === 0) {
+        return [];
+      }
+      const instrumentos = await VerTodosLosInstrumentosAsync();
+      const fondosAsignados: FondoAsignado[] = postulacionesProyecto.map(postulacion => {
+        const instrumento = instrumentos.find(inst => inst.ID === postulacion.Instrumento);
+        return {
+          nombreFondo: instrumento ? instrumento.Titulo : "Fondo no encontrado",
+          estado: postulacion.Resultado,
+          instrumentoId: postulacion.Instrumento
+        };
+      });
+      return fondosAsignados;
+    } catch (error) {
+      console.error("Error al obtener fondos del proyecto:", error);
+      return [];
+    }
+  };
+
   const processRadarChartData = (postulaciones: Postulacion[]) => {
   if (postulaciones.length === 0) return [];
 
@@ -81,7 +127,7 @@ const MisPostulaciones: React.FC = () => {
   const tasaExito = conResultado.length > 0 ? (adjudicadas.length / conResultado.length) * 100 : 0;
 
   
-  const montoTotalAdjudicado = adjudicadas.reduce((sum, p) => sum + p.MontoObtenido, 0);
+  const montoTotalAdjudicado = adjudicadas.reduce((sum, p) => sum + (p.MontoObtenido || 0), 0);
   const scoreMonto = Math.min((montoTotalAdjudicado / TARGET_AMOUNT) * 100, 100);
 
   const uniqueInstrumentos = new Set(postulaciones.map(p => p.Instrumento)).size;
@@ -93,8 +139,8 @@ const MisPostulaciones: React.FC = () => {
   let totalDiasRespuesta = 0;
   conResultado.forEach(p => {
       const fechaInicio = new Date(p.FechaDePostulacion).getTime();
-      const fechaFin = new Date(p.FechaDeResultado).getTime();
-      if (!isNaN(fechaInicio) && !isNaN(fechaFin) && fechaFin > fechaInicio) {
+      const fechaFin = p.FechaDeResultado ? new Date(p.FechaDeResultado).getTime() : null;
+      if (!isNaN(fechaInicio) && fechaFin && !isNaN(fechaFin) && fechaFin > fechaInicio) {
           totalDiasRespuesta += (fechaFin - fechaInicio) / (1000 * 60 * 60 * 24);
       }
   });
@@ -140,8 +186,17 @@ const MisPostulaciones: React.FC = () => {
         try {
             const response = await fetch(`https://backend.matchafunding.com/verproyectosdeempresa/${empresaId}`);
             if (!response.ok) throw new Error(`Error ${response.status}`);
-            const data = await response.json();
-            setProyectos(data || []); 
+            const data: Proyecto[] = await response.json();
+            const proyectosConFondo: ProyectoConFondo[] = await Promise.all(
+                data.map(async (proyecto) => {
+                    const fondosAsignados = await obtenerFondosProyecto(proyecto.ID);
+                    return {
+                        ...proyecto,
+                        fondosAsignados
+                    };
+                })
+            );
+            setProyectos(proyectosConFondo || []); 
         } catch (error: any) {
             setErrorProyectos(error.message || "Ocurrió un error inesperado.");
         } finally {
@@ -162,7 +217,6 @@ const MisPostulaciones: React.FC = () => {
         return;
       }
 
-      const parsedUser = JSON.parse(storedUser);
       const beneficiarioId = 112;
       if (!beneficiarioId) {
         setErrorEstadisticas("No se pudo obtener el ID del beneficiario.");
@@ -235,43 +289,11 @@ const colorPalette = {
       color: statusMap[status]?.color || colorPalette.oliveGray,
     }));
   };
-  
-  const processLineChartData = (postulaciones: Postulacion[]) => {
-    const statusMap: { [key: string]: string } = {
-        'ADJ': 'Adjudicadas', 'PEN': 'Pendientes', 'REC': 'Rechazadas', 'APR': 'Aprobadas'
-    };
-    const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-
-    const monthlyData = postulaciones.reduce((acc, post) => {
-        const date = new Date(post.FechaDePostulacion);
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth()).padStart(2, '0')}`;
-        
-        if (!acc[monthKey]) {
-            acc[monthKey] = {
-                mes: `${monthNames[date.getMonth()]} '${String(date.getFullYear()).slice(2)}`,
-                originalDate: date,
-                Adjudicadas: 0,
-                Pendientes: 0,
-                Rechazadas: 0,
-                Aprobadas: 0
-            };
-        }
-        
-        const statusName = statusMap[post.Resultado.trim()];
-        if (statusName) {
-            acc[monthKey][statusName]++;
-        }
-        
-        return acc;
-    }, {} as any);
-
-    return Object.values(monthlyData).sort((a: any, b: any) => a.originalDate - b.originalDate);
-  };
 
   const handleFiltersIdeaChange = (newFilters: FiltersIdeaValues) => { setFiltersIdea(newFilters); };
   const handleDeleteIdea = (idToDelete: number) => { if (window.confirm("¿Seguro que quieres eliminar esta idea?")) { const updated = ideas.filter(i => i.ID !== idToDelete); setIdeas(updated); } };
   const handleRetakeIdea = (idea: Idea) => { alert(`Retomando la idea: "${idea.Campo}".`); };
-  const handleEditProyecto = (proyecto: Proyecto) => { alert(`Funcionalidad para editar el proyecto "${proyecto.Titulo}" no implementada.`); };
+  const handleEditProyecto = (proyecto: ProyectoConFondo) => { alert(`Funcionalidad para editar el proyecto "${proyecto.Titulo}" no implementada.`); };
   const handleDeleteProyecto = (proyectoId: number) => { if (window.confirm("¿Seguro que quieres eliminar este proyecto?")) { alert(`Funcionalidad para eliminar el proyecto con ID ${proyectoId} no implementada.`); } };
   const postulacionesHistoricas: any[] = [];
  
@@ -391,30 +413,64 @@ const colorPalette = {
                                         <p style={{ color: colorPalette.oliveGray }}>Aún no tienes proyectos guardados.</p>
                                     </div>
                                 ) : (
-                                    <>
-                                        <div className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 bg-slate-50">
-                                            <div className="text-sm font-semibold col-span-2" style={{ color: colorPalette.oliveGray }}>Título del Proyecto</div>
-                                            <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray }}>Fondo</div>
-                                            <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray }}>Estado</div>
-                                            <div className="text-sm font-semibold text-center" style={{ color: colorPalette.oliveGray }}>Acciones</div>
+                                    <>  {/* Títulos de las columnas */}
+                                        <div className="flex border-b border-slate-200 bg-slate-50" style={{ paddingLeft: '12px', paddingRight: '76px', paddingTop: '16px', paddingBottom: '16px' }}>
+                                            <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '45%', paddingRight: '8px' }}>Proyecto</div>
+                                            <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '40%', paddingRight: '8px' }}>Fondo(s)</div>
+                                            <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '15%' }}>Estado</div>
                                         </div>
                                         {proyectos.map((proyecto) => (
-                                            <div key={proyecto.ID} className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-slate-200 items-center last:border-b-0 hover:bg-slate-50 transition-colors">
-                                                <div className="col-span-2">
-                                                    <p className="font-medium" style={{ color: colorPalette.darkGreen }}>{proyecto.Titulo}</p>
-                                                    <p className="text-sm truncate" style={{ color: colorPalette.oliveGray }}>{proyecto.Descripcion}</p>
+                                            <div key={proyecto.ID} className="relative py-4 border-b border-slate-200 last:border-b-0 hover:bg-slate-50 transition-colors">
+                                                {/* Botones de acciones en la esquina superior derecha */}
+                                                <div className="absolute top-1 right-2 flex space-x-1">
+                                                    <button onClick={() => handleEditProyecto(proyecto)} title="Editar Proyecto" className="p-1 rounded-full hover:bg-slate-200 transition-colors"><PencilIcon className="h-4 w-4 text-[#505143]" /></button>
+                                                    <button onClick={() => handleDeleteProyecto(proyecto.ID)} title="Eliminar Proyecto" className="p-1 rounded-full hover:bg-red-100 transition-colors"><TrashIcon className="h-4 w-4 text-red-500" /></button>
                                                 </div>
-                                                <div>
-                                                    <span className="inline-block px-3 py-1 text-sm font-semibold rounded-full" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen }}>
-                                                        {proyecto.fondo_seleccionado || "No asignado"}
-                                                    </span>
-                                                </div>
-                                                <div className="text-sm font-semibold" style={{ color: colorPalette.darkGreen }}>
-                                                    {proyecto.estado || "En preparación"}
-                                                </div>
-                                                <div className="flex justify-center items-center space-x-3">
-                                                    <button onClick={() => handleEditProyecto(proyecto)} title="Editar Proyecto" className="p-2 rounded-full hover:bg-slate-200 transition-colors"><PencilIcon className="h-5 w-5 text-[#505143]" /></button>
-                                                    <button onClick={() => handleDeleteProyecto(proyecto.ID)} title="Eliminar Proyecto" className="p-2 rounded-full hover:bg-red-100 transition-colors"><TrashIcon className="h-5 w-5 text-red-500" /></button>
+                                                
+                                                {/* Tabla */}
+                                                <div className="flex items-start pt-2" style={{ paddingLeft: '12px', paddingRight: '76px' }}>
+                                                    {/* Proyecto */}
+                                                    <div style={{ textAlign: 'left', width: '45%', paddingRight: '8px' }}>
+                                                        <p className="font-medium" style={{ color: colorPalette.darkGreen, textAlign: 'left' }}>{proyecto.Titulo}</p>
+                                                        <p className="text-sm truncate" style={{ color: colorPalette.oliveGray, textAlign: 'left' }}>{proyecto.Descripcion}</p>
+                                                    </div>
+                                                    <div style={{ textAlign: 'left', width: '40%', paddingRight: '8px' }}>
+                                                        {/* Si hay fondo(s) */}
+                                                        {proyecto.fondosAsignados.length > 0 ? (
+                                                            <div className="space-y-1">
+                                                                {proyecto.fondosAsignados.map((fondo, index) => (
+                                                                    <div key={index} style={{ minHeight: '32px', display: 'flex', alignItems: 'center' }}>
+                                                                        <span className="inline-block px-3 py-1 text-sm font-semibold rounded-full truncate" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen, maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'left' }} title={fondo.nombreFondo}>
+                                                                            {fondo.nombreFondo}
+                                                                        </span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            // No hay fondos asignados
+                                                            <div style={{ minHeight: '32px', display: 'flex', alignItems: 'center' }}>
+                                                                <span className="inline-block px-3 py-1 text-sm font-semibold rounded-full" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen, textAlign: 'left' }}>
+                                                                    No asignado
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    {/* Estado del fondo */}
+                                                    <div className="text-sm font-semibold" style={{ color: colorPalette.darkGreen, textAlign: 'left', width: '15%' }}>
+                                                        {proyecto.fondosAsignados.length > 0 ? (
+                                                            <div className="space-y-1">
+                                                                {proyecto.fondosAsignados.map((fondo, index) => (
+                                                                    <div key={index} className="text-sm" style={{ minHeight: '32px', display: 'flex', alignItems: 'center', textAlign: 'left' }}>
+                                                                        {obtenerEstadoTexto(fondo.estado)}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-sm" style={{ minHeight: '32px', display: 'flex', alignItems: 'center', textAlign: 'left' }}>
+                                                                En preparación
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}

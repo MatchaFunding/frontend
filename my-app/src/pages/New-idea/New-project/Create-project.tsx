@@ -160,11 +160,13 @@ const NuevoProyecto: React.FC = () => {
   const prevStep = () => setStep((prev) => prev - 1);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: colorPalette.lightGray }}>
+    <div className="min-h-screen w-full" style={{ backgroundColor: colorPalette.lightGray }}>
       <NavBar />
-      <main className="flex flex-col items-center justify-center px-4 py-10 mt-[5%]">
-        <StepIndicator currentStep={step} totalSteps={4} />
-        <Card className="w-full max-w-3xl px-9 py-8">
+      <main className="flex flex-col items-center justify-center px-4 py-6 md:py-10 mt-20 md:mt-[5%] w-full">
+        <div className="w-full max-w-3xl mb-4 md:mb-6">
+          <StepIndicator currentStep={step} totalSteps={4} />
+        </div>
+        <Card className="w-full max-w-3xl px-4 md:px-9 py-6 md:py-8">
           <form onSubmit={(e) => { e.preventDefault(); if (step < 4) nextStep(); else EnviarProyecto(); }}>
             {step === 1 && (
               <CardContent className="space-y-6">
@@ -212,10 +214,25 @@ const NuevoProyecto: React.FC = () => {
                 <CardContent className="space-y-6">
                     <h2 className="text-2xl font-semibold text-center" style={{ color: colorPalette.oliveGray }}>Añadir Miembros</h2>
                     <div className="flex flex-wrap gap-3 mb-6">
-                      {personas.map((p) => (<span key={p.ID} draggable onDragStart={(e) => e.dataTransfer.setData("text/plain", p.Nombre)} className="px-4 py-2 rounded-full cursor-grab shadow-sm hover:shadow-md transition" style={{ backgroundColor: colorPalette.lightGray, color: colorPalette.darkGreen, border: `1px solid ${colorPalette.softGreen}` }}>{p.Nombre}</span>))}
+                      {personas.map((p) => (
+                        <span key={p.ID} draggable onDragStart={(e) => e.dataTransfer.setData("text/plain", p.Nombre)} onClick={() => {
+                            if (!formData.Miembros.includes(p.Nombre)) {
+                              setFormData({ ...formData, Miembros: [...formData.Miembros, p.Nombre] });
+                            }
+                          }}
+                          className="px-4 py-2 rounded-full cursor-pointer select-none shadow-sm hover:shadow-md transition active:scale-95" 
+                          style={{ 
+                            backgroundColor: formData.Miembros.includes(p.Nombre) ? colorPalette.softGreen : colorPalette.lightGray, 
+                            color: formData.Miembros.includes(p.Nombre) ? 'white' : colorPalette.darkGreen, 
+                            border: `1px solid ${colorPalette.softGreen}` 
+                          }}
+                        >
+                          {p.Nombre}
+                        </span>
+                      ))}
                     </div>
                     <div className="min-h-[140px] rounded-2xl flex flex-wrap items-center gap-3 p-4 shadow-inner" style={{ border: `2px dashed ${colorPalette.softGreen}`, backgroundColor: colorPalette.lightGray }} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const droppedName = e.dataTransfer.getData("text/plain"); if (droppedName && !formData.Miembros.includes(droppedName)) { setFormData({ ...formData, Miembros: [...formData.Miembros, droppedName] }); } }}>
-                      {formData.Miembros.length === 0 ? (<p className="text-sm italic" style={{ color: colorPalette.oliveGray }}>Arrastra aquí los miembros existentes</p>) : (formData.Miembros.map((m, i) => (<span key={i} className="flex items-center gap-2 px-4 py-2 rounded-full shadow-sm" style={{ backgroundColor: colorPalette.softGreen, color: colorPalette.lightGray, border: `1px solid ${colorPalette.oliveGray}` }}>{m}<button type="button" onClick={() => setFormData({ ...formData, Miembros: formData.Miembros.filter((mi) => mi !== m) })} className="w-5 h-5 flex items-center justify-center rounded-full hover:scale-110 transition" style={{ backgroundColor: colorPalette.darkGreen }}><span className="text-xs text-white">×</span></button></span>)))}
+                      {formData.Miembros.length === 0 ? (<p className="text-sm italic" style={{ color: colorPalette.oliveGray }}>Arrastra aquí los miembros existentes o toca para seleccionar</p>) : (formData.Miembros.map((m, i) => (<span key={i} className="flex items-center gap-2 px-4 py-2 rounded-full shadow-sm" style={{ backgroundColor: colorPalette.softGreen, color: colorPalette.lightGray, border: `1px solid ${colorPalette.oliveGray}` }}>{m}<button type="button" onClick={() => setFormData({ ...formData, Miembros: formData.Miembros.filter((mi) => mi !== m) })} className="w-5 h-5 flex items-center justify-center rounded-full hover:scale-110 transition" style={{ backgroundColor: colorPalette.darkGreen }}><span className="text-xs text-white">×</span></button></span>)))}
                     </div>
                     <div className="text-center pt-4">
                       <Button type="button" onClick={() => setIsModalOpen(true)}>Crear Nuevo Colaborador</Button>
@@ -230,7 +247,7 @@ const NuevoProyecto: React.FC = () => {
                   <button type="button" onClick={() => setActiveTab("presentacion")} className="px-6 py-2 border rounded-md font-semibold transition-colors duration-200" style={{ color: activeTab === "presentacion" ? colorPalette.darkGreen : colorPalette.softGreen, borderColor: activeTab === "presentacion" ? colorPalette.softGreen : "#e2e8f0", borderWidth: "2px" }}>PRESENTACIÓN</button>
                   <button type="button" onClick={() => setActiveTab("publico")} className="px-6 py-2 border rounded-md font-semibold transition-colors duration-200" style={{ color: activeTab === "publico" ? colorPalette.darkGreen : colorPalette.softGreen, borderColor: activeTab === "publico" ? colorPalette.softGreen : "#e2e8f0", borderWidth: "2px" }}>DETALLE</button>
                 </div>
-                {activeTab === "presentacion" && (<Card><div className="p-6 md:p-8"><h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Presentación</h3><div className="space-y-4 leading-relaxed" style={{ color: colorPalette.oliveGray }}>{formData.Titulo && <p><strong>Título:</strong> {formData.Titulo}</p>}{formData.Descripcion && <p><strong>Descripción:</strong> {formData.Descripcion}</p>}{(formData.DuracionEnMesesMinimo > 0 || formData.DuracionEnMesesMaximo > 0) && <p><strong>Duración:</strong> {formData.DuracionEnMesesMinimo || "?"} - {formData.DuracionEnMesesMaximo || "?"} meses</p>}</div></div></Card>)}
+                {activeTab === "presentacion" && (<Card><div className="p-6 md:p-8"><h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Presentación</h3><div className="space-y-4 leading-relaxed" style={{ color: colorPalette.oliveGray }}>{formData.Titulo && <div><strong>Título:</strong> <p className="break-words overflow-hidden text-ellipsis line-clamp-2 mt-1">{formData.Titulo}</p></div>}{formData.Descripcion && <div><strong>Descripción:</strong> <p className="break-words overflow-hidden text-ellipsis line-clamp-3 mt-1">{formData.Descripcion}</p></div>}{(formData.DuracionEnMesesMinimo > 0 || formData.DuracionEnMesesMaximo > 0) && <p><strong>Duración:</strong> {formData.DuracionEnMesesMinimo || "?"} - {formData.DuracionEnMesesMaximo || "?"} meses</p>}</div></div></Card>)}
                 {activeTab === "publico" && (<Card><div className="p-6 md:p-8"><h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Detalle</h3><div className="space-y-4 leading-relaxed" style={{ color: colorPalette.oliveGray }}>{formData.Alcance && <p><strong>Alcance:</strong> {opcionesAlcance.find(o => o.value === formData.Alcance)?.label}</p>}{formData.Area && <p><strong>Área:</strong> {formData.Area}</p>}{formData.Miembros.length > 0 ? (<p><strong>Miembros:</strong> {formData.Miembros.join(", ")}</p>) : (<p className="italic" style={{ color: colorPalette.softGreen }}>No hay miembros agregados</p>)}</div></div></Card>)}
               </CardContent>
             )}

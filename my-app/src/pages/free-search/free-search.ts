@@ -238,6 +238,7 @@ export function mapInstrumentToCard(instrumento: any): FreeSearchCardType {
   }
 
   const mappedCard = {
+    id: instrumento.ID, // Agregar el ID del instrumento
     title: instrumento.Titulo || 'Título no disponible',
     description: instrumento.Descripcion || 'Descripción no disponible',
     topic: getTipoBeneficioDisplayName(instrumento.TipoDeBeneficio) || 'General', // Mostrar nombre legible

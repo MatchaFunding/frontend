@@ -1,4 +1,4 @@
-# README hecho por Max Bardi
+# README
 
 Este repositorio Front está hecho con **React + Vite + Tailwind**
 

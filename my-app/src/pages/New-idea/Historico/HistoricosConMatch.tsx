@@ -48,9 +48,14 @@ interface ProyectoCardProps extends ProyectoHistorico {
 
 interface ProyectoSeleccionado {
   id: number;
-  nombre: string;
-  resumen: string;
-  area: string;
+  beneficiario: number;
+  Titulo: string;
+  Descripcion: string;
+  DuracionEnMesesMinimo:number;
+  DuracionEnMesesMaximo:number;
+  Alcance: string;
+  Area:string;
+
 }
 
 // --- Componentes Adicionales ---
@@ -316,11 +321,11 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
         <div className="text-center mb-10">
           {selectedProject ? (
             <>
-              <h1 className="text-4xl font-bold text-[#505143]">Proyectos Históricos similares a</h1>
-              <h2 className="text-3xl font-semibold text-[#44624a] mt-1">"{selectedProject.nombre}"</h2>
+              <h1 className="text-4xl font-bold text-[#505143]">Proyectos históricos Recomendados para</h1>
+              <h2 className="text-3xl font-semibold text-[#44624a] mt-1">"{selectedProject.Titulo}"</h2>
             </>
           ) : (
-            <h1 className="text-4xl font-bold text-[#505143]">Explorar Proyectos Históricos Adjudicados</h1>
+            <h1 className="text-4xl font-bold text-[#505143]">Explorar Todos los Fondos</h1>
           )}
         </div>
 

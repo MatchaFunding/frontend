@@ -81,8 +81,8 @@ const GraduationCapIcon: React.FC = () => (
     <path d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0l-.07.002z" />
   </svg>
 );
-
 const FondoCard: React.FC<FondoCardProps> = ({ 
+    ID, // <--- 1. Asegúrate de recibir el ID desde las props
     Titulo, Descripcion, compatibilidad, PresupuestoMaximo, Categoria, ImagenUrl,
     semantic_score, topic_score, rules_score, onRightClick 
 }) => {
@@ -120,7 +120,8 @@ const FondoCard: React.FC<FondoCardProps> = ({
           <span className="font-bold text-slate-700">{formattedPresupuesto}</span>
         </div>
         <button
-          onClick={() => navigate("/Matcha/Select-Project/fondos/detalle")}
+          // 2. Modificamos el onClick para usar el ID en la URL
+          onClick={() => navigate(`/Matcha/Select-Project/fondos/detalle/${ID}`)}
           className="w-full bg-[#8ba888] hover:bg-[rgba(68,98,74,0.8)] text-white font-bold py-3 px-4 rounded-xl transition-colors duration-300"
         >
           Ver más detalles
@@ -129,7 +130,6 @@ const FondoCard: React.FC<FondoCardProps> = ({
     </div>
   );
 };
-
 
 // --- COMPONENTE PRINCIPAL ---
 
@@ -231,13 +231,20 @@ const FondosconPorcentaje: React.FC = () => {
     
     CargarFondosYCalces();
   }, []);
-  
-  useEffect(() => {
+   useEffect(() => {
     const handleClickOutside = () => setContextMenu(null);
     window.addEventListener('click', handleClickOutside);
     return () => window.removeEventListener('click', handleClickOutside);
   }, []);
-
+    const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
+  
+    useEffect(() => {
+    const handleClickOutside = () => setContextMenu(null);
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
+  
   const categorias = useMemo(() => ['Todas', ...new Set(fondos.map(f => f.Categoria))], [fondos]);
 
   const filteredFondos = useMemo(() => {
@@ -254,6 +261,18 @@ const FondosconPorcentaje: React.FC = () => {
     });
     return fondosFiltrados;
   }, [searchTerm, categoriaFilter, sortBy, fondos]);
+
+  // --- PAGINACIÓN: Paso 2 -> useEffect para resetear la página cuando cambian los filtros ---
+  // Esto evita que te quedes en una página que ya no existe después de filtrar.
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, categoriaFilter, sortBy]);
+
+  // --- PAGINACIÓN: Paso 3 -> Calcular los fondos a mostrar en la página actual ---
+  const paginatedFondos = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredFondos.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [currentPage, filteredFondos]);
 
   const handleCardRightClick = (event: React.MouseEvent, scores: ScoreData) => {
     setContextMenu({ x: event.clientX, y: event.clientY, scores });
@@ -286,12 +305,15 @@ const FondosconPorcentaje: React.FC = () => {
         </div>
     );
   }
+  const totalPages = Math.ceil(filteredFondos.length / ITEMS_PER_PAGE);
 
   return (
     <div className="min-h-screen bg-[#f1f5f9]">
       <NavBar />
       {showDisclaimer && <DisclaimerModal onClose={() => setShowDisclaimer(false)} />}
       <main className="flex-grow p-6 md:p-10 max-w-screen-2xl mx-auto mt-[5%]">
+        
+        {/* --- TU CÓDIGO DEL TÍTULO REINTEGRADO --- */}
         <div className="text-center mb-10">
           {selectedProject ? (
             <>
@@ -303,6 +325,7 @@ const FondosconPorcentaje: React.FC = () => {
           )}
         </div>
 
+        {/* --- TU CÓDIGO DEL HEADER REINTEGRADO --- */}
         <header className="bg-white p-4 sm:p-6 rounded-2xl shadow-md mb-8 flex flex-col sm:flex-row items-center gap-4">
           <div className="relative w-full sm:flex-grow">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><SearchIcon /></div>
@@ -337,6 +360,7 @@ const FondosconPorcentaje: React.FC = () => {
           </div>
         </header>
 
+        {/* --- BANNER OPCIONAL REINTEGRADO --- */}
         {!selectedProject && (
           <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-8">
             <p className="font-bold">No has seleccionado un proyecto.</p>
@@ -344,9 +368,10 @@ const FondosconPorcentaje: React.FC = () => {
           </div>
         )}
 
+        {/* --- GRID DE TARJETAS (Ahora usa paginatedFondos) --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredFondos.length > 0 ? (
-            filteredFondos.map(fondo => (
+          {paginatedFondos.length > 0 ? (
+            paginatedFondos.map(fondo => (
               <FondoCard 
                 key={fondo.ID} 
                 {...fondo}
@@ -360,15 +385,46 @@ const FondosconPorcentaje: React.FC = () => {
           )}
         </div>
 
+        {/* --- FOOTER CON PAGINACIÓN DINÁMICA --- */}
         <footer className="flex flex-col sm:flex-row justify-between items-center mt-10 text-[rgba(80,81,67,1)]">
-          <p>Mostrando {filteredFondos.length} de {fondos.length} fondos</p>
-          <div className="flex items-center gap-2 mt-4 sm:mt-0">
-            <button className="px-3 py-1 border rounded-lg hover:bg-[rgba(139,168,136,0.2)]">&lt;</button>
-            <button className="px-3 py-1 border rounded-lg bg-[rgba(68,98,74,1)] text-white border-[rgba(68,98,74,1)]">1</button>
-            <button className="px-3 py-1 border rounded-lg hover:bg-[rgba(139,168,136,0.2)]">2</button>
-            <button className="px-3 py-1 border rounded-lg hover:bg-[rgba(139,168,136,0.2)]">3</button>
-            <button className="px-3 py-1 border rounded-lg hover:bg-[rgba(139,168,136,0.2)]">&gt;</button>
-          </div>
+          <p>
+            Mostrando {Math.min(paginatedFondos.length, filteredFondos.length > 0 ? 1 : 0) > 0 ? ((currentPage - 1) * ITEMS_PER_PAGE) + 1 : 0} 
+            - {Math.min(currentPage * ITEMS_PER_PAGE, filteredFondos.length)} de {filteredFondos.length} fondos
+          </p>
+
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2 mt-4 sm:mt-0">
+              <button 
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 border rounded-lg hover:bg-[rgba(139,168,136,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                &lt;
+              </button>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNumber => (
+                <button 
+                  key={pageNumber}
+                  onClick={() => setCurrentPage(pageNumber)}
+                  className={`px-3 py-1 border rounded-lg ${
+                    currentPage === pageNumber 
+                    ? 'bg-[rgba(68,98,74,1)] text-white border-[rgba(68,98,74,1)]' 
+                    : 'hover:bg-[rgba(139,168,136,0.2)]'
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              ))}
+
+              <button 
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 border rounded-lg hover:bg-[rgba(139,168,136,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                &gt;
+              </button>
+            </div>
+          )}
         </footer>
       </main>
 

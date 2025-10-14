@@ -86,7 +86,24 @@ const SearchIcon: React.FC = () => (
 
 // --- Componente de Tarjeta de Proyecto Modificado ---
 
+interface ProyectoCardProps {
+  ID: number; // <-- ¡AÑADIDO!
+  Titulo: string;
+  Descripcion: string;
+  Area: string;
+  Alcance: string;
+  DuracionEnMesesMinimo: number;
+  DuracionEnMesesMaximo: number;
+  Compatibilidad: number;
+  ImagenUrl?: string;
+  semantic_score: number;
+  topic_score: number;
+  rules_score: number;
+  onRightClick: (event: React.MouseEvent, scores: ScoreData) => void;
+}
+
 const ProyectoCard: React.FC<ProyectoCardProps> = ({
+  ID, // <-- ¡AÑADIDO! Lo desestructuramos de las props
   Titulo, Descripcion, Area, Alcance, DuracionEnMesesMinimo, DuracionEnMesesMaximo, Compatibilidad, ImagenUrl,
   semantic_score, topic_score, rules_score, onRightClick
 }) => {
@@ -94,7 +111,7 @@ const ProyectoCard: React.FC<ProyectoCardProps> = ({
   const defaultImage = '/sin-foto.png';
 
   const handleContextMenu = (event: React.MouseEvent) => {
-    event.preventDefault(); // Previene el menú contextual nativo del navegador
+    event.preventDefault();
     onRightClick(event, { semantic_score, topic_score, rules_score });
   };
 
@@ -127,7 +144,8 @@ const ProyectoCard: React.FC<ProyectoCardProps> = ({
           <p className="text-xs text-slate-400 italic mb-2">Duración: {DuracionEnMesesMinimo}-{DuracionEnMesesMaximo} meses</p>
           <p className="text-xs text-slate-400 italic mb-4">Alcance: {Alcance}</p>
           <button
-            onClick={() => navigate(`/Matcha/My-projects/proyectos-historicos/Detalle`)}
+            // 2. Modificamos el onClick para usar el ID en la URL
+            onClick={() => navigate(`/Matcha/My-projects/proyectos-historicos/Detalle/${ID}`)}
             className="w-full bg-[#8ba888] hover:bg-[rgba(68,98,74,0.8)] text-white font-bold py-3 px-4 rounded-xl transition-colors duration-300"
           >
             Ver más detalles
@@ -383,6 +401,10 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
               <ProyectoCard
                 key={proyecto.ID}
                 {...proyecto}
+                Compatibilidad={proyecto.Compatibilidad ?? 0}
+                semantic_score={proyecto.semantic_score ?? 0}
+                topic_score={proyecto.topic_score ?? 0}
+                rules_score={proyecto.rules_score ?? 0}
                 onRightClick={handleCardRightClick}
               />)
           ) : (

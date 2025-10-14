@@ -42,7 +42,7 @@ function App() {
         <Route path="/Matcha/Select-Idea" element={<SelectIdea />} />
         <Route path="/Matcha/Select-Project" element={<MisProyectos />} />
         <Route path="/Matcha/Select-Project/fondos" element={<FondosconPorcentaje />} />
-        <Route path="/Matcha/Select-Project/fondos/detalle" element={<DetalleFondo />} />
+        <Route path="/Matcha/Select-Project/fondos/detalle/:fondoId" element={<DetalleFondo />} />
         <Route path="/Matcha/New-Match" element={<Newmatch />} />
         <Route path="/Matcha/New-idea" element={<CreateIdea />} />
         <Route path="/Matcha/retomar-idea" element={<RetomarIdea />} />
@@ -54,7 +54,7 @@ function App() {
         <Route path="/Matcha/Nuevo-proyecto" element={<NuevoProyecto />} />
         <Route path="/Matcha/My-projects" element={<MisProyectosH/>} />
         <Route path="/Matcha/My-projects/proyectos-historicos" element={<ProyectosHistoricosConPorcentaje/>} />
-        <Route path="/Matcha/My-projects/proyectos-historicos/Detalle" element={<DetalleProyecto/>} />
+        <Route path="/Matcha/My-projects/proyectos-historicos/Detalle/:proyectoId" element={<DetalleProyecto/>} />
       </Routes>
     </BrowserRouter>
   );

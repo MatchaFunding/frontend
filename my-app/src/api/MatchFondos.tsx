@@ -117,6 +117,52 @@ export async function getMatchFondosAsync(request: MatchRequest): Promise<MatchR
   }
 }
 
+
+export async function getMatchProyectoFondosAsync(request: MatchRequest): Promise<MatchResult[]> {
+  try {
+    console.log('Enviando request de match con endpoint GET:', request);
+    
+    const ideaId = request.idea_id;
+    const topK = request.top_k || 10;
+
+    // Timeout de 30 segundos
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    
+    console.log(`Llamando a endpoint GET: https://ai.matchafunding.com/api/v1/ia/funds/{id}/${topK}?id_idea=${ideaId}`);
+    
+    const response = await fetch(`https://ai.matchafunding.com/api/v1/ia/funds/{id}/${topK}?id_idea=${ideaId}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+      },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error en getMatchFondos - Status:', response.status);
+      console.error('Error details:', errorText);
+      throw new Error(`Error al obtener matches: ${response.status} - ${errorText}`);
+    }
+
+    const result: MatchResult[] = await response.json();
+    console.log('Resultado exitoso del endpoint GET:', result);
+    return result;
+
+  } catch (error) {
+    console.error('Error en getMatchFondos:', error);
+    throw error;
+  }
+}
+
+
+
+
 export async function checkCollectionsHealth(): Promise<any> {
   try {
     const response = await fetch(`https://ai.matchafunding.com/api/v1/ia/health/collections`, {

@@ -1,9 +1,6 @@
 export interface MatchRequest {
   idea_id: number;
   top_k?: number;
-  estado?: string;
-  regiones?: string[];
-  tipos_perfil?: string[];
 }
 
 export interface MatchResult {
@@ -80,29 +77,22 @@ export async function processIdeaAsync(idea: ProcessIdeaRequest): Promise<Proces
 
 export async function getMatchFondosAsync(request: MatchRequest): Promise<MatchResult[]> {
   try {
-    console.log('Enviando request de match:', request);
+    console.log('Enviando request de match con endpoint GET:', request);
     
-    const requestBody = {
-      idea_id: request.idea_id,
-      top_k: request.top_k || 10,
-      estado: request.estado || "abierto",
-      regiones: request.regiones,
-      tipos_perfil: request.tipos_perfil,
-    };
+    const ideaId = request.idea_id;
+    const topK = request.top_k || 10;
 
     // Timeout de 30 segundos
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000);
     
-    console.log('Llamando a API real de IA...');
+    console.log(`Llamando a endpoint GET: https://ai.matchafunding.com/api/v1/ia/{id}/${topK}?id_idea=${ideaId}`);
     
-    const response = await fetch(`https://ai.matchafunding.com/api/v1/ia/match`, {
-      method: 'POST',
+    const response = await fetch(`https://ai.matchafunding.com/api/v1/ia/{id}/${topK}?id_idea=${ideaId}`, {
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
         'accept': 'application/json',
       },
-      body: JSON.stringify(requestBody),
       signal: controller.signal,
     });
 
@@ -118,7 +108,7 @@ export async function getMatchFondosAsync(request: MatchRequest): Promise<MatchR
     }
 
     const result: MatchResult[] = await response.json();
-    console.log('Resultado exitoso de la API:', result);
+    console.log('Resultado exitoso del endpoint GET:', result);
     return result;
 
   } catch (error) {

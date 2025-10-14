@@ -192,11 +192,10 @@ const FondosIdea: React.FC = () => {
               // En caso de que la idea ya esté procesada
             }
             
-            // Ahora hacer el match
+            // Ahora hacer el match con el nuevo endpoint GET simplificado
             const matches = await getMatchFondosAsync({
               idea_id: ideaData.id,
-              top_k: 10,
-              estado: "abierto"
+              top_k: 10
             });
             
             console.log('Matches recibidos:', matches);

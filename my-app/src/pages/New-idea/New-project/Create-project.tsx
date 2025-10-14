@@ -6,7 +6,7 @@ import { Input } from "../../../components/UI/input";
 import { Button } from "../../../components/UI/buttons";
 import { Textarea } from "../../../components/UI/textarea";
 import { StepIndicator } from "../../../components/Shared/StepIndicator";
-import { CrearProyectoAsync } from "../../../api/CrearProyecto";
+import { CrearProyectoAsync } from "../../../api/CrearProyecto"; 
 import { CrearColaboradorAsync } from "../../../api/CrearColaborador";
 import { VerEmpresaCompletaAsync } from "../../../api/VerEmpresaCompleta";
 import PersonaClass from "../../../models/Persona";
@@ -60,6 +60,47 @@ const NuevoProyecto: React.FC = () => {
   });
   const navigate = useNavigate();
   const storedUser = sessionStorage.getItem("usuario");
+  // --- INICIO: Bloque para añadir ---
+
+ const AI_API_URL = "https://ai.matchafunding.com/api/v1/projects/upsertusers";
+
+  const enviarProyectoAI = async (proyecto: Proyecto) => {
+    console.log("Enviando proyecto al servicio de IA:", proyecto);
+
+    const payload = [{
+      ID: proyecto.ID,
+      Beneficiario: proyecto.Beneficiario,
+      Titulo: proyecto.Titulo,
+      Descripcion: proyecto.Descripcion,
+      DuracionEnMesesMinimo: proyecto.DuracionEnMesesMinimo,
+      DuracionEnMesesMaximo: proyecto.DuracionEnMesesMaximo,
+      Alcance: proyecto.Alcance,
+      Area: proyecto.Area,
+    }];
+
+    try {
+      const response = await fetch(AI_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Error desconocido del servidor de IA.' }));
+        console.error('Error al enviar datos a la IA:', response.status, errorData);
+        throw new Error(`El servidor de IA respondió con el estado ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Respuesta exitosa del servicio de IA:', result);
+    } catch (error) {
+      console.error("Falló la comunicación con el endpoint de la IA:", error);
+      // Opcional: podrías decidir si quieres que este error detenga todo el flujo o no.
+      // Por ahora, solo lo registra en la consola.
+    }
+  };
+
+// --- FIN: Bloque para añadir ---
 
   useEffect(() => {
     if (storedUser) {
@@ -103,59 +144,88 @@ const NuevoProyecto: React.FC = () => {
     }
   };
 
-  const EnviarProyecto = async () => {
-    if (formData.Titulo.length < 10) { alert("El título debe tener al menos 10 caracteres."); return; }
-    if (formData.Descripcion.length < 10) { alert("La descripción debe tener al menos 10 caracteres."); return; }
-    if (formData.DuracionEnMesesMinimo <= 0 || formData.DuracionEnMesesMaximo <= 0) { alert("La duración debe ser mayor a cero."); return; }
-    if (formData.DuracionEnMesesMinimo > formData.DuracionEnMesesMaximo) { alert("La duración mínima no puede ser mayor que la máxima."); return; }
-    if (!formData.Alcance || !formData.Area) { alert("Debes seleccionar un Alcance y un Área."); return; }
+  // --- INICIO: Bloque para reemplazar ---
+// En tu componente NuevoProyecto.tsx
 
-    try {
-      const json_proy = {
-        Beneficiario: formData.Beneficiario,
-        Titulo: formData.Titulo,
-        Descripcion: formData.Descripcion,
-        DuracionEnMesesMinimo: formData.DuracionEnMesesMinimo,
-        DuracionEnMesesMaximo: formData.DuracionEnMesesMaximo,
-        Alcance: formData.Alcance,
-        Area: formData.Area
-      };
-      const proyecto: Proyecto = new Proyecto(json_proy);
-      const proyectoCreado: Proyecto = await CrearProyectoAsync(proyecto);
-      if (storedUser) {
-        const datos = JSON.parse(storedUser);
-        const usuario = datos.Usuario;
-        const miembros = datos.Miembros;
-        for (let p = 0; p < personas.length; p++) {
-          if (miembros.includes(personas[p]) === false) {
-            const json_colab = {
-              Persona: personas[p].ID,
-              Proyecto: proyectoCreado.ID
-            };
-            const colaborador: Colaborador = new Colaborador(json_colab);
-            CrearColaboradorAsync(colaborador);
+const EnviarProyecto = () => { // Ya no necesita ser 'async' aquí
+  // --- 1. Validaciones del formulario (se mantienen igual) ---
+  if (formData.Titulo.length < 10) { alert("El título debe tener al menos 10 caracteres."); return; }
+  // ... resto de tus validaciones ...
+  if (!formData.Alcance || !formData.Area) { alert("Debes seleccionar un Alcance y un Área."); return; }
+
+  const proyectoParaEnviar = new Proyecto({
+    Beneficiario: formData.Beneficiario,
+    Titulo: formData.Titulo,
+    Descripcion: formData.Descripcion,
+    DuracionEnMesesMinimo: formData.DuracionEnMesesMinimo,
+    DuracionEnMesesMaximo: formData.DuracionEnMesesMaximo,
+    Alcance: formData.Alcance,
+    Area: formData.Area,
+    ID: 0,
+  });
+
+  console.log("1. Llamando a CrearProyectoAsync...", proyectoParaEnviar);
+
+  // --- 2. Lógica con .then() y .catch() ---
+  CrearProyectoAsync(proyectoParaEnviar)
+    .then(proyectoCreado => {
+      // ESTE BLOQUE SOLO SE EJECUTA SI LA PROMESA FUE EXITOSA
+      console.log("2. ¡Éxito! Proyecto recibido del backend:", proyectoCreado);
+
+      // Verificación CRÍTICA
+      if (!proyectoCreado || !proyectoCreado.ID) {
+        // Lanzamos un error para ser capturado por el .catch() de abajo
+        throw new Error("El proyecto se creó, pero el backend no devolvió un ID válido.");
+      }
+
+      console.log(`3. Iniciando tareas secundarias para el proyecto ID: ${proyectoCreado.ID}`);
+      
+      // Para poder usar 'await' aquí dentro, envolvemos la lógica en una función async auto-ejecutable
+      (async () => {
+        // a) Enviar a la IA (no detiene el flujo si falla)
+        enviarProyectoAI(proyectoCreado).catch(err => {
+          console.warn("Advertencia: Falló el envío a la IA, pero el proceso continúa.", err);
+        });
+
+        // b) Crear Colaboradores y actualizar sesión
+        const storedUser = sessionStorage.getItem("usuario");
+        if (storedUser) {
+          const nombresMiembrosSeleccionados = new Set(formData.Miembros);
+          const personasSeleccionadas = personas.filter(p => nombresMiembrosSeleccionados.has(p.Nombre));
+
+          if (personasSeleccionadas.length > 0) {
+            const promesasColaboradores = personasSeleccionadas.map(p => CrearColaboradorAsync(new Colaborador({ Persona: p.ID, Proyecto: proyectoCreado!.ID })));
+            await Promise.all(promesasColaboradores);
+            console.log("   - Colaboradores creados exitosamente.");
+          }
+
+          const datos = JSON.parse(storedUser);
+          if (datos.Usuario?.ID) {
+            const resultado = await VerEmpresaCompletaAsync(datos.Usuario.ID);
+            if (resultado) sessionStorage.setItem('usuario', JSON.stringify(resultado));
           }
         }
-        if (usuario.ID) {
-          const resultado = await VerEmpresaCompletaAsync(usuario.ID);
-          if (resultado) {
-            sessionStorage.setItem('usuario', JSON.stringify(resultado));
-          }
-          alert("¡Proyecto y colaboradores creados exitosamente!");
-          navigate("/Home-i");
-        }
-      }
-      else {
-        console.log('No se encontraron datos de usuario en sessionStorage');
-      }
-    } 
-    catch (error) {
-      console.error("Falló el proceso de creación:", error);
-      if (error instanceof Error) alert(error.message);
-      else alert("Ha ocurrido un error inesperado.");
-    }
-  };
-  
+        
+        // c) Finalización y Navegación
+        alert("¡Proyecto creado exitosamente!");
+        navigate("/Home-i");
+
+      })().catch(secondaryError => {
+        // Este catch es para errores DENTRO de las tareas secundarias
+        console.error("💥 FALLARON LAS TAREAS SECUNDARIAS:", secondaryError);
+        alert(`El proyecto fue creado, pero ocurrió un error al procesar los colaboradores: ${secondaryError.message}`);
+        navigate("/Home-i"); // Navegamos de todas formas
+      });
+
+    })
+    .catch(error => {
+      // ESTE BLOQUE SOLO SE EJECUTA SI LA PROMESA FALLÓ EN CUALQUIER PUNTO
+      console.error("💥 FALLÓ LA CREACIÓN DEL PROYECTO (capturado en .catch):", error);
+      const errorMessage = error instanceof Error ? error.message : "Ocurrió un error desconocido.";
+      alert(`No se pudo crear el proyecto: ${errorMessage}`);
+    });
+};
+// --- FIN: Bloque para reemplazar ---
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 

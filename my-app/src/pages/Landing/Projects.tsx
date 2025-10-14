@@ -159,50 +159,57 @@ const MisPostulaciones: React.FC = () => {
     }
   };
 
-  const processRadarChartData = (postulaciones: Postulacion[]) => {
-  if (postulaciones.length === 0) return [];
+  // La función ahora recibe el conteo de proyectos para calcular la nueva métrica
+const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparacionCount: number, totalProyectos: number) => {
+    // Si no hay datos, devuelve un array vacío para evitar errores
+    if (postulaciones.length === 0 && totalProyectos === 0) return [];
 
-  const TARGET_AMOUNT = 10000000;      // Meta de $10,000,000 para el 100% en el gráfico
-  const TARGET_DIVERSITY = 10;         // Meta de 10 fondos distintos para el 100%
-  const TARGET_APPLICATIONS = 20;      // Meta de 20 postulaciones enviadas para el 100%
-  const TARGET_RESPONSE_DAYS = 90;     // Un tiempo de respuesta "ideal" (menor es mejor)
+    // --- Métricas existentes (sin cambios) ---
+    const TARGET_AMOUNT = 10000000;
+    const TARGET_DIVERSITY = 10;
+    const TARGET_APPLICATIONS = 20;
+    const TARGET_RESPONSE_DAYS = 90;
 
- 
-  const totalPostulaciones = postulaciones.length;
-  const conResultado = postulaciones.filter(p => p.Resultado.trim() !== 'PEN');
-  const adjudicadas = conResultado.filter(p => p.Resultado.trim() === 'ADJ' || p.Resultado.trim() === 'APR');
-  
+    const totalPostulaciones = postulaciones.length;
+    const conResultado = postulaciones.filter(p => p.Resultado.trim() !== 'PEN');
+    const adjudicadas = conResultado.filter(p => p.Resultado.trim() === 'ADJ' || p.Resultado.trim() === 'APR');
+    
+    const tasaExito = conResultado.length > 0 ? (adjudicadas.length / conResultado.length) * 100 : 0;
+    const montoTotalAdjudicado = adjudicadas.reduce((sum, p) => sum + (p.MontoObtenido || 0), 0);
+    const scoreMonto = Math.min((montoTotalAdjudicado / TARGET_AMOUNT) * 100, 100);
 
-  const tasaExito = conResultado.length > 0 ? (adjudicadas.length / conResultado.length) * 100 : 0;
+    const uniqueInstrumentos = new Set(postulaciones.map(p => p.Instrumento)).size;
+    const scoreDiversidad = Math.min((uniqueInstrumentos / TARGET_DIVERSITY) * 100, 100);
 
-  
-  const montoTotalAdjudicado = adjudicadas.reduce((sum, p) => sum + (p.MontoObtenido || 0), 0);
-  const scoreMonto = Math.min((montoTotalAdjudicado / TARGET_AMOUNT) * 100, 100);
+    const scorePostulaciones = Math.min((totalPostulaciones / TARGET_APPLICATIONS) * 100, 100);
 
-  const uniqueInstrumentos = new Set(postulaciones.map(p => p.Instrumento)).size;
-  const scoreDiversidad = Math.min((uniqueInstrumentos / TARGET_DIVERSITY) * 100, 100);
+    let totalDiasRespuesta = 0;
+    conResultado.forEach(p => {
+        const fechaInicio = new Date(p.FechaDePostulacion).getTime();
+        const fechaFin = p.FechaDeResultado ? new Date(p.FechaDeResultado).getTime() : null;
+        if (!isNaN(fechaInicio) && fechaFin && !isNaN(fechaFin) && fechaFin > fechaInicio) {
+            totalDiasRespuesta += (fechaFin - fechaInicio) / (1000 * 60 * 60 * 24);
+        }
+    });
+    const avgDiasRespuesta = conResultado.length > 0 ? totalDiasRespuesta / conResultado.length : 0;
+    const scoreTiempo = Math.max(0, (1 - (avgDiasRespuesta / TARGET_RESPONSE_DAYS)) * 100);
 
-  const scorePostulaciones = Math.min((totalPostulaciones / TARGET_APPLICATIONS) * 100, 100);
+    // --- NUEVO: Métrica de Actividad en Pipeline ---
+    // Calcula qué porcentaje de los proyectos totales está "En preparación".
+    // Si no hay proyectos, el puntaje es 0 para evitar división por cero.
+    const scorePipeline = totalProyectos > 0 
+        ? (proyectosEnPreparacionCount / totalProyectos) * 100 
+        : 0;
 
- 
-  let totalDiasRespuesta = 0;
-  conResultado.forEach(p => {
-      const fechaInicio = new Date(p.FechaDePostulacion).getTime();
-      const fechaFin = p.FechaDeResultado ? new Date(p.FechaDeResultado).getTime() : null;
-      if (!isNaN(fechaInicio) && fechaFin && !isNaN(fechaFin) && fechaFin > fechaInicio) {
-          totalDiasRespuesta += (fechaFin - fechaInicio) / (1000 * 60 * 60 * 24);
-      }
-  });
-  const avgDiasRespuesta = conResultado.length > 0 ? totalDiasRespuesta / conResultado.length : 0;
-  const scoreTiempo = Math.max(0, (1 - (avgDiasRespuesta / TARGET_RESPONSE_DAYS)) * 100);
-
-  return [
-    { categoria: 'Monto adjudicado', A: scoreMonto, fullMark: 100 },
-    { categoria: 'Tasa de éxito', A: tasaExito, fullMark: 100 },
-    { categoria: 'Postulaciones', A: scorePostulaciones, fullMark: 100 },
-    { categoria: 'Tiempo respuesta', A: scoreTiempo, fullMark: 100 },
-    { categoria: 'Diversidad fondos', A: scoreDiversidad, fullMark: 100 },
-  ];
+    return [
+      { categoria: 'Monto adjudicado', A: scoreMonto, fullMark: 100 },
+      { categoria: 'Tasa de éxito', A: tasaExito, fullMark: 100 },
+      { categoria: 'Postulaciones', A: scorePostulaciones, fullMark: 100 },
+      { categoria: 'Tiempo respuesta', A: scoreTiempo, fullMark: 100 },
+      { categoria: 'Diversidad fondos', A: scoreDiversidad, fullMark: 100 },
+      // --- NUEVO: Se añade el nuevo eje al gráfico ---
+      { categoria: 'Actividad Pipeline', A: scorePipeline, fullMark: 100 },
+    ];
 };
   
   useEffect(() => {
@@ -296,19 +303,20 @@ const MisPostulaciones: React.FC = () => {
   }, [activeSection]);
 
 
-
   useEffect(() => {
     const fetchAndProcessPostulaciones = async () => {
       const storedUser = sessionStorage.getItem("usuario");
       if (!storedUser) {
-        setErrorEstadisticas("No se encontró información del usuario para cargar estadísticas.");
+        setErrorEstadisticas("No se encontró información del usuario.");
         setLoadingEstadisticas(false);
         return;
       }
+      const userData = JSON.parse(storedUser);
+      const beneficiarioId = userData?.Beneficiario?.ID;
+      const empresaId = userData?.Beneficiario?.ID;
 
-      const beneficiarioId = 112;
-      if (!beneficiarioId) {
-        setErrorEstadisticas("No se pudo obtener el ID del beneficiario.");
+      if (!beneficiarioId || !empresaId) {
+        setErrorEstadisticas("No se pudo obtener el ID del beneficiario/empresa.");
         setLoadingEstadisticas(false);
         return;
       }
@@ -317,21 +325,42 @@ const MisPostulaciones: React.FC = () => {
       setErrorEstadisticas(null);
 
       try {
-        const response = await fetch(`https://backend.matchafunding.com/vertodaslaspostulaciones`);
-        if (!response.ok) {
-          throw new Error(`Error al obtener postulaciones: ${response.statusText}`);
-        }
-        const allPostulaciones: Postulacion[] = await response.json();
+        const [postulacionesResponse, proyectosResponse] = await Promise.all([
+            fetch(`https://backend.matchafunding.com/vertodaslaspostulaciones`),
+            fetch(`https://backend.matchafunding.com/verproyectosdeempresa/${empresaId}`)
+        ]);
 
-    
+        if (!postulacionesResponse.ok) throw new Error(`Error al obtener postulaciones: ${postulacionesResponse.statusText}`);
+        if (!proyectosResponse.ok) throw new Error(`Error al obtener proyectos: ${proyectosResponse.statusText}`);
+
+        const allPostulaciones: Postulacion[] = await postulacionesResponse.json();
+        const allProyectos: Proyecto[] = await proyectosResponse.json();
+        
         const userPostulaciones = allPostulaciones.filter(p => p.Beneficiario === beneficiarioId);
         
-    
-         const pieData = processPieChartData(userPostulaciones);
-      const radarData = processRadarChartData(userPostulaciones); 
+        const projectsWithPostulaciones = new Set(userPostulaciones.map(p => p.Proyecto));
+        
+        const proyectosEnPreparacionCount = allProyectos.filter(p => !projectsWithPostulaciones.has(p.ID)).length;
 
-      setPieChartData(pieData);
-      setRadarChartData(radarData); 
+        // Procesamiento para el PieChart (gráfico de torta)
+        const pieData = processPieChartData(userPostulaciones);
+        if (proyectosEnPreparacionCount > 0) {
+          pieData.push({
+            name: 'En preparación',
+            value: proyectosEnPreparacionCount,
+            color: colorPalette.oliveGray,
+          });
+        }
+        
+        // CAMBIO: Ahora pasamos los conteos de proyectos a la función del RadarChart
+        const radarData = processRadarChartData(
+            userPostulaciones, 
+            proyectosEnPreparacionCount, 
+            allProyectos.length // Total de proyectos del usuario
+        );
+
+        setPieChartData(pieData);
+        setRadarChartData(radarData);
 
       } catch (error: any) {
         setErrorEstadisticas(error.message || "Ocurrió un error al cargar los datos.");
@@ -340,11 +369,10 @@ const MisPostulaciones: React.FC = () => {
       }
     };
     
-   
     if (activeSection === 'estadisticas') {
       fetchAndProcessPostulaciones();
     }
-  }, [activeSection]); 
+  }, [activeSection]);
 const colorPalette = {
   darkGreen: '#44624a',
   softGreen: '#8ba888',

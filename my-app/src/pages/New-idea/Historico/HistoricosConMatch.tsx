@@ -1,19 +1,13 @@
-import React, { useState, useMemo, useEffect } from 'react';
+
+import { useState, useMemo, useEffect } from 'react';
 import NavBar from '../../../components/NavBar/navbar';
 import { Link, useNavigate } from 'react-router-dom';
 import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
-//import { VerLosProyectosIAAsync } from '../../../api/VerLosProyectosIA';
-//import type MatchRequest from '../../../models/MatchRequest';
-
 import { VerProyectosHistoricosIAAsync } from '../../../api/VerProyectosHistoricosIA';
 import { VerCalceProyectosIAAsync } from '../../../api/VerCalceProyectosIA';
 import LoopAnimation from '../../../components/Shared/animationFrame';
 import type MatchResult from '../../../models/MatchResult';
-//import MatchRequest from '../../../models/MatchRequest';
-//import MatchResult from '../../../models/MatchResult';
-// import { VerLosProyectosIAAsync } from '../../../api/VerCalceProyectosIA';
-
-// import Proyecto from '../../../models/Proyecto';
+import Proyecto from '../../../models/Proyecto';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -22,6 +16,7 @@ const colorPalette = {
   lightGray: '#f1f5f9',
 };
 
+// Interfaz actualizada para incluir los scores
 interface ProyectoHistorico {
   ID: number;
   Beneficiario: number;
@@ -33,6 +28,22 @@ interface ProyectoHistorico {
   Area: string;
   Compatibilidad?: number;
   ImagenUrl?: string;
+  // Nuevos campos para almacenar los scores del calce
+  semantic_score?: number;
+  topic_score?: number;
+  rules_score?: number;
+}
+
+// Interfaz para el objeto de scores que se mostrará
+interface ScoreData {
+  semantic_score?: number;
+  topic_score?: number;
+  rules_score?: number;
+}
+
+// Interfaz para las props del ProyectoCard, incluyendo el manejador de evento
+interface ProyectoCardProps extends ProyectoHistorico {
+  onRightClick: (event: React.MouseEvent, scores: ScoreData) => void;
 }
 
 interface ProyectoSeleccionado {
@@ -42,31 +53,57 @@ interface ProyectoSeleccionado {
   area: string;
 }
 
+// --- Componentes Adicionales ---
+
+// Componente para el menú contextual que muestra los scores
+const ScoreContextMenu: React.FC<{ x: number, y: number, scores: ScoreData }> = ({ x, y, scores }) => {
+  return (
+    <div
+      style={{ top: y, left: x, position: 'fixed' }}
+      className="bg-white p-4 rounded-lg shadow-xl z-50 border border-slate-200"
+      onClick={(e) => e.stopPropagation()} // Evita que el clic dentro del menú lo cierre
+    >
+      <h4 className="font-bold text-slate-800 mb-2 text-md">Scores del Calce de IA</h4>
+      <ul className="text-sm text-slate-600 space-y-1">
+        <li><strong>Semantic Score:</strong> {scores.semantic_score?.toFixed(4) ?? 'N/A'}</li>
+        <li><strong>Topic Score:</strong> {scores.topic_score ?? 'N/A'}</li>
+        <li><strong>Rules Score:</strong> {scores.rules_score ?? 'N/A'}</li>
+      </ul>
+    </div>
+  );
+};
+
 const SearchIcon: React.FC = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={colorPalette.oliveGray} className="w-5 h-5">
     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
   </svg>
 );
 
-const ProyectoCard: React.FC<ProyectoHistorico> = ({ 
-  Titulo, Descripcion, Area, Alcance, DuracionEnMesesMinimo, DuracionEnMesesMaximo, Compatibilidad, ImagenUrl 
+// --- Componente de Tarjeta de Proyecto Modificado ---
+
+const ProyectoCard: React.FC<ProyectoCardProps> = ({
+  Titulo, Descripcion, Area, Alcance, DuracionEnMesesMinimo, DuracionEnMesesMaximo, Compatibilidad, ImagenUrl,
+  semantic_score, topic_score, rules_score, onRightClick
 }) => {
   const navigate = useNavigate();
-  
-  // Imagen por defecto si no viene ImagenUrl desde la API
   const defaultImage = '/sin-foto.png';
-  
+
+  const handleContextMenu = (event: React.MouseEvent) => {
+    event.preventDefault(); // Previene el menú contextual nativo del navegador
+    onRightClick(event, { semantic_score, topic_score, rules_score });
+  };
+
   return (
-    <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80 h-[560px]">
+    <div
+      onContextMenu={handleContextMenu}
+      className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80 h-[560px] cursor-pointer"
+    >
       <div className="relative h-52 flex-shrink-0">
-        <img 
-          src={ImagenUrl || defaultImage} 
-          alt={Titulo} 
+        <img
+          src={ImagenUrl || defaultImage}
+          alt={Titulo}
           className="w-full h-full object-cover"
-          onError={(e) => {
-            console.log('Error loading image:', ImagenUrl);
-            e.currentTarget.src = defaultImage;
-          }}
+          onError={(e) => { e.currentTarget.src = defaultImage; }}
         />
         <span className="absolute top-4 left-4 bg-[rgba(68,98,74,0.8)] backdrop-blur-sm text-white text-sm font-semibold py-1 px-3 rounded-lg">
           {Compatibilidad || 0}% compatibilidad
@@ -74,15 +111,10 @@ const ProyectoCard: React.FC<ProyectoHistorico> = ({
       </div>
       <div className="p-6 flex flex-col flex-grow min-h-0">
         <h2 className="text-xl font-bold text-slate-800 mb-2 line-clamp-2 flex-shrink-0">{Titulo}</h2>
-        <p className="text-slate-500 text-sm mb-4 overflow-hidden flex-shrink-0" 
-           style={{
-             display: '-webkit-box',
-             WebkitLineClamp: 5,
-             WebkitBoxOrient: 'vertical',
-             lineHeight: '1.4',
-             maxHeight: 'calc(1.4em * 5)',
-             minHeight: 'calc(1.4em * 5)'
-           }}>
+        <p
+          className="text-slate-500 text-sm mb-4 overflow-hidden flex-shrink-0"
+          style={{ display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical', lineHeight: '1.4', maxHeight: 'calc(1.4em * 5)', minHeight: 'calc(1.4em * 5)' }}
+        >
           {Descripcion}
         </p>
         <div className="mt-auto flex-shrink-0">
@@ -101,6 +133,9 @@ const ProyectoCard: React.FC<ProyectoHistorico> = ({
   );
 };
 
+
+// --- Componente Principal ---
+
 const ProyectosHistoricosConPorcentaje: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<ProyectoSeleccionado | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -111,50 +146,95 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const [historicos, setHistoricos] = useState<ProyectoHistorico[]>([]);
-  const [calces, setCalces] = useState<MatchResult[]>([]);
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
+
+  // Estado para manejar la visibilidad y posición del menú contextual
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; scores: ScoreData } | null>(null);
+
+  const AI_API_URL = "https://ai.matchafunding.com/api/v1/projects/upsertusers";
+
+  const enviarProyectoAI = async (proyecto: Proyecto) => {
+    console.log("Enviando proyecto al servicio de IA:", proyecto);
+    const payload = [{
+      ID: proyecto.ID,
+      Beneficiario: proyecto.Beneficiario,
+      Titulo: proyecto.Titulo,
+      Descripcion: proyecto.Descripcion,
+      DuracionEnMesesMinimo: proyecto.DuracionEnMesesMinimo,
+      DuracionEnMesesMaximo: proyecto.DuracionEnMesesMaximo,
+      Alcance: proyecto.Alcance,
+      Area: proyecto.Area,
+    }];
+    try {
+      const response = await fetch(AI_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Error desconocido del servidor de IA.' }));
+        console.error('Error al enviar datos a la IA:', response.status, errorData);
+        throw new Error(`El servidor de IA respondió con el estado ${response.status}`);
+      }
+      const result = await response.json();
+      console.log('Respuesta exitosa del servicio de IA:', result);
+    } catch (error) {
+      console.error("Falló la comunicación con el endpoint de la IA:", error);
+    }
+  };
 
   async function VerProyectosHistoricos(id: number) {
-  try {
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
+      const proyectoshistoricos = await VerProyectosHistoricosIAAsync();
+      console.log("Proyectos historicos:", proyectoshistoricos.projects);
 
-    const proyectoshistoricos = await VerProyectosHistoricosIAAsync();
-    console.log("Proyectos historicos:", proyectoshistoricos.projects);
+      if (proyectoshistoricos && proyectoshistoricos.projects) {
+        const calces: MatchResult[] = await VerCalceProyectosIAAsync(id);
+        console.log("Los calces fueron:", calces);
 
-    if (proyectoshistoricos && proyectoshistoricos.projects) {
-      const calce = await VerCalceProyectosIAAsync(id);
-      console.log("Los calces fueron:", calce);
+        interface ProyectoConCompatibilidad extends ProyectoHistorico {
+          Compatibilidad: number;
+          semantic_score?: number;
+          topic_score?: number;
+          rules_score?: number;
+        }
 
-    
-      const proyectosConCompatibilidad = proyectoshistoricos.projects
-        .filter((p: ProyectoHistorico) =>
-          calce.some(c => c.name === p.Titulo)
-        )
-        .map((p: ProyectoHistorico) => {
-          const match = calce.find(c => c.name === p.Titulo);
-          return {
-            ...p,
-            Compatibilidad: Math.floor((match?.affinity || 0) * 100),
-            CallId: match?.call_id, 
-          };
-        });
+        interface MatchResultExtended {
+          name: string;
+          affinity?: number;
+          semantic_score?: number;
+          topic_score?: number;
+          rules_score?: number;
+        }
 
-      setHistoricos(proyectosConCompatibilidad);
-      setCalces(calce);
+        const proyectosConCompatibilidad: ProyectoConCompatibilidad[] = proyectoshistoricos.projects
+          .map((p: ProyectoHistorico): ProyectoConCompatibilidad | null => {
+            const match: MatchResultExtended | undefined = calces.find((c: MatchResultExtended) => c.name === p.Titulo);
+
+            if (!match) {
+              return null; // Si no hay calce, no incluimos el proyecto
+            }
+
+            // Aquí guardamos los scores en el objeto de cada proyecto
+            return {
+              ...p,
+              Compatibilidad: Math.floor((match.affinity || 0) * 100),
+              semantic_score: match.semantic_score,
+              topic_score: match.topic_score,
+              rules_score: match.rules_score,
+            };
+          })
+          .filter((p: ProyectoHistorico | null): p is ProyectoHistorico => p !== null)
+
+        setHistoricos(proyectosConCompatibilidad);
+      }
+    } catch (error) {
+      console.error("Error al obtener proyectos históricos:", error);
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.error("Error al obtener proyectos históricos:", error);
-  } finally {
-    setIsLoading(false);
   }
-}
-
-
-useEffect(() => {
-  if (calces.length > 0) {
-    const affinities = calces.map(c => Math.floor(c.affinity * 100));
-    console.log("Affinitys en porcentaje:", affinities);
-  }
-}, [calces]);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowAnimation(false), 5000);
@@ -168,6 +248,7 @@ useEffect(() => {
         const project = JSON.parse(projectData);
         setSelectedProject(project);
         console.log("Proyecto seleccionado: " + JSON.stringify(project));
+        enviarProyectoAI(project);
 
         if (project.ID) {
           VerProyectosHistoricos(project.ID);
@@ -176,6 +257,15 @@ useEffect(() => {
         console.error(error);
       }
     }
+  }, []);
+
+  // Efecto para cerrar el menú contextual al hacer clic en cualquier otro lugar
+  useEffect(() => {
+    const handleClickOutside = () => setContextMenu(null);
+    window.addEventListener('click', handleClickOutside);
+    return () => {
+      window.removeEventListener('click', handleClickOutside);
+    };
   }, []);
 
   const areas = useMemo(() => ['Todas', ...new Set(historicos.map(p => p.Area))], [historicos]);
@@ -194,8 +284,16 @@ useEffect(() => {
     });
     return proyectos;
   }, [searchTerm, areaFilter, sortBy, historicos]);
-  const [showDisclaimer, setShowDisclaimer] = useState(true);
-  
+
+  // Manejador que se activa desde el ProyectoCard
+  const handleCardRightClick = (event: React.MouseEvent, scores: ScoreData) => {
+    setContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      scores: scores
+    });
+  };
+
   if (showAnimation || isLoading) {
     return (
       <div className="min-h-screen bg-[#f1f5f9] flex flex-col">
@@ -210,11 +308,10 @@ useEffect(() => {
     );
   }
 
-
   return (
     <div className="min-h-screen bg-[#f1f5f9]">
       <NavBar />
-       {showDisclaimer && <DisclaimerModal onClose={() => setShowDisclaimer(false)} />}
+      {showDisclaimer && <DisclaimerModal onClose={() => setShowDisclaimer(false)} />}
       <main className="flex-grow p-6 md:p-10 max-w-screen-2xl mx-auto mt-[5%]">
         <div className="text-center mb-10">
           {selectedProject ? (
@@ -277,7 +374,12 @@ useEffect(() => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredProyectos.length > 0 ? (
-            filteredProyectos.map(proyecto => <ProyectoCard key={proyecto.ID} {...proyecto} />)
+            filteredProyectos.map(proyecto =>
+              <ProyectoCard
+                key={proyecto.ID}
+                {...proyecto}
+                onRightClick={handleCardRightClick}
+              />)
           ) : (
             <div className="col-span-full text-center py-12">
               <p className="text-xl text-gray-500">No se encontraron proyectos históricos que coincidan con los filtros seleccionados.</p>
@@ -296,6 +398,15 @@ useEffect(() => {
           </div>
         </footer>
       </main>
+
+      {/* Renderiza el menú contextual si hay datos en el estado */}
+      {contextMenu && (
+        <ScoreContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          scores={contextMenu.scores}
+        />
+      )}
     </div>
   );
 };

@@ -21,6 +21,7 @@ const SelectProjectModal: React.FC<SelectProjectModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [postulacionActual, setPostulacionActual] = useState<Postulacion | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   // Fetch de proyectos y postulación actual
   useEffect(() => {
@@ -58,6 +59,16 @@ const SelectProjectModal: React.FC<SelectProjectModalProps> = ({
 
     fetchData();
   }, [isOpen, mode, instrumentoId]);
+
+  // Limpiar selección si el proyecto seleccionado no coincide con la búsqueda
+  useEffect(() => {
+    if (selectedProject && searchTerm) {
+      const proyecto = proyectos.find(p => p.ID.toString() === selectedProject);
+      if (proyecto && !proyecto.Titulo.toLowerCase().includes(searchTerm.toLowerCase())) {
+        setSelectedProject('');
+      }
+    }
+  }, [searchTerm, selectedProject, proyectos]);
 
   const handleUnlinkPostulacion = async () => {
     if (!postulacionActual) {
@@ -181,6 +192,7 @@ const SelectProjectModal: React.FC<SelectProjectModalProps> = ({
   const handleClose = () => {
     onClose();
     setSelectedProject('');
+    setSearchTerm('');
     setError(null);
   };
 
@@ -198,9 +210,6 @@ const SelectProjectModal: React.FC<SelectProjectModalProps> = ({
           </button>
         </div>
         <div className="select-project-modal__content">
-          <div className="select-project-modal__fondo-info">
-            <p><strong>Fondo seleccionado:</strong> {fondoTitle || 'Fondo sin título'}</p>
-          </div>
           {/* Eliminar postulación */}
           {mode === 'unlink' ? (
             <div className="select-project-modal__unlink-section">
@@ -214,10 +223,9 @@ const SelectProjectModal: React.FC<SelectProjectModalProps> = ({
                 </div>
               ) : postulacionActual ? (
                 <div className="select-project-modal__current-postulacion">
-                  <h3>Postulación actual:</h3>
                   <div className="select-project-modal__postulacion-info">
                     <p><strong>Proyecto:</strong> {proyectos.find(p => p.ID === postulacionActual.Proyecto)?.Titulo || 'Proyecto no encontrado'}</p>
-                    <p><strong>Estado:</strong> {postulacionActual.Resultado === 'PEN' ? 'Pendiente' : postulacionActual.Resultado}</p>
+                    <p><strong>Fondo:</strong> {fondoTitle || 'Fondo sin título'}</p>
                     <p><strong>Fecha de postulación:</strong> {postulacionActual.FechaDePostulacion}</p>
                   </div>
                   <p className="select-project-modal__unlink-warning">
@@ -233,7 +241,23 @@ const SelectProjectModal: React.FC<SelectProjectModalProps> = ({
           ) : (
             // Crear postulación
             <div className="select-project-modal__projects-section">
+              <div className="select-project-modal__disclaimer">
+                <p>
+                  <strong>Importante:</strong> Este proceso registra la postulación en su sistema de seguimiento personal. 
+                  La postulación oficial al fondo debe realizarse directamente a través de los canales oficiales 
+                  del financiador correspondiente. Esta funcionalidad tiene fines de gestión y monitoreo interno.
+                </p>
+              </div>
               <h3>Selecciona un proyecto:</h3>
+              <div className="select-project-modal__search-container">
+                <input
+                  type="text"
+                  placeholder="Buscar por título del proyecto..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="select-project-modal__search-input"
+                />
+              </div>
               {loading ? (
                 <div className="select-project-modal__loading">
                   Cargando proyectos...
@@ -245,7 +269,11 @@ const SelectProjectModal: React.FC<SelectProjectModalProps> = ({
               ) : (
                 <div className="select-project-modal__projects-list">
                   {proyectos.length > 0 ? (
-                    proyectos.map((proyecto) => (
+                    proyectos
+                      .filter(proyecto => 
+                        proyecto.Titulo.toLowerCase().includes(searchTerm.toLowerCase())
+                      )
+                      .map((proyecto) => (
                       <div 
                         key={proyecto.ID} 
                         className={`select-project-modal__project-item ${
@@ -265,17 +293,13 @@ const SelectProjectModal: React.FC<SelectProjectModalProps> = ({
                           <p className="select-project-modal__project-description">
                             {proyecto.Descripcion}
                           </p>
-                          <div className="select-project-modal__project-metadata">
-                            <span className="select-project-modal__project-fondo">
-                              {proyecto.fondo_seleccionado || "No asignado"}
-                            </span>
-                            <span className={`select-project-modal__project-status ${proyecto.estado?.toLowerCase().replace(' ', '_') || 'en_preparacion'}`}>
-                              {proyecto.estado || "En preparación"}
-                            </span>
-                          </div>
                         </div>
                       </div>
                     ))
+                  ) : proyectos.length > 0 ? (
+                    <div className="select-project-modal__no-projects">
+                      No se encontraron proyectos que coincidan con "{searchTerm}".
+                    </div>
                   ) : (
                     <div className="select-project-modal__no-projects">
                       Aún no tienes proyectos guardados.

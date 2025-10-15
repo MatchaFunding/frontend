@@ -76,7 +76,6 @@
   padding: 1rem;
   border-radius: 0.5rem;
   margin-bottom: 1.5rem;
-  border-left: 4px solid #8ba888;
 }
 
 .select-project-modal__fondo-info p {
@@ -89,6 +88,51 @@
   font-size: 1.125rem;
   font-weight: 600;
   color: #1e293b;
+}
+
+.select-project-modal__search-container {
+  margin-bottom: 1rem;
+}
+
+.select-project-modal__search-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #1e293b;
+  background-color: #ffffff;
+  transition: border-color 0.2s ease;
+}
+
+.select-project-modal__search-input:focus {
+  outline: none;
+  border-color: #8ba888;
+  box-shadow: 0 0 0 3px rgba(139, 168, 136, 0.1);
+}
+
+.select-project-modal__search-input::placeholder {
+  color: #94a3b8;
+}
+
+.select-project-modal__disclaimer {
+  background-color: #fefce8;
+  border: 1px solid #facc15;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.select-project-modal__disclaimer p {
+  margin: 0;
+  color: #713f12;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.select-project-modal__disclaimer strong {
+  font-weight: 600;
+  color: #92400e;
 }
 
 .select-project-modal__loading,
@@ -302,7 +346,7 @@
   background-color: #f9fafb;
   padding: 1rem;
   border-radius: 0.5rem;
-  border-left: 4px solid #8ba888;
+  border: 2px solid #8ba888;
   margin-bottom: 1rem;
 }
 
@@ -321,7 +365,6 @@
   color: #dc2626;
   padding: 1rem;
   border-radius: 0.5rem;
-  border-left: 4px solid #dc2626;
   font-weight: 500;
   margin-top: 1rem;
 }

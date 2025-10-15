@@ -53,6 +53,8 @@ const Members: React.FC = () => {
 	const [newMemberRut, setNewMemberRut] = useState('');
 	const [newTagName, setNewTagName] = useState('');
 
+    // Mostrar por consola para que compile con Vite
+    console.log(tags);
 
     useEffect(() => {
         const fetchMembers = async () => {

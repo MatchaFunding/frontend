@@ -15,6 +15,9 @@ const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ id, title, description,
   const [hasPostulacion, setHasPostulacion] = useState(false);
   const [isCheckingPostulacion, setIsCheckingPostulacion] = useState(true);
 
+  // Mostrar por consola para que compile con Vite
+  console.log(isCheckingPostulacion);
+
   // Verificar si existe postulación al montar el componente
   useEffect(() => {
     const verificarPostulacion = async () => {

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 // 1. Importamos los hooks necesarios
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import NavBar from '../../../components/NavBar/navbar';
 import { Card } from '../../../components/UI/cards';
 
@@ -29,7 +29,6 @@ const colorPalette = {
 
 const DetalleProyecto: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { proyectoId } = useParams<{ proyectoId: string }>(); // 2. Obtenemos el ID de la URL
 
   // 3. Estados para manejar los datos, la carga y los errores

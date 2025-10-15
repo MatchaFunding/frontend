@@ -14,14 +14,27 @@ const colorPalette = {
 
 
 interface Fondo {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  compatibilidad?: number; 
-  presupuesto: string;
-  categoria: string;
-  imagenUrl: string;
-  agency?: string;
+  ID: number;
+  Titulo: string;
+  Descripcion: string;
+  Beneficios: string;
+  Requisitos: string;
+  Estado: string;
+  FechaDeApertura: string;
+  FechaDeCierre: string;
+  MontoMinimo: number;
+  MontoMaximo: number;
+  DuracionEnMeses: number;
+  Alcance: string;
+  TipoDeBeneficio: string;
+  TipoDePerfil: string;
+  EnlaceDeLaFoto: string;
+  EnlaceDelDetalle: string;
+
+  compatibilidad?: number;
+  semantic_score?: number;
+  topic_score?: number;
+  rules_score?: number;
 }
 
 interface IdeaLocal {
@@ -35,45 +48,67 @@ interface IdeaLocal {
 
 const SearchIcon: React.FC = () => ( <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={colorPalette.oliveGray} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg> );
 const GraduationCapIcon: React.FC = () => ( <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={colorPalette.darkGreen} className="w-6 h-6"><path d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0l-.07.002z" /></svg> );
+const StatusBadge: React.FC<{ estado: string; className?: string }> = ({ estado, className }) => {
+  const isAbierto = estado === 'ABI';
+  const bgColor = isAbierto ? 'bg-green-100' : 'bg-red-100';
+  const textColor = isAbierto ? 'text-green-800' : 'text-red-800';
+  const text = isAbierto ? 'Abierto' : 'Cerrado';
+  const ringColor = isAbierto ? 'ring-green-200' : 'ring-red-200';
+  return (<span className={`px-3 py-1 text-xs font-bold rounded-full ring-2 ring-inset ${bgColor} ${textColor} ${ringColor} ${className}`}>{text}</span>);
+};
+const formatDate = (dateString: string) => {
+  if (!dateString) return 'N/A';
+  return new Date(dateString).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+};
+interface FondoCardProps extends Fondo {
+  onRightClick: (event: React.MouseEvent, scores: ScoreData) => void;
+}
+interface ScoreData {
+  semantic_score?: number;
+  topic_score?: number;
+  rules_score?: number;
+}
 
-
-const FondoCard: React.FC<{ fondo: Fondo }> = ({ fondo }) => {
-  const navigate = useNavigate(); 
-  
-  /*
-  const handleViewDetails = () => {
-    navigate(`/Matcha/fondos/${fondo.id}`, { state: { fondo } });
+const FondoCard: React.FC<FondoCardProps> = ({ ID, Titulo, Descripcion, compatibilidad, Estado, FechaDeCierre, MontoMaximo, TipoDeBeneficio, EnlaceDeLaFoto, semantic_score, topic_score, rules_score, onRightClick }) => {
+  const navigate = useNavigate();
+  const defaultImage = '/sin-foto.png';
+  const handleContextMenu = (event: React.MouseEvent) => {
+    event.preventDefault();
+    onRightClick(event, { semantic_score, topic_score, rules_score });
   };
-  */
-
   return (
-    <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80">
-      <div className="relative h-52">
-        <img src={fondo.imagenUrl} alt={fondo.nombre} className="w-full h-full object-cover" />
-        <span className="absolute top-4 left-4 bg-[rgba(68,98,74,0.8)] backdrop-blur-sm text-white text-sm font-semibold py-1 px-3 rounded-lg">
-          {fondo.compatibilidad}% compatibilidad
-        </span>
-        <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm w-10 h-10 rounded-full flex items-center justify-center">
-          <GraduationCapIcon />
-        </div>
+    <div onContextMenu={handleContextMenu} className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80 cursor-pointer h-[560px]">
+      <div className="relative h-52 flex-shrink-0">
+        <img src={EnlaceDeLaFoto || defaultImage} alt={Titulo} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = defaultImage; }} />
+        {compatibilidad !== undefined && (<span className="absolute top-4 left-4 bg-[rgba(68,98,74,0.8)] backdrop-blur-sm text-white text-sm font-semibold py-1 px-3 rounded-lg">{compatibilidad}% compatibilidad</span>)}
+        <StatusBadge estado={Estado} className="absolute top-4 right-4" />
       </div>
       <div className="p-6 flex flex-col flex-grow">
-        <h2 className="text-xl font-bold text-slate-800 mb-2">{fondo.nombre}</h2>
-        <p className="text-slate-500 text-sm flex-grow mb-4">{fondo.descripcion}</p>
-        <div className="flex justify-between items-center border-t border-slate-200 pt-4 mb-4">
-          <span className="bg-[rgba(139,168,136,0.2)] text-[rgba(68,98,74,1)] text-xs font-semibold px-3 py-1 rounded-full">{fondo.categoria}</span>
-          <span className="font-bold text-slate-700">{fondo.presupuesto}</span>
+        <h2 className="text-xl font-bold text-slate-800 mb-2 line-clamp-2">{Titulo}</h2>
+        <p className="text-slate-500 text-sm mb-4 line-clamp-3">{Descripcion}</p>
+        <div className="mt-auto border-t border-slate-200 pt-4 space-y-3">
+          <div className="flex items-center text-sm text-slate-600">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 text-slate-400"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M-4.5 12h22.5" /></svg>
+            <strong>Cierre:</strong><span className="ml-2">{formatDate(FechaDeCierre)}</span>
+          </div>
+          {MontoMaximo > 0 && (
+            <div className="flex items-center text-sm text-slate-600">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 text-slate-400"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <strong>Monto Máx:</strong><span className="ml-2">{new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(MontoMaximo)}</span>
+            </div>
+          )}
+          <div className="flex justify-start">
+            <span className="bg-[rgba(139,168,136,0.2)] text-[rgba(68,98,74,1)] text-xs font-semibold px-3 py-1 rounded-full">{TipoDeBeneficio}</span>
+          </div>
         </div>
-        <button
-          onClick={() => navigate("detalle")}
-          className="w-full bg-[#8ba888] hover:bg-[rgba(68,98,74,0.8)] text-white font-bold py-3 px-4 rounded-xl transition-colors duration-300"
-        >
+        <button onClick={() => navigate(`/Matcha/Select-Project/fondos/detalle/${ID}`)} className="w-full bg-[#8ba888] hover:bg-[rgba(68,98,74,0.8)] text-white font-bold py-3 px-4 rounded-xl transition-colors duration-300 mt-4">
           Ver más detalles
         </button>
       </div>
     </div>
   );
 };
+
 
 
 const FondosIdea: React.FC = () => {
@@ -222,16 +257,28 @@ const FondosIdea: React.FC = () => {
             
             // Convertir MatchResult a Fondo (usando datos reales de la API)
             const fondosFromMatch: Fondo[] = matches.map((match, index) => ({
-              id: match.call_id,
-              nombre: match.name,
-              descripcion: match.explanations.length > 0 
+              ID: match.call_id,
+              Titulo: match.name,
+              Descripcion: match.explanations.length > 0 
                 ? `${match.explanations.join(', ')}. Compatibilidad: ${(match.affinity * 100).toFixed(1)}%`
                 : `Compatibilidad: ${(match.affinity * 100).toFixed(1)}% (Semántico: ${(match.semantic_score * 100).toFixed(1)}%, Temático: ${(match.topic_score * 100).toFixed(1)}%)`,
+              Beneficios: '', // Valor por defecto
+              Requisitos: '', // Valor por defecto
+              Estado: 'ABI', // Valor por defecto, ajustar si tienes el dato
+              FechaDeApertura: '', // Valor por defecto
+              FechaDeCierre: '', // Valor por defecto
+              MontoMinimo: 0, // Valor por defecto
+              MontoMaximo: 0, // Valor por defecto
+              DuracionEnMeses: 0, // Valor por defecto
+              Alcance: '', // Valor por defecto
+              TipoDeBeneficio: '', // Valor por defecto
+              TipoDePerfil: '', // Valor por defecto
+              EnlaceDeLaFoto: `https://images.unsplash.com/photo-${1542744173000 + index}?auto=format&fit=crop&w=800&q=60`,
+              EnlaceDelDetalle: '', // Valor por defecto
               compatibilidad: Math.round(match.affinity * 100),
-              presupuesto: 'Consultar detalles en la institución',
-              categoria: match.agency || 'Sin categoría',
-              imagenUrl: `https://images.unsplash.com/photo-${1542744173000 + index}?auto=format&fit=crop&w=800&q=60`,
-              agency: match.agency
+              semantic_score: match.semantic_score,
+              topic_score: match.topic_score,
+              rules_score: match.rules_score
             }));
             
             console.log('Fondos convertidos exitosamente:', fondosFromMatch.length, 'fondos');
@@ -254,7 +301,7 @@ const FondosIdea: React.FC = () => {
   }, []);
 
   const categorias = useMemo(() => {
-    const allCategorias = matchedFondos.map(f => f.categoria).filter(Boolean);
+    const allCategorias = matchedFondos.map(f => f.Alcance).filter(Boolean);
     return ['Todas', ...new Set(allCategorias)];
   }, [matchedFondos]);
 
@@ -265,17 +312,17 @@ const FondosIdea: React.FC = () => {
 
     let fondosConMatch: Fondo[] = [...matchedFondos];
 
-    if (searchTerm) fondosConMatch = fondosConMatch.filter(f => f.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
-    if (categoriaFilter !== 'Todas') fondosConMatch = fondosConMatch.filter(f => f.categoria === categoriaFilter);
+    if (searchTerm) fondosConMatch = fondosConMatch.filter(f => f.Titulo.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (categoriaFilter !== 'Todas') fondosConMatch = fondosConMatch.filter(f => f.Alcance === categoriaFilter);
 
     fondosConMatch.sort((a, b) => {
       switch (sortBy) {
-        case 'alfabetico': return a.nombre.localeCompare(b.nombre);
+        case 'alfabetico': return a.Titulo.localeCompare(b.Titulo);
         case 'compatibilidad': return (b.compatibilidad ?? 0) - (a.compatibilidad ?? 0);
         case 'presupuesto':
           // Para presupuestos de API que son "Consultar en detalle", mantener el orden actual
-          const aPresupuesto = parseInt(a.presupuesto.replace(/[^0-9]/g, ''), 10) || 0;
-          const bPresupuesto = parseInt(b.presupuesto.replace(/[^0-9]/g, ''), 10) || 0;
+          const aPresupuesto = a.MontoMinimo || 0;
+          const bPresupuesto = b.MontoMaximo || 0;
           return bPresupuesto - aPresupuesto;
         default: return 0;
       }
@@ -366,7 +413,32 @@ const FondosIdea: React.FC = () => {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {matchedAndFilteredFondos.map(fondo => <FondoCard key={fondo.id} fondo={fondo} />)}
+          {matchedAndFilteredFondos.map(fondo => (
+            <FondoCard
+              key={fondo.ID}
+              ID={fondo.ID}
+              Titulo={fondo.Titulo}
+              Descripcion={fondo.Descripcion}
+              Beneficios={fondo.Beneficios}
+              Requisitos={fondo.Requisitos}
+              Estado={fondo.Estado}
+              FechaDeApertura={fondo.FechaDeApertura}
+              FechaDeCierre={fondo.FechaDeCierre}
+              MontoMinimo={fondo.MontoMinimo}
+              MontoMaximo={fondo.MontoMaximo}
+              DuracionEnMeses={fondo.DuracionEnMeses}
+              Alcance={fondo.Alcance}
+              TipoDeBeneficio={fondo.TipoDeBeneficio}
+              TipoDePerfil={fondo.TipoDePerfil}
+              EnlaceDeLaFoto={fondo.EnlaceDeLaFoto}
+              EnlaceDelDetalle={fondo.EnlaceDelDetalle}
+              compatibilidad={fondo.compatibilidad}
+              semantic_score={fondo.semantic_score}
+              topic_score={fondo.topic_score}
+              rules_score={fondo.rules_score}
+              onRightClick={() => {}}
+            />
+          ))}
         </div>
 
       </main>

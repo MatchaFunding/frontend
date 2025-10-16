@@ -58,7 +58,7 @@ function DropdownMenu({ navigate }: { navigate: (path: string) => void }) {
           </button>   */}
 
           <button onClick={() => { setOpen(false); navigate("/Proyectos"); }} className="block w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
-            Proyectos
+            Ideas y proyectos
           </button>
           <button onClick={() => { setOpen(false); navigate("/Perfil"); }} className="block w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
             Perfil
@@ -130,9 +130,6 @@ const NavBar: React.FC = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-[#9ab05f] shadow-lg z-40">
           <div className="px-6 py-4 space-y-1">
-            <div className="text-white font-bold text-lg mb-4 border-b border-white/20 pb-2">
-              Menú principal
-            </div>
             <button onClick={() => { navigate("/free-search"); setIsMobileMenuOpen(false); }} className="block w-full text-left text-white font-semibold px-4 py-3 rounded-lg hover:bg-white/20 transition-colors">
               Búsqueda libre
             </button>
@@ -148,11 +145,9 @@ const NavBar: React.FC = () => {
             <button onClick={() => { navigate("/Matcha/Select-Project"); setIsMobileMenuOpen(false); }} className="block w-full text-left text-white font-semibold px-4 py-3 rounded-lg hover:bg-white/20 transition-colors"> 
               Match fondos
             </button>
-            <button onClick={() => {navigate("/edit-profile"); setIsMobileMenuOpen(false);}} className="block w-full text-left text-white font-semibold px-4 py-3 rounded-lg hover:bg-white/20 transition-colors">
-              Editar perfil
-            </button>
+            <div className="border-t border-white/20 my-2"></div>
             <button onClick={() => {navigate("/Proyectos"); setIsMobileMenuOpen(false);}} className="block w-full text-left text-white font-semibold px-4 py-3 rounded-lg hover:bg-white/20 transition-colors">
-              Proyectos
+              Ideas y proyectos
             </button>
             <button onClick={() => {navigate("/Perfil"); setIsMobileMenuOpen(false);}} className="block w-full text-left text-white font-semibold px-4 py-3 rounded-lg hover:bg-white/20 transition-colors">
               Perfil

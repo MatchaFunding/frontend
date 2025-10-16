@@ -1,7 +1,6 @@
-
 import { useState, useMemo, useEffect } from 'react';
 import NavBar from '../../../components/NavBar/navbar';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
 import { VerProyectosHistoricosIAAsync } from '../../../api/VerProyectosHistoricosIA';
 import { VerCalceProyectosIAAsync } from '../../../api/VerCalceProyectosIA';
@@ -16,7 +15,8 @@ const colorPalette = {
   lightGray: '#f1f5f9',
 };
 
-// Interfaz actualizada para incluir los scores
+// --- INTERFACES ---
+
 interface ProyectoHistorico {
   ID: number;
   Beneficiario: number;
@@ -28,22 +28,9 @@ interface ProyectoHistorico {
   Area: string;
   Compatibilidad?: number;
   ImagenUrl?: string;
-  // Nuevos campos para almacenar los scores del calce
   semantic_score?: number;
   topic_score?: number;
   rules_score?: number;
-}
-
-// Interfaz para el objeto de scores que se mostrará
-interface ScoreData {
-  semantic_score?: number;
-  topic_score?: number;
-  rules_score?: number;
-}
-
-// Interfaz para las props del ProyectoCard, incluyendo el manejador de evento
-interface ProyectoCardProps extends ProyectoHistorico {
-  onRightClick: (event: React.MouseEvent, scores: ScoreData) => void;
 }
 
 interface ProyectoSeleccionado {
@@ -55,28 +42,57 @@ interface ProyectoSeleccionado {
   DuracionEnMesesMaximo:number;
   Alcance: string;
   Area:string;
-
 }
 
-// --- Componentes Adicionales ---
+interface ScoreData {
+  semantic_score?: number;
+  topic_score?: number;
+  rules_score?: number;
+}
 
-// Componente para el menú contextual que muestra los scores
-const ScoreContextMenu: React.FC<{ x: number, y: number, scores: ScoreData }> = ({ x, y, scores }) => {
+// --- COMPONENTE PARA EL MENÚ CONTEXTUAL ---
+
+interface ContextMenuProps {
+  x: number;
+  y: number;
+  data: ScoreData | null;
+  onClose: () => void;
+}
+
+const ScoreContextMenu: React.FC<ContextMenuProps> = ({ x, y, data }) => {
+  if (!data) return null;
+
+  const formatScore = (score?: number) => {
+    if (score === undefined || score === null) return 'N/A';
+    return `${(score * 100).toFixed(1)}%`;
+  };
+
   return (
     <div
-      style={{ top: y, left: x, position: 'fixed' }}
-      className="bg-white p-4 rounded-lg shadow-xl z-50 border border-slate-200"
-      onClick={(e) => e.stopPropagation()} // Evita que el clic dentro del menú lo cierre
+      style={{ top: y, left: x }}
+      className="absolute bg-white rounded-lg shadow-2xl p-4 z-50 border border-slate-200 w-64 animate-fade-in-fast"
     >
-      <h4 className="font-bold text-slate-800 mb-2 text-md">Scores del Calce de IA</h4>
-      <ul className="text-sm text-slate-600 space-y-1">
-        <li><strong>Semantic Score:</strong> {scores.semantic_score?.toFixed(4) ?? 'N/A'}</li>
-        <li><strong>Topic Score:</strong> {scores.topic_score ?? 'N/A'}</li>
-        <li><strong>Rules Score:</strong> {scores.rules_score ?? 'N/A'}</li>
-      </ul>
+      <h4 className="font-bold text-slate-800 text-lg mb-2">Detalle de Afinidad</h4>
+      <div className="space-y-2 text-sm">
+        <div className="flex justify-between items-center">
+          <span className="text-slate-600">Puntaje Semántico:</span>
+          <span className="font-semibold text-slate-800 bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">{formatScore(data.semantic_score)}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-slate-600">Puntaje Temático:</span>
+          <span className="font-semibold text-slate-800 bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">{formatScore(data.topic_score)}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-slate-600">Puntaje por Reglas:</span>
+          <span className="font-semibold text-slate-800 bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">{formatScore(data.rules_score)}</span>
+        </div>
+      </div>
+       <p className="text-xs text-slate-400 mt-3 italic">Estos puntajes miden qué tan bien coincide tu proyecto con otros históricos.</p>
     </div>
   );
 };
+
+// --- COMPONENTES AUXILIARES ---
 
 const SearchIcon: React.FC = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={colorPalette.oliveGray} className="w-5 h-5">
@@ -84,34 +100,34 @@ const SearchIcon: React.FC = () => (
   </svg>
 );
 
-// --- Componente de Tarjeta de Proyecto Modificado ---
+// --- COMPONENTE DE TARJETA DE PROYECTO ---
 
 interface ProyectoCardProps {
-  ID: number; // <-- ¡AÑADIDO!
+  ID: number;
   Titulo: string;
   Descripcion: string;
   Area: string;
   Alcance: string;
   DuracionEnMesesMinimo: number;
   DuracionEnMesesMaximo: number;
-  Compatibilidad: number;
+  Compatibilidad?: number;
   ImagenUrl?: string;
-  semantic_score: number;
-  topic_score: number;
-  rules_score: number;
+  semantic_score?: number;
+  topic_score?: number;
+  rules_score?: number;
   onRightClick: (event: React.MouseEvent, scores: ScoreData) => void;
 }
 
 const ProyectoCard: React.FC<ProyectoCardProps> = ({
-  ID, // <-- ¡AÑADIDO! Lo desestructuramos de las props
-  Titulo, Descripcion, Area, Alcance, DuracionEnMesesMinimo, DuracionEnMesesMaximo, Compatibilidad, ImagenUrl,
+  ID, Titulo, Descripcion, Area, Alcance, DuracionEnMesesMinimo, DuracionEnMesesMaximo, Compatibilidad, ImagenUrl,
   semantic_score, topic_score, rules_score, onRightClick
 }) => {
   const navigate = useNavigate();
   const defaultImage = '/sin-foto.png';
 
   const handleContextMenu = (event: React.MouseEvent) => {
-    event.preventDefault();
+    event.preventDefault(); // Previene el menú nativo del navegador
+    event.stopPropagation(); // Detiene la propagación del evento para que no active otros listeners
     onRightClick(event, { semantic_score, topic_score, rules_score });
   };
 
@@ -121,30 +137,19 @@ const ProyectoCard: React.FC<ProyectoCardProps> = ({
       className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80 h-[560px] cursor-pointer"
     >
       <div className="relative h-52 flex-shrink-0">
-        <img
-          src={ImagenUrl || defaultImage}
-          alt={Titulo}
-          className="w-full h-full object-cover"
-          onError={(e) => { e.currentTarget.src = defaultImage; }}
-        />
+        <img src={ImagenUrl || defaultImage} alt={Titulo} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = defaultImage; }}/>
         <span className="absolute top-4 left-4 bg-[rgba(68,98,74,0.8)] backdrop-blur-sm text-white text-sm font-semibold py-1 px-3 rounded-lg">
           {Compatibilidad || 0}% compatibilidad
         </span>
       </div>
       <div className="p-6 flex flex-col flex-grow min-h-0">
         <h2 className="text-xl font-bold text-slate-800 mb-2 line-clamp-2 flex-shrink-0">{Titulo}</h2>
-        <p
-          className="text-slate-500 text-sm mb-4 overflow-hidden flex-shrink-0"
-          style={{ display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical', lineHeight: '1.4', maxHeight: 'calc(1.4em * 5)', minHeight: 'calc(1.4em * 5)' }}
-        >
-          {Descripcion}
-        </p>
+        <p className="text-slate-500 text-sm mb-4 line-clamp-5 overflow-hidden flex-shrink-0">{Descripcion}</p>
         <div className="mt-auto flex-shrink-0">
           <p className="text-xs text-slate-400 italic mb-2">Área: {Area}</p>
           <p className="text-xs text-slate-400 italic mb-2">Duración: {DuracionEnMesesMinimo}-{DuracionEnMesesMaximo} meses</p>
           <p className="text-xs text-slate-400 italic mb-4">Alcance: {Alcance}</p>
           <button
-            // 2. Modificamos el onClick para usar el ID en la URL
             onClick={() => navigate(`/Matcha/My-projects/proyectos-historicos/Detalle/${ID}`)}
             className="w-full bg-[#8ba888] hover:bg-[rgba(68,98,74,0.8)] text-white font-bold py-3 px-4 rounded-xl transition-colors duration-300"
           >
@@ -157,7 +162,8 @@ const ProyectoCard: React.FC<ProyectoCardProps> = ({
 };
 
 
-// --- Componente Principal ---
+
+// --- COMPONENTE PRINCIPAL ---
 
 const ProyectosHistoricosConPorcentaje: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<ProyectoSeleccionado | null>(null);
@@ -167,12 +173,11 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [showAnimation, setShowAnimation] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-
   const [historicos, setHistoricos] = useState<ProyectoHistorico[]>([]);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
-
-  // Estado para manejar la visibilidad y posición del menú contextual
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; scores: ScoreData } | null>(null);
+  
+  // Estado para el menú contextual
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; data: ScoreData } | null>(null);
 
   const AI_API_URL = "https://ai.matchafunding.com/api/v1/projects/upsertusers";
 
@@ -206,40 +211,20 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
     }
   };
 
+  //const enviarProyectoAI = async (proyecto: Proyecto) => {
+  // ... tu lógica para enviar el proyecto (sin cambios)
+  //};
+
   async function VerProyectosHistoricos(id: number) {
     try {
       setIsLoading(true);
       const proyectoshistoricos = await VerProyectosHistoricosIAAsync();
-      console.log("Proyectos historicos:", proyectoshistoricos.projects);
-
       if (proyectoshistoricos && proyectoshistoricos.projects) {
         const calces: MatchResult[] = await VerCalceProyectosIAAsync(id);
-        console.log("Los calces fueron:", calces);
-
-        interface ProyectoConCompatibilidad extends ProyectoHistorico {
-          Compatibilidad: number;
-          semantic_score?: number;
-          topic_score?: number;
-          rules_score?: number;
-        }
-
-        interface MatchResultExtended {
-          name: string;
-          affinity?: number;
-          semantic_score?: number;
-          topic_score?: number;
-          rules_score?: number;
-        }
-
-        const proyectosConCompatibilidad: ProyectoConCompatibilidad[] = proyectoshistoricos.projects
-          .map((p: ProyectoHistorico): ProyectoConCompatibilidad | null => {
-            const match: MatchResultExtended | undefined = calces.find((c: MatchResultExtended) => c.name === p.Titulo);
-
-            if (!match) {
-              return null; // Si no hay calce, no incluimos el proyecto
-            }
-
-            // Aquí guardamos los scores en el objeto de cada proyecto
+        const proyectosConCompatibilidad: ProyectoHistorico[] = proyectoshistoricos.projects
+          .map((p: ProyectoHistorico) => {
+            const match = calces.find((c) => c.name === p.Titulo);
+            if (!match) return null;
             return {
               ...p,
               Compatibilidad: Math.floor((match.affinity || 0) * 100),
@@ -247,9 +232,7 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
               topic_score: match.topic_score,
               rules_score: match.rules_score,
             };
-          })
-          .filter((p: ProyectoHistorico | null): p is ProyectoHistorico => p !== null)
-
+          }).filter((p: ProyectoHistorico | null): p is ProyectoHistorico => p !== null);
         setHistoricos(proyectosConCompatibilidad);
       }
     } catch (error) {
@@ -270,26 +253,29 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
       try {
         const project = JSON.parse(projectData);
         setSelectedProject(project);
-        console.log("Proyecto seleccionado: " + JSON.stringify(project));
         enviarProyectoAI(project);
-
-        if (project.ID) {
-          VerProyectosHistoricos(project.ID);
-        }
-      } catch (error) {
-        console.error(error);
-      }
+        if (project.ID) VerProyectosHistoricos(project.ID);
+      } catch (error) { console.error(error); }
     }
   }, []);
 
-  // Efecto para cerrar el menú contextual al hacer clic en cualquier otro lugar
+  // --- useEffect CORREGIDO para cerrar el menú ---
   useEffect(() => {
+    // Función que se ejecutará al hacer click fuera
     const handleClickOutside = () => setContextMenu(null);
-    window.addEventListener('click', handleClickOutside);
+
+    // Solo añadimos el listener si el menú está visible
+    if (contextMenu) {
+      window.addEventListener('click', handleClickOutside);
+      window.addEventListener('contextmenu', handleClickOutside); // También cierra con otro click derecho
+    }
+
+    // Función de limpieza: se ejecuta cuando el componente se desmonta o cuando `contextMenu` cambia
     return () => {
       window.removeEventListener('click', handleClickOutside);
+      window.removeEventListener('contextmenu', handleClickOutside);
     };
-  }, []);
+  }, [contextMenu]); // La dependencia clave: se ejecuta cada vez que `contextMenu` cambia
 
   const areas = useMemo(() => ['Todas', ...new Set(historicos.map(p => p.Area))], [historicos]);
 
@@ -308,12 +294,11 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
     return proyectos;
   }, [searchTerm, areaFilter, sortBy, historicos]);
 
-  // Manejador que se activa desde el ProyectoCard
   const handleCardRightClick = (event: React.MouseEvent, scores: ScoreData) => {
     setContextMenu({
       x: event.clientX,
       y: event.clientY,
-      scores: scores
+      data: scores
     });
   };
 
@@ -343,40 +328,21 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
               <h2 className="text-3xl font-semibold text-[#44624a] mt-1">"{selectedProject.Titulo}"</h2>
             </>
           ) : (
-            <h1 className="text-4xl font-bold text-[#505143]">Explorar Todos los Fondos</h1>
+            <h1 className="text-4xl font-bold text-[#505143]">Explorar Todos los Proyectos Históricos</h1>
           )}
         </div>
 
         <header className="bg-white p-4 sm:p-6 rounded-2xl shadow-md mb-8 flex flex-col sm:flex-row items-center gap-4">
           <div className="relative w-full sm:flex-grow">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <SearchIcon />
-            </div>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Busca un proyecto histórico..."
-              className="w-full bg-[rgba(241,245,249,1)] border border-[rgba(80,81,67,0.3)] rounded-lg py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-[rgba(68,98,74,1)]"
-            />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><SearchIcon /></div>
+            <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Busca un proyecto histórico..." className="w-full bg-[rgba(241,245,249,1)] border border-[rgba(80,81,67,0.3)] rounded-lg py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-[rgba(68,98,74,1)]" />
           </div>
-
           <div className="flex items-center gap-2">
-            <select
-              value={areaFilter}
-              onChange={(e) => setAreaFilter(e.target.value)}
-              className="bg-[rgba(139,168,136,0.2)] text-[rgba(80,81,67,1)] font-semibold py-3 px-5 rounded-lg cursor-pointer focus:outline-none"
-            >
+            <select value={areaFilter} onChange={(e) => setAreaFilter(e.target.value)} className="bg-[rgba(139,168,136,0.2)] text-[rgba(80,81,67,1)] font-semibold py-3 px-5 rounded-lg cursor-pointer focus:outline-none">
               {areas.map(area => <option key={area} value={area}>{area}</option>)}
             </select>
-
             <div className="relative">
-              <button
-                onClick={() => setDropdownOpen(!isDropdownOpen)}
-                className="bg-[rgba(139,168,136,0.2)] text-[rgba(80,81,67,1)] font-semibold py-3 px-5 rounded-lg transition-colors"
-              >
-                Ordenar
-              </button>
+              <button onClick={() => setDropdownOpen(!isDropdownOpen)} className="bg-[rgba(139,168,136,0.2)] text-[rgba(80,81,67,1)] font-semibold py-3 px-5 rounded-lg transition-colors">Ordenar</button>
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl z-10">
                   <button onClick={() => { setSortBy('alfabetico'); setDropdownOpen(false); }} className="block px-4 py-2 text-[rgba(80,81,67,1)] hover:bg-[rgba(139,168,136,0.2)] w-full text-left">Alfabético</button>
@@ -388,50 +354,28 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
           </div>
         </header>
 
-        {!selectedProject && (
-          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-8">
-            <p className="font-bold">No has seleccionado un proyecto.</p>
-            <p>Mostrando todos los proyectos históricos adjudicados. Para ver compatibilidad personalizada, <Link to="/Matcha/My-projects" className="underline font-semibold">selecciona un proyecto primero</Link>.</p>
-          </div>
-        )}
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredProyectos.length > 0 ? (
             filteredProyectos.map(proyecto =>
               <ProyectoCard
                 key={proyecto.ID}
                 {...proyecto}
-                Compatibilidad={proyecto.Compatibilidad ?? 0}
-                semantic_score={proyecto.semantic_score ?? 0}
-                topic_score={proyecto.topic_score ?? 0}
-                rules_score={proyecto.rules_score ?? 0}
                 onRightClick={handleCardRightClick}
               />)
           ) : (
             <div className="col-span-full text-center py-12">
-              <p className="text-xl text-gray-500">No se encontraron proyectos históricos que coincidan con los filtros seleccionados.</p>
+              <p className="text-xl text-gray-500">No se encontraron proyectos históricos que coincidan.</p>
             </div>
           )}
         </div>
-
-        <footer className="flex flex-col sm:flex-row justify-between items-center mt-10 text-[rgba(80,81,67,1)]">
-          <p>Mostrando {filteredProyectos.length} de {historicos.length} proyectos</p>
-          <div className="flex items-center gap-2 mt-4 sm:mt-0">
-            <button className="px-3 py-1 border rounded-lg hover:bg-[rgba(139,168,136,0.2)]">&lt;</button>
-            <button className="px-3 py-1 border rounded-lg bg-[rgba(68,98,74,1)] text-white border-[rgba(68,98,74,1)]">1</button>
-            <button className="px-3 py-1 border rounded-lg hover:bg-[rgba(139,168,136,0.2)]">2</button>
-            <button className="px-3 py-1 border rounded-lg hover:bg-[rgba(139,168,136,0.2)]">3</button>
-            <button className="px-3 py-1 border rounded-lg hover:bg-[rgba(139,168,136,0.2)]">&gt;</button>
-          </div>
-        </footer>
       </main>
 
-      {/* Renderiza el menú contextual si hay datos en el estado */}
       {contextMenu && (
         <ScoreContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
-          scores={contextMenu.scores}
+          data={contextMenu.data}
+          onClose={() => setContextMenu(null)}
         />
       )}
     </div>

@@ -295,7 +295,7 @@ const CrearProyectoMatch: React.FC = () => {
 
     <div className="min-h-screen bg-slate-50">
       <NavBar />
-      <main className="flex flex-col items-center justify-center px-4 py-10 mt-[5%]">
+      <main className="flex flex-col items-center justify-center px-4 py-10 mt-16 md:mt-20 lg:mt-[5%]">
         {formData.isFromConvertedIdea && (
           <div className="w-full max-w-3xl mb-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
             <div className="flex items-center">

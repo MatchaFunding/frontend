@@ -7,6 +7,7 @@ export default defineConfig({
 
   server: {
     allowedHosts: [
+      'matchafunding.com',
       'website.matchafunding.com',
       'ipod-ha-reel-tennessee.trycloudflare.com'
     ]

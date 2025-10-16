@@ -9,12 +9,14 @@ import { VerFondosIAAsync } from '../../../api/VerFondosIA';
 import { getMatchProyectoFondosAsync } from '../../../api/MatchFondos';
 import type Proyecto from '../../../models/Proyecto';
 
+/*
 const colorPalette = {
   darkGreen: '#44624a',
   softGreen: '#8ba888',
   oliveGray: '#505143',
   lightGray: '#f1f5f9',
 };
+*/
 
 // --- INTERFACES ---
 
@@ -85,6 +87,8 @@ const ScoreContextMenu: React.FC<ContextMenuProps> = ({ x, y, scores, onClose })
     if (score === undefined || score === null) return 'N/A';
     return `${(score * 100).toFixed(1)}%`;
   };
+
+  console.log(onClose);
 
   return (
     <div

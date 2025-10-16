@@ -3,7 +3,7 @@ import NavBar from '../../../components/NavBar/navbar';
 import { useNavigate } from 'react-router-dom';
 import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
 import LoopAnimation from '../../../components/Shared/animationFrame';
-import { getMatchFondosAsync, processIdeaAsync, checkCollectionsHealth, type ProcessIdeaRequest } from '../../../api/MatchFondos';
+import { getMatchFondosAsync, processIdeaAsync, type ProcessIdeaRequest } from '../../../api/MatchFondos';
 
 const colorPalette = {
   darkGreen: '#44624a',

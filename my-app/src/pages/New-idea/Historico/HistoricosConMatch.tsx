@@ -1,12 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
 import NavBar from '../../../components/NavBar/navbar';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
 import { VerProyectosHistoricosIAAsync } from '../../../api/VerProyectosHistoricosIA';
 import { VerCalceProyectosIAAsync } from '../../../api/VerCalceProyectosIA';
 import LoopAnimation from '../../../components/Shared/animationFrame';
 import type MatchResult from '../../../models/MatchResult';
-import Proyecto from '../../../models/Proyecto';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -177,9 +176,9 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
   // Estado para el menú contextual
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; data: ScoreData } | null>(null);
 
-  const enviarProyectoAI = async (proyecto: Proyecto) => {
-    // ... tu lógica para enviar el proyecto (sin cambios)
-  };
+  //const enviarProyectoAI = async (proyecto: Proyecto) => {
+  // ... tu lógica para enviar el proyecto (sin cambios)
+  //};
 
   async function VerProyectosHistoricos(id: number) {
     try {

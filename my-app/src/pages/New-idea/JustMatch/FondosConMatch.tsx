@@ -9,6 +9,15 @@ import { VerFondosIAAsync } from '../../../api/VerFondosIA';
 import { getMatchProyectoFondosAsync } from '../../../api/MatchFondos';
 import type Proyecto from '../../../models/Proyecto';
 
+const colorPalette = {
+  darkGreen: '#44624a',
+  softGreen: '#8ba888',
+  oliveGray: '#505143',
+  lightGray: '#f1f5f9',
+};
+
+// --- INTERFACES ---
+
 interface ProyectoSeleccionado {
   id: number;
   nombre: string;
@@ -40,7 +49,6 @@ interface Fondo {
   rules_score?: number;
 }
 
-
 interface MatchFondo {
   call_id: number; 
   affinity: number;
@@ -49,11 +57,9 @@ interface MatchFondo {
   rules_score: number;
 }
 
-
 interface VerFondosResponse {
   funds: Fondo[];
 }
-
 
 interface ScoreData {
   semantic_score?: number;
@@ -65,18 +71,55 @@ interface FondoCardProps extends Fondo {
   onRightClick: (event: React.MouseEvent, scores: ScoreData) => void;
 }
 
+// --- COMPONENTE PARA EL MENÚ CONTEXTUAL (SCORE CONTEXT MENU) ---
 
+interface ContextMenuProps {
+    x: number;
+    y: number;
+    scores: ScoreData;
+    onClose: () => void;
+}
 
-const ScoreContextMenu: React.FC<{ x: number, y: number, scores: ScoreData }> = ({ x, y, scores }) => (
-  <div style={{ top: y, left: x, position: 'fixed' }} className="bg-white p-4 rounded-lg shadow-xl z-50 border border-slate-200" onClick={(e) => e.stopPropagation()}>
-    <h4 className="font-bold text-slate-800 mb-2 text-md">Scores del Calce de IA</h4>
-    <ul className="text-sm text-slate-600 space-y-1">
-      <li><strong>Semantic Score:</strong> {scores.semantic_score?.toFixed(4) ?? 'N/A'}</li>
-      <li><strong>Topic Score:</strong> {scores.topic_score?.toFixed(4) ?? 'N/A'}</li>
-      <li><strong>Rules Score:</strong> {scores.rules_score?.toFixed(4) ?? 'N/A'}</li>
-    </ul>
-  </div>
-);
+const ScoreContextMenu: React.FC<ContextMenuProps> = ({ x, y, scores, onClose }) => {
+  const formatScore = (score?: number) => {
+    if (score === undefined || score === null) return 'N/A';
+    return `${(score * 100).toFixed(1)}%`;
+  };
+
+  return (
+    <div
+      style={{ top: y, left: x }}
+      className="absolute bg-white rounded-lg shadow-2xl p-4 z-50 border border-slate-200 w-64 animate-fade-in-fast"
+      // Detiene la propagación del click dentro del menú para que no se cierre inmediatamente
+      onContextMenu={(e) => e.stopPropagation()} 
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h4 className="font-bold text-slate-800 text-lg mb-2">Detalle de Afinidad</h4>
+      <div className="space-y-2 text-sm">
+        <div className="flex justify-between items-center">
+          <span className="text-slate-600">Puntaje Semántico:</span>
+          <span className="font-semibold text-slate-800 bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+            {formatScore(scores.semantic_score)}
+          </span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-slate-600">Puntaje Temático:</span>
+          <span className="font-semibold text-slate-800 bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
+            {formatScore(scores.topic_score)}
+          </span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-slate-600">Puntaje por Reglas:</span>
+          <span className="font-semibold text-slate-800 bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
+            {formatScore(scores.rules_score)}
+          </span>
+        </div>
+      </div>
+       <p className="text-xs text-slate-400 mt-3 italic">Estos puntajes miden qué tan bien coincide tu proyecto con el fondo en diferentes aspectos.</p>
+    </div>
+  );
+};
+
 
 const SearchIcon: React.FC = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#505143" className="w-5 h-5">
@@ -95,16 +138,26 @@ const StatusBadge: React.FC<{ estado: string; className?: string }> = ({ estado,
 
 const formatDate = (dateString: string) => {
   if (!dateString) return 'N/A';
-  return new Date(dateString).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Fecha inválida';
+    return date.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  } catch (error) {
+    return 'Fecha inválida';
+  }
 };
 
+// --- COMPONENTE FondoCard (Corregido) ---
 const FondoCard: React.FC<FondoCardProps> = ({ ID, Titulo, Descripcion, compatibilidad, Estado, FechaDeCierre, MontoMaximo, TipoDeBeneficio, EnlaceDeLaFoto, semantic_score, topic_score, rules_score, onRightClick }) => {
   const navigate = useNavigate();
   const defaultImage = '/sin-foto.png';
+
   const handleContextMenu = (event: React.MouseEvent) => {
     event.preventDefault();
+    event.stopPropagation(); // Importante: Detener la propagación
     onRightClick(event, { semantic_score, topic_score, rules_score });
   };
+
   return (
     <div onContextMenu={handleContextMenu} className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80 cursor-pointer h-[560px]">
       <div className="relative h-52 flex-shrink-0">
@@ -141,7 +194,6 @@ const FondoCard: React.FC<FondoCardProps> = ({ ID, Titulo, Descripcion, compatib
 
 // --- COMPONENTE PRINCIPAL ---
 const FondosconPorcentaje: React.FC = () => {
-  // --- ESTADOS ---
   const [selectedProject, setSelectedProject] = useState<ProyectoSeleccionado | null>(null);
   const [fondos, setFondos] = useState<Fondo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -152,45 +204,34 @@ const FondosconPorcentaje: React.FC = () => {
   const [sortBy, setSortBy] = useState<'compatibilidad' | 'alfabetico' | 'presupuesto'>('compatibilidad');
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
+  
+  // Estado para el menú contextual
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; scores: ScoreData } | null>(null);
+  
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 8;
   
   // --- FUNCIONES ASÍNCRONAS ---
 
-  // Función para enviar (upsert) el proyecto a la IA. Es asíncrona y devuelve una promesa.
   const enviarProyectoAI = async (proyecto: Proyecto): Promise<void> => {
     const AI_API_URL = "https://ai.matchafunding.com/api/v1/projects/upsertusers";
-    console.log("Enviando proyecto al servicio de IA:", proyecto);
     const payload = [{
-      ID: proyecto.ID,
-      Beneficiario: proyecto.Beneficiario,
-      Titulo: proyecto.Titulo,
-      Descripcion: proyecto.Descripcion,
-      DuracionEnMesesMinimo: proyecto.DuracionEnMesesMinimo,
-      DuracionEnMesesMaximo: proyecto.DuracionEnMesesMaximo,
-      Alcance: proyecto.Alcance,
-      Area: proyecto.Area,
+      ID: proyecto.ID, Beneficiario: proyecto.Beneficiario, Titulo: proyecto.Titulo, Descripcion: proyecto.Descripcion,
+      DuracionEnMesesMinimo: proyecto.DuracionEnMesesMinimo, DuracionEnMesesMaximo: proyecto.DuracionEnMesesMaximo,
+      Alcance: proyecto.Alcance, Area: proyecto.Area,
     }];
 
     try {
       const response = await fetch(AI_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Error desconocido del servidor de IA.' }));
-        console.error('Error al enviar datos a la IA:', response.status, errorData);
-        throw new Error(`El servidor de IA respondió con un error al registrar el proyecto (estado ${response.status})`);
+        throw new Error(`El servidor de IA respondió con un error al registrar el proyecto (estado ${response.status}): ${errorData.message}`);
       }
-      
-      const result = await response.json();
-      console.log('Respuesta exitosa del servicio de IA (Upsert):', result);
     } catch (error) {
       console.error("Falló la comunicación con el endpoint de upsert de la IA:", error);
-      // Relanzamos el error para que el 'catch' del useEffect lo capture y actualice la UI.
       throw error;
     }
   };
@@ -198,7 +239,6 @@ const FondosconPorcentaje: React.FC = () => {
   // --- HOOKS DE EFECTO ---
 
   useEffect(() => {
-    // ---- LÓGICA DE CARGA SECUENCIAL Y CORRECTA ----
     const CargarFondosConMatch = async () => {
       setIsLoading(true);
       setError(null);
@@ -215,10 +255,10 @@ const FondosconPorcentaje: React.FC = () => {
         const project: Proyecto = JSON.parse(projectData);
         setSelectedProject({ id: project.ID, nombre: project.Titulo, resumen: project.Descripcion, area: project.Area });
 
-        // PASO 1: "Upsert" del proyecto en la API de IA. Usamos await para esperar que termine.
+        // PASO 1: "Upsert" del proyecto
         await enviarProyectoAI(project);
         
-        // PASO 2: Una vez el upsert es exitoso, obtenemos los matches y la lista de fondos en paralelo.
+        // PASO 2: Obtener matches y lista de fondos
         const [matches, todosLosFondosResponse] = await Promise.all([
           getMatchProyectoFondosAsync({ idea_id: project.ID }) as Promise<MatchFondo[]>,
           VerFondosIAAsync() as Promise<VerFondosResponse>
@@ -226,7 +266,7 @@ const FondosconPorcentaje: React.FC = () => {
 
         const listaDeFondosCompleta: Fondo[] = todosLosFondosResponse?.funds || [];
 
-        // PASO 3: Combinar los datos para mostrar en la UI.
+        // PASO 3: Combinar los datos
         const fondosConMatch: Fondo[] = matches.reduce((acc: Fondo[], match) => {
           const fullFondoDetails = listaDeFondosCompleta.find(f => f.ID === match.call_id);
           if (fullFondoDetails) {
@@ -252,13 +292,24 @@ const FondosconPorcentaje: React.FC = () => {
     };
     
     CargarFondosConMatch();
-  }, []); // El array vacío asegura que este efecto se ejecute solo una vez.
+  }, []);
 
+  // --- useEffect CORREGIDO para cerrar el menú ---
   useEffect(() => {
     const handleClickOutside = () => setContextMenu(null);
-    window.addEventListener('click', handleClickOutside);
-    return () => window.removeEventListener('click', handleClickOutside);
-  }, []);
+
+    if (contextMenu) {
+      // Añadir listeners solo cuando el menú está visible
+      window.addEventListener('click', handleClickOutside);
+      window.addEventListener('contextmenu', handleClickOutside);
+    }
+
+    return () => {
+      // Limpiar listeners al desmontar o al cerrar el menú
+      window.removeEventListener('click', handleClickOutside);
+      window.removeEventListener('contextmenu', handleClickOutside);
+    };
+  }, [contextMenu]); // Dependencia clave
 
   useEffect(() => {
     setCurrentPage(1);
@@ -269,12 +320,8 @@ const FondosconPorcentaje: React.FC = () => {
   
   const filteredFondos = useMemo(() => {
     let fondosFiltrados = [...fondos];
-    if (searchTerm) {
-      fondosFiltrados = fondosFiltrados.filter(f => f.Titulo.toLowerCase().includes(searchTerm.toLowerCase()));
-    }
-    if (tipoBeneficioFilter !== 'Todas') {
-      fondosFiltrados = fondosFiltrados.filter(f => f.TipoDeBeneficio === tipoBeneficioFilter);
-    }
+    if (searchTerm) { fondosFiltrados = fondosFiltrados.filter(f => f.Titulo.toLowerCase().includes(searchTerm.toLowerCase())); }
+    if (tipoBeneficioFilter !== 'Todas') { fondosFiltrados = fondosFiltrados.filter(f => f.TipoDeBeneficio === tipoBeneficioFilter); }
     fondosFiltrados.sort((a, b) => {
       switch (sortBy) {
         case 'alfabetico': return a.Titulo.localeCompare(b.Titulo);
@@ -398,7 +445,15 @@ const FondosconPorcentaje: React.FC = () => {
         </footer>
       </main>
       
-      {contextMenu && <ScoreContextMenu x={contextMenu.x} y={contextMenu.y} scores={contextMenu.scores} />}
+      {/* Renderiza el menú contextual si el estado no es null */}
+      {contextMenu && (
+        <ScoreContextMenu 
+          x={contextMenu.x} 
+          y={contextMenu.y} 
+          scores={contextMenu.scores} 
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   );
 };

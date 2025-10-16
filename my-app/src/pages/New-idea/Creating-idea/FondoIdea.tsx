@@ -217,11 +217,18 @@ const FondosIdea: React.FC = () => {
             };
             
             try {
-              await processIdeaAsync(processRequest);
-              console.log('Idea procesada exitosamente');
+              // Solo procesar la idea si NO tiene ResumenLLM (propuesta)
+              // Si ya tiene ResumenLLM, significa que ya fue procesada y no debemos sobrescribirla
+              if (!ideaData.propuesta || ideaData.propuesta.trim() === "") {
+                console.log('Idea sin ResumenLLM, procesando en IA...');
+                await processIdeaAsync(processRequest);
+                console.log('Idea procesada exitosamente');
+              } else {
+                console.log('Idea ya tiene ResumenLLM, saltando procesamiento para preservar datos en Qdrant');
+              }
             } catch (processError) {
               console.error('Error al procesar idea:', processError);
-            console.log('Continuando con match aunque falló el procesamiento (puede que ya esté procesada)');
+              console.log('Continuando con match aunque falló el procesamiento (puede que ya esté procesada)');
               // Continuar con el match aunque falle el procesamiento
               // En caso de que la idea ya esté procesada
             }

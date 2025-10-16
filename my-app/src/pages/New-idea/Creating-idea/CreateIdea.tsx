@@ -375,35 +375,37 @@ const CreateIdea: React.FC = () => {
               </div>
 
               {/* Input y botón enviar */}
-              <div className="mt-4 flex flex-col">
-                <div className="flex">
-                  <input
-                    type="text"
-                    value={input}
-                    onChange={handleChange}
-                    onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                    placeholder="Escribe tu respuesta..."
-                    className={`flex-1 border rounded-l-md px-3 py-2 focus:outline-none focus:ring-2 ${
-                      error ? "border-red-500" : "border-gray-300"
-                    }`}
-                    style={{ "--tw-ring-color": colorPalette.primary } as React.CSSProperties}
-                    disabled={showPreview || isProcessing}
-                  />
-                  <button
-                    onClick={handleSend}
-                    className="text-white px-5 py-2 rounded-r-md transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: colorPalette.secondary }}
-                    onMouseOver={(e) => !isProcessing && !showPreview && (e.currentTarget.style.backgroundColor = colorPalette.primary)}
-                    onMouseOut={(e) => !isProcessing && !showPreview && (e.currentTarget.style.backgroundColor = colorPalette.secondary)}
-                    disabled={showPreview || isProcessing}
-                  >
-                    Enviar
-                  </button>
+              {!showRefinedIdea && (
+                <div className="mt-4 flex flex-col">
+                  <div className="flex">
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={handleChange}
+                      onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                      placeholder="Escribe tu respuesta..."
+                      className={`flex-1 border rounded-l-md px-3 py-2 focus:outline-none focus:ring-2 ${
+                        error ? "border-red-500" : "border-gray-300"
+                      }`}
+                      style={{ "--tw-ring-color": colorPalette.primary } as React.CSSProperties}
+                      disabled={showPreview || isProcessing}
+                    />
+                    <button
+                      onClick={handleSend}
+                      className="text-white px-5 py-2 rounded-r-md transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ backgroundColor: colorPalette.secondary }}
+                      onMouseOver={(e) => !isProcessing && !showPreview && (e.currentTarget.style.backgroundColor = colorPalette.primary)}
+                      onMouseOut={(e) => !isProcessing && !showPreview && (e.currentTarget.style.backgroundColor = colorPalette.secondary)}
+                      disabled={showPreview || isProcessing}
+                    >
+                      Enviar
+                    </button>
+                  </div>
+                  <div className="text-sm mt-1 text-right" style={{ color: error ? "red" : colorPalette.textSecondary }}>
+                    {error ? error : `${input.length}/${MAX_CHARS}`}
+                  </div>
                 </div>
-                <div className="text-sm mt-1 text-right" style={{ color: error ? "red" : colorPalette.textSecondary }}>
-                  {error ? error : `${input.length}/${MAX_CHARS}`}
-                </div>
-              </div>
+              )}
             </>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center space-y-6">

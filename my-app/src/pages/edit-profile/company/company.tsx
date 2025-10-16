@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react';
 import { Building2 } from 'lucide-react';
 import Beneficiario from '../../../models/Beneficiario'; // Asegúrate que la ruta a tu modelo sea correcta
 

@@ -44,3 +44,19 @@ Y el src/index.css:
 ```
 
 Todas esas cosas las hice yo pero no sé si estén en sus carpetas al clonar
+
+# Produccion
+
+Para correr el FrontEnd en produccion, hay que compilar el proyecto primero
+
+```
+npm run build
+```
+
+Si no hay errores al compilar el proyecto, se ejecuta el programa compilado con el siguiente comando:
+
+```
+npm run prod
+```
+
+Si no compila el proyecto, arreglar los bugs primero, ya que no se creara el programa

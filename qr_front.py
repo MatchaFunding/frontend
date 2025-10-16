@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw
 
 # --- CONFIGURACIÓN ---
 # 1. Contenido del QR (URL o texto)
-QR_DATA = "https://www.instagram.com/matchafunding/"
+QR_DATA = "http://matchafunding.com/"
 
 # 2. Ruta a tu archivo de logo (debe ser PNG con fondo transparente o el fondo será pegado)
 LOGO_PATH = "C:/Users/etrtp/Downloads/logo.png"

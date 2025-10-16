@@ -6,6 +6,7 @@ import { VerProyectosHistoricosIAAsync } from '../../../api/VerProyectosHistoric
 import { VerCalceProyectosIAAsync } from '../../../api/VerCalceProyectosIA';
 import LoopAnimation from '../../../components/Shared/animationFrame';
 import type MatchResult from '../../../models/MatchResult';
+import Proyecto from '../../../models/Proyecto';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -160,6 +161,8 @@ const ProyectoCard: React.FC<ProyectoCardProps> = ({
   );
 };
 
+
+
 // --- COMPONENTE PRINCIPAL ---
 
 const ProyectosHistoricosConPorcentaje: React.FC = () => {
@@ -175,6 +178,38 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
   
   // Estado para el menú contextual
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; data: ScoreData } | null>(null);
+
+  const AI_API_URL = "https://ai.matchafunding.com/api/v1/projects/upsertusers";
+
+  const enviarProyectoAI = async (proyecto: Proyecto) => {
+    console.log("Enviando proyecto al servicio de IA:", proyecto);
+    const payload = [{
+      ID: proyecto.ID,
+      Beneficiario: proyecto.Beneficiario,
+      Titulo: proyecto.Titulo,
+      Descripcion: proyecto.Descripcion,
+      DuracionEnMesesMinimo: proyecto.DuracionEnMesesMinimo,
+      DuracionEnMesesMaximo: proyecto.DuracionEnMesesMaximo,
+      Alcance: proyecto.Alcance,
+      Area: proyecto.Area,
+    }];
+    try {
+      const response = await fetch(AI_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Error desconocido del servidor de IA.' }));
+        console.error('Error al enviar datos a la IA:', response.status, errorData);
+        throw new Error(`El servidor de IA respondió con el estado ${response.status}`);
+      }
+      const result = await response.json();
+      console.log('Respuesta exitosa del servicio de IA:', result);
+    } catch (error) {
+      console.error("Falló la comunicación con el endpoint de la IA:", error);
+    }
+  };
 
   //const enviarProyectoAI = async (proyecto: Proyecto) => {
   // ... tu lógica para enviar el proyecto (sin cambios)

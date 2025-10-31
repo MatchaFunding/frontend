@@ -1,4 +1,6 @@
-import type { FiltersValues, OrderOption, CardsPerPageOption } from '../../components/filters-component/filters-component.ts';
+import type { CardsPerPageOption } from '../../components/filters-component/filters-component.ts';
+import type { FiltersValues } from '../../components/filters-component/filters-component.ts';
+import type { OrderOption } from '../../components/filters-component/filters-component.ts';
 import { useState, useMemo, useEffect } from 'react';
 import { initialFilters, filterCards } from './free-search';
 import { sortCards, mapInstrumentsToCards } from './free-search';
@@ -16,6 +18,7 @@ function FreeSearch() {
 	const [filters, setFilters] = useState<FiltersValues>(initialFilters);
 	const [searchTerm, setSearchTerm] = useState('');
 	const instrumentos = VerTodosLosInstrumentos();
+
 	const availableCards = useMemo(() => {
 		return mapInstrumentsToCards(instrumentos);
 	}, [instrumentos]);

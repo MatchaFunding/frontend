@@ -1,8 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import NavBar from '../../components/NavBar/navbar';
-import { Edit, Mail, Phone, User, Briefcase, ShieldCheck, UserCircle2, Building2, Users, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Edit, Mail } from 'lucide-react';
+import { Phone, User } from 'lucide-react';
+import { Briefcase, ShieldCheck } from 'lucide-react';
+import { UserCircle2, Building2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, MapPin } from 'lucide-react';
+
 import { Card } from '../../components/UI/cards';
 import { useNavigate } from 'react-router-dom';
+import NavBar from '../../components/NavBar/navbar';
+import React from 'react';
+
 import Persona from "../../models/Persona";
 import Usuario from "../../models/Usuario";
 import Beneficiario from '../../models/Beneficiario';
@@ -12,7 +20,6 @@ interface MemberRelation {
   Persona: number;
   Beneficiario: number;
 }
-
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -33,7 +40,6 @@ const InfoField: React.FC<{ icon: React.ElementType; label: string; value: strin
 
 const ProfileI: React.FC = () => {
   const navigate = useNavigate();
-  
   const [profileUser, setProfileUser] = useState<Usuario | null>(null);
   const [profilePersona, setProfilePersona] = useState<Persona | null>(null);
   const [companyInfo, setCompanyInfo] = useState<Beneficiario | null>(null);
@@ -49,8 +55,10 @@ const ProfileI: React.FC = () => {
     const fetchProfileData = async () => {
       setLoading(true);
       setError(null);
-      const storedUser = sessionStorage.getItem("usuario");
-      if (!storedUser) {
+      const storedUser = localStorage.getItem("usuario");
+      console.log(`Datos completos: ${storedUser}`);
+
+      if (storedUser === null) {
         setError("No se encontró información de sesión.");
         setLoading(false);
         return;
@@ -60,42 +68,46 @@ const ProfileI: React.FC = () => {
         const datos = JSON.parse(storedUser);
         const user: Usuario = datos.Usuario;
         const beneficiario: Beneficiario = datos.Beneficiario;
-        const beneficiarioId = beneficiario?.ID;
+        //const beneficiarioId = beneficiario?.ID;
+
+        console.log(`Usuario: ${user}`);
+        console.log(`Beneficiario: ${beneficiario}`);
+
+        /*
 
         if (!user || !beneficiarioId) {
           throw new Error("La información de sesión es incompleta.");
-        }
-
-      
+        }      
         const [membersRes, personasRes] = await Promise.all([
             fetch('http://127.0.0.1:8000/vertodoslosmiembros/'),
             fetch('http://127.0.0.1:8000/vertodaslaspersonas/')
         ]);
 
-        if (!membersRes.ok || !personasRes.ok) throw new Error("Error al obtener datos del servidor.");
+        if (!membersRes.ok || !personasRes.ok)
+          throw new Error("Error al obtener datos del servidor.");
 
         const allMemberRelations: MemberRelation[] = await membersRes.json();
         const allPersonas: Persona[] = await personasRes.json();
-      
         const currentUserPersona = allPersonas.find(p => p.ID === user.Persona);
-        if(!currentUserPersona) throw new Error("No se encontraron los datos de la persona del usuario.");
 
-   
+        if(!currentUserPersona)
+          throw new Error("No se encontraron los datos de la persona del usuario.");
+
         const companyMemberRelations = allMemberRelations.filter(rel => rel.Beneficiario === beneficiarioId);
-        
-      
         const companyMembers = companyMemberRelations
           .map(relation => allPersonas.find(p => p.ID === relation.Persona))
           .filter((p): p is Persona => p !== undefined); 
+          */
 
-        setProfileUser(user);
-        setProfilePersona(currentUserPersona);
-        setCompanyInfo(beneficiario);
-        setMembers(companyMembers);
-
-      } catch (err: any) {
+        //setProfileUser(user);
+        //setProfilePersona(currentUserPersona);
+        //setCompanyInfo(beneficiario);
+        //setMembers(companyMembers);
+      }
+      catch (err: any) {
         setError(err.message || "Ocurrió un error al cargar el perfil.");
-      } finally {
+      }
+      finally {
         setLoading(false);
       }
     };
@@ -121,7 +133,7 @@ const ProfileI: React.FC = () => {
   useEffect(() => {
     const fetchProfileData = () => {
       setLoading(true);
-      const storedUser = sessionStorage.getItem("usuario");
+      const storedUser = localStorage.getItem("usuario");
       if (!storedUser) {
         setError("No se encontró información de sesión.");
         setLoading(false);

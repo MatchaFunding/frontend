@@ -67,11 +67,17 @@ const Login: React.FC = () => {
 
       console.log(`JSON Web Token: ${token}`);
       
-      console.log(`Usuario: ${JSON.stringify(usuario)}`);
-      console.log(`Beneficiario: ${JSON.stringify(beneficiario)}`);
-      console.log(`Proyectos: ${JSON.stringify(proyectos)}`);
-      console.log(`Postulaciones: ${JSON.stringify(postulaciones)}`);
-      console.log(`Miembros: ${JSON.stringify(miembros)}`);
+      const datos = {
+        "Usuario":usuario,
+        "Beneficiario":beneficiario,
+        "Proyectos":proyectos,
+        "Postulaciones":postulaciones,
+        "Miembros":miembros,
+        "Ideas": []
+      }
+
+      localStorage.setItem("usuario", JSON.stringify(datos));
+      console.log(`Datos completos: ${localStorage.getItem("usuario")}`);
 
       if (resultado.message) {
         navigate('/Home-i');

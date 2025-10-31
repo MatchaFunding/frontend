@@ -17,7 +17,7 @@ export const isValidEmail = (email: string): boolean => {
 };
 
 // Validación de campos individuales
-export const validateFieldPure = (field: string, value: string): string => {
+export const ValidateFieldPure = (field: string, value: string): string => {
   switch (field) {
     case 'email':
       if (!value.trim()) {
@@ -60,7 +60,7 @@ export const isLoginFormValid = (email: string, password: string): boolean => {
 };
 
 // Obtener datos del formulario
-export const obtenerDatosFormulario = (form: HTMLFormElement): LoginFormData => {
+export const ObtenerDatosFormulario = (form: HTMLFormElement): LoginFormData => {
   const formData = new FormData(form);
   const email = (formData.get('email') as string)?.trim() || '';
   const password = (formData.get('password') as string)?.trim() || '';
@@ -72,7 +72,7 @@ export const obtenerDatosFormulario = (form: HTMLFormElement): LoginFormData => 
 };
 
 // Validar formulario de login
-export const validarFormularioLogin = (email: string, password: string): { valid: boolean; error: string } => {
+export const ValidarFormularioLogin = (email: string, password: string): { valid: boolean; error: string } => {
   if (!email.trim()) {
     return { valid: false, error: 'Por favor, ingresa tu correo electrónico' };
   }

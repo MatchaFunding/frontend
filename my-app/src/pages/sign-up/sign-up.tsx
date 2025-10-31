@@ -1,22 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import './sign-up.css';
 import type { FormData, CustomDropdownProps } from './sign-up';
-import { initialFormData, dropdownOptions, getNextStep, getPrevStep, getSelectedOption, mapearSexoParaBackend, validarCamposStep1, validarCamposStep2, manejarErrorServidor, ObtenerDatosFormulario, validarFormularioInicial, isStepValid, isInitialFormValid, isValidEmail, validateFieldPure, handleInputChangePure, handleDropdownChangePure, toggleDropdownPure, generarContrasenaNueva, crearNombreCompleto, procesarRespuestaServidor, validarIdServidor, obtenerFechaActualISO } from './sign-up';
-import { CrearPersonaAsync } from '../../api/CrearPersona';
-import { CrearUsuarioAsync } from '../../api/CrearUsuario';
-import { CambiarPersonaAsync } from '../../api/CambiarPersona';
-import { CrearBeneficiarioAsync } from '../../api/CrearBeneficiario';
-import { CrearMiembroAsync } from '../../api/CrearMiembro';
-import { ValidarCredencialesDeEmpresaAsync } from '../../api/Login';
-import Persona from '../../models/Persona';
-import Usuario from '../../models/Usuario';
-import Beneficiario from '../../models/Beneficiario';
-import Miembro from '../../models/Miembro';
-
+import { Link, useNavigate } from 'react-router-dom';
+import { initialFormData, dropdownOptions, getNextStep, getPrevStep, getSelectedOption, validarCamposStep1, validarCamposStep2, manejarErrorServidor, ObtenerDatosFormulario, validarFormularioInicial, isStepValid, isInitialFormValid, isValidEmail, validateFieldPure, handleInputChangePure, handleDropdownChangePure, toggleDropdownPure, generarContrasenaNueva } from './sign-up';
 import { VerificarEmailExiste } from '../../api/VerificarEmail';
 import { Registrarse } from '../../api/Registrarse';
 import { Autorizar } from '../../api/Autorizar';
+import { useState, useRef, useEffect } from 'react';
+import React from 'react';
+import './sign-up.css';
 
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
@@ -26,8 +16,6 @@ const SignUp: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdatingPersona, setIsUpdatingPersona] = useState(false);
   const [isUpdatingBeneficiario, setIsUpdatingBeneficiario] = useState(false);
-  const [createdPersonaId, setCreatedPersonaId] = useState<number | null>(null);
-  const [createdUsuarioId, setCreatedUsuarioId] = useState<number | null>(null);
   const [correo, setCorreo] = useState<string>('');
   const [contrasena, setContrasena] = useState<string>('');
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
@@ -291,18 +279,7 @@ const SignUp: React.FC = () => {
           navigate('/Home-i');
         }
         catch (error) {
-          console.error('Error al validar credenciales después del registro:', error);
-          const userData = {
-            ID: createdUsuarioId,
-            Correo: correo,
-            NombreDeUsuario: correo,
-            ...(formData.Nombre && formData.Apellido && {
-              Nombre: `${formData.Nombre} ${formData.Apellido}`
-            })
-          };
-          sessionStorage.setItem('usuario', JSON.stringify(userData));
-          console.log('Datos básicos guardados en sessionStorage (SignUp - error):', userData);
-          navigate('/Home-i');
+          console.error('Faltan datos del usuario para validar credenciales');
         }
       }
       else {

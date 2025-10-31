@@ -2,6 +2,7 @@ import type { LoginFormData } from './login';
 import { initialLoginFormData, ValidarFormularioLogin, ObtenerDatosFormulario, isLoginFormValid, ValidateFieldPure, handleInputChangePure } from './login';
 import { Link, useNavigate } from 'react-router-dom';
 import { IniciarSesion } from '../../api/IniciarSesion';
+import { Autorizar } from '../../api/Autorizar';
 import { useState } from 'react';
 import React from 'react';
 import './login.css';
@@ -47,6 +48,9 @@ const Login: React.FC = () => {
       }
 
       const resultado = await IniciarSesion(email, password);
+      var auth = await Autorizar(email, password);
+      console.log(`Resultado: ${JSON.stringify(resultado)}`);
+      console.log(`Auth: ${JSON.stringify(auth)}`);
 
       if (resultado.message) {
         navigate('/Home-i');

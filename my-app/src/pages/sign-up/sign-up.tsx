@@ -1,6 +1,6 @@
 import type { FormData, CustomDropdownProps } from './sign-up';
 import { Link, useNavigate } from 'react-router-dom';
-import { initialFormData, dropdownOptions, getNextStep, getPrevStep, getSelectedOption, validarCamposStep1, validarCamposStep2, manejarErrorServidor, ObtenerDatosFormulario, validarFormularioInicial, isStepValid, isInitialFormValid, isValidEmail, validateFieldPure, handleInputChangePure, handleDropdownChangePure, toggleDropdownPure, generarContrasenaNueva } from './sign-up';
+import { initialFormData, dropdownOptions, getNextStep, getPrevStep, getSelectedOption, validarCamposStep1, validarCamposStep2, manejarErrorServidor, ObtenerDatosFormulario, validarFormularioInicial, isStepValid, isInitialFormValid, isValidEmail, validateFieldPure, handleInputChangePure, handleDropdownChangePure, toggleDropdownPure, GenerarContrasenaNueva } from './sign-up';
 import { VerificarEmailExiste } from '../../api/VerificarEmail';
 import { Registrarse } from '../../api/Registrarse';
 import { Autorizar } from '../../api/Autorizar';
@@ -144,8 +144,8 @@ const SignUp: React.FC = () => {
   };
 
   // Función para generar contraseña
-  const generarContrasena = () => {
-    const nuevaContrasena = generarContrasenaNueva(8);
+  const GenerarContrasena = () => {
+    const nuevaContrasena = GenerarContrasenaNueva(8);
     
     const passwordInput = document.getElementById('password') as HTMLInputElement;
     if (passwordInput) {
@@ -272,11 +272,8 @@ const SignUp: React.FC = () => {
       if (correo && contrasena) {
         try {
           var registro = await Registrarse(formData, correo, contrasena, correo);
-          var auth = await Autorizar(correo, contrasena);
-          console.log(`Datos del formulario: ${formData}`);
-          console.log(`Registro: ${registro}`);
-          console.log(`Auth: ${auth}`);
-          navigate('/Home-i');
+          console.log(`Registro: ${JSON.stringify(registro)}`);
+          navigate('/login');
         }
         catch (error) {
           console.error('Faltan datos del usuario para validar credenciales');
@@ -366,7 +363,7 @@ const SignUp: React.FC = () => {
                     )}
                   </button>
                 </div>
-                <button type="button" onClick={generarContrasena} className="generate-password-btn">
+                <button type="button" onClick={GenerarContrasena} className="generate-password-btn">
                   Generar contraseña segura
                 </button>
                 {fieldErrors.password && (

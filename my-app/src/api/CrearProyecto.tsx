@@ -4,7 +4,7 @@ import Proyecto from "../models/Proyecto"; // Asegúrate de que la ruta del mode
 
 export const CrearProyectoAsync = async (proyecto: Proyecto): Promise<Proyecto> => {
   try {
-    const response = await fetch("https://backend.matchafunding.com/crearproyecto/", {
+    const response = await fetch("http://127.0.0.1:8000/crearproyecto/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(proyecto)

@@ -50,7 +50,7 @@ const EditProfile: React.FC = () => {
 
     try {
       const response = await fetch(
-        `https://backend.matchafunding.com/cambiarbeneficiario/${originalCompanyData.ID}/`,
+        `http://127.0.0.1:8000/cambiarbeneficiario/${originalCompanyData.ID}/`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },

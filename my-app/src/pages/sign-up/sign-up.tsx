@@ -2,18 +2,21 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './sign-up.css';
 import type { FormData, CustomDropdownProps } from './sign-up';
-import { initialFormData, dropdownOptions, getNextStep, getPrevStep, getSelectedOption, mapearSexoParaBackend, validarCamposStep1, validarCamposStep2, manejarErrorServidor, obtenerDatosFormulario, validarFormularioInicial, isStepValid, isInitialFormValid, isValidEmail, validateFieldPure, handleInputChangePure, handleDropdownChangePure, toggleDropdownPure, generarContrasenaNueva, crearNombreCompleto, procesarRespuestaServidor, validarIdServidor, obtenerFechaActualISO } from './sign-up';
+import { initialFormData, dropdownOptions, getNextStep, getPrevStep, getSelectedOption, mapearSexoParaBackend, validarCamposStep1, validarCamposStep2, manejarErrorServidor, ObtenerDatosFormulario, validarFormularioInicial, isStepValid, isInitialFormValid, isValidEmail, validateFieldPure, handleInputChangePure, handleDropdownChangePure, toggleDropdownPure, generarContrasenaNueva, crearNombreCompleto, procesarRespuestaServidor, validarIdServidor, obtenerFechaActualISO } from './sign-up';
 import { CrearPersonaAsync } from '../../api/CrearPersona';
 import { CrearUsuarioAsync } from '../../api/CrearUsuario';
 import { CambiarPersonaAsync } from '../../api/CambiarPersona';
 import { CrearBeneficiarioAsync } from '../../api/CrearBeneficiario';
 import { CrearMiembroAsync } from '../../api/CrearMiembro';
-import { VerificarEmailExiste } from '../../api/VerificarEmail';
 import { ValidarCredencialesDeEmpresaAsync } from '../../api/Login';
 import Persona from '../../models/Persona';
 import Usuario from '../../models/Usuario';
 import Beneficiario from '../../models/Beneficiario';
 import Miembro from '../../models/Miembro';
+
+import { VerificarEmailExiste } from '../../api/VerificarEmail';
+import { Registrarse } from '../../api/Registrarse';
+import { Autorizar } from '../../api/Autorizar';
 
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
@@ -25,8 +28,8 @@ const SignUp: React.FC = () => {
   const [isUpdatingBeneficiario, setIsUpdatingBeneficiario] = useState(false);
   const [createdPersonaId, setCreatedPersonaId] = useState<number | null>(null);
   const [createdUsuarioId, setCreatedUsuarioId] = useState<number | null>(null);
-  const [userEmail, setUserEmail] = useState<string>('');
-  const [userPassword, setUserPassword] = useState<string>('');
+  const [correo, setCorreo] = useState<string>('');
+  const [contrasena, setContrasena] = useState<string>('');
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [openDropdowns, setOpenDropdowns] = useState<{ [key: string]: boolean }>({});
@@ -34,6 +37,7 @@ const SignUp: React.FC = () => {
   const [emailExists, setEmailExists] = useState(false);
   const [emailCheckTimeout, setEmailCheckTimeout] = useState<number | null>(null);
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+  
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const setDropdownRef = (field: string) => (ref: HTMLDivElement | null) => {
     dropdownRefs.current[field] = ref;
@@ -74,7 +78,6 @@ const SignUp: React.FC = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutsideWrapper);
       window.removeEventListener('scroll', handleScrollWrapper, true);
-      // Limpiar timeout al desmontar componente
       if (emailCheckTimeout) {
         clearTimeout(emailCheckTimeout);
       }
@@ -115,8 +118,9 @@ const SignUp: React.FC = () => {
             ...prev,
             email: 'Este correo electrónico ya está registrado'
           }));
-        } else {
-          // Si no existe, limpiar el error de email si solo era por duplicado
+        }
+        // Si no existe, limpiar el error de email si solo era por duplicado
+        else {
           setFieldErrors(prev => {
             const newErrors = { ...prev };
             if (newErrors.email === 'Este correo electrónico ya está registrado') {
@@ -125,10 +129,12 @@ const SignUp: React.FC = () => {
             return newErrors;
           });
         }
-      } catch (error) {
+      } 
+      catch (error) {
         console.error('Error al verificar email:', error);
         setEmailExists(false);
-      } finally {
+      } 
+      finally {
         setIsCheckingEmail(false);
         setEmailCheckTimeout(null);
       }
@@ -215,28 +221,17 @@ const SignUp: React.FC = () => {
     );
   };
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
+  const HandleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    try {
-      // Obtener datos del formulario
-      const { email, password } = obtenerDatosFormulario(e.target as HTMLFormElement);
-
-      console.log('Email original del formulario:', (e.target as HTMLFormElement).email?.value);
-      console.log('Email procesado para envío:', email);
-      console.log('Longitud del email:', email.length);
-      console.log('Email válido según nuestra validación:', isValidEmail(email));
-
-      // Validar campos básicos
+  try {
+      const { email, password } = ObtenerDatosFormulario(e.target as HTMLFormElement);
       const validacion = validarFormularioInicial(email, password, isTermsAccepted);
       if (!validacion.valid) {
         alert(validacion.error);
         setIsLoading(false);
         return;
       }
-
-      // Verificar una vez más que el email no existe antes de proceder
       const emailExiste = await VerificarEmailExiste(email);
       if (emailExiste) {
         alert('Este correo electrónico ya está registrado. Por favor, usa otro correo.');
@@ -248,209 +243,73 @@ const SignUp: React.FC = () => {
         setIsLoading(false);
         return;
       }
-
-      // Paso 1: Crear Persona con atributos básicos (nombre genérico temporal)
-      const nuevaPersona: Persona = new Persona({
-        ID: 0, // El backend asignará el ID
-        Nombre: 'Usuario Temporal', // Nombre genérico que se actualizará en el paso 1
-        Sexo: 'NA', // Valor por defecto válido que se puede cambiar después
-        RUT: '00.000.000-0', // RUT temporal válido que se llenará en el formulario paso a paso
-        FechaDeNacimiento: '2000-01-01'
-      });
-
-      const personaResponse = await CrearPersonaAsync(nuevaPersona);
-      
-      // El backend puede devolver un objeto directo o un array
-      const personaCreada = procesarRespuestaServidor<Persona>(personaResponse);
-      const personaId = validarIdServidor(personaCreada.ID, 'la persona');
-      
-      setCreatedPersonaId(personaId); // Guardar el ID para usarlo en el paso 1
-
-      // Paso 2: Crear Usuario vinculado a la Persona
-      const nuevoUsuario = new Usuario({
-        ID: 0, // El backend asignará el ID
-        Persona: personaId,
-        NombreDeUsuario: email, // Usar email como nombre de usuario
-        Contrasena: password,
-        Correo: email
-      });
-
-      const usuarioResponse = await CrearUsuarioAsync(nuevoUsuario);
-      
-      if (!usuarioResponse) {
-        throw new Error('Error al crear el usuario');
+      else {
+        setCorreo(email);
       }
-
-      // Procesar la respuesta y obtener el ID del usuario creado
-      const usuarioCreado = procesarRespuestaServidor<Usuario>(usuarioResponse);
-      const usuarioId = validarIdServidor(usuarioCreado.ID, 'el usuario');
-      
-      // Guardar la información del usuario creado
-      setCreatedUsuarioId(usuarioId);
-      setUserEmail(email);
-      setUserPassword(password);
-
-      // Solo después de crear ambas entidades, continuar al formulario paso a paso
+      setContrasena(password);
       setShowStepForm(true);
-      
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error en el proceso de registro:', error);
       const errorMessage = manejarErrorServidor(error);
       alert(`Error al crear la cuenta: ${errorMessage}`);
-    } finally {
+    }
+    finally {
       setIsLoading(false);
     }
   };
 
-  const handleNextStep = async () => {
-    // Si estamos en el paso 1, actualizar la persona antes de avanzar
-    if (currentStep === 1 && createdPersonaId) {
-      // Validar campos antes de proceder
+  /*
+  Esta funcion gestiona el formulario de multiples pasos
+  para crear al Usuario , su Empresa, y sus Miembros
+  */
+  const HandleNextStep = async () => {
+    if (currentStep === 1) {
       const validacion = validarCamposStep1(formData);
       if (!validacion.valid) {
         alert(`Por favor, completa todos los campos requeridos:\n${validacion.errors.join('\n')}`);
         return;
       }
-
-      setIsUpdatingPersona(true);
-      
-      try {
-        // Crear objeto Persona con los datos actualizados del formulario
-        const nombreCompleto = crearNombreCompleto(formData.firstName || '', formData.lastName || '');
-        const personaActualizada = new Persona({
-          ID: createdPersonaId,
-          Nombre: nombreCompleto,
-          Sexo: mapearSexoParaBackend(formData.gender || ''),
-          RUT: formData.rut || '00.000.000-0',
-          FechaDeNacimiento: formData.birthDate || '2000-01-01'
-        });
-
-        const response = await CambiarPersonaAsync(createdPersonaId, personaActualizada);
-        
-        // Verificar que la respuesta sea válida
-        if (!response) {
-          throw new Error('Error al actualizar la persona');
-        }
-
-        // Solo después de actualizar exitosamente, avanzar al siguiente paso
-        setCurrentStep(getNextStep(currentStep));
-        
-      } catch (error) {
-        console.error('Error al actualizar persona:', error);
-        alert('Error al actualizar los datos. Por favor, inténtalo de nuevo.');
-      } finally {
-        setIsUpdatingPersona(false);
-      }
-    } else if (currentStep === 2 && createdPersonaId) {
-      // Validar campos antes de proceder
+      setCurrentStep(getNextStep(currentStep));
+    }
+    else if (currentStep === 2) {
       const validacion = validarCamposStep2(formData);
       if (!validacion.valid) {
         alert(`Por favor, completa todos los campos requeridos:\n${validacion.errors.join('\n')}`);
         return;
       }
-
-      // Si estamos en el paso 2, crear beneficiario y miembro
-      setIsUpdatingBeneficiario(true);
-      
-      try {
-
-        // Crear Beneficiario con todos los datos del formulario
-        const nuevoBeneficiario = new Beneficiario({
-          ID: 0, // El backend asignará el ID
-          Nombre: formData.companyName?.trim() || '',
-          FechaDeCreacion: formData.companyCreationDate || obtenerFechaActualISO(),
-          RegionDeCreacion: formData.companyCreationRegion || '',
-          Direccion: formData.companyAddress?.trim() || '',
-          TipoDePersona: formData.companyPersonType || '',
-          TipoDeEmpresa: formData.companyType || '',
-          Perfil: formData.companyProfile || '',
-          RUTdeEmpresa: formData.companyRut?.trim() || '',
-          RUTdeRepresentante: formData.legalRepresentativeRut?.trim() || ''
-        });
-
-        const beneficiarioResponse = await CrearBeneficiarioAsync(nuevoBeneficiario);
-        
-        // El backend puede devolver un objeto directo o un array
-        const beneficiarioCreado = procesarRespuestaServidor<Beneficiario>(beneficiarioResponse);
-        const beneficiarioId = validarIdServidor(beneficiarioCreado.ID, 'el beneficiario');
-        
-        // Crear Miembro vinculando la Persona con el Beneficiario
-        const nuevoMiembro = new Miembro({
-          ID: 0, // El backend asignará el ID
-          Persona: createdPersonaId,
-          Beneficiario: beneficiarioId
-        });
-
-        const miembroResponse = await CrearMiembroAsync(nuevoMiembro);
-        
-        if (!miembroResponse) {
-          throw new Error('Error al crear el miembro');
-        }
-
-        // Solo después de crear exitosamente, avanzar al siguiente paso
-        setCurrentStep(getNextStep(currentStep));
-        
-      } catch (error) {
-        console.error('Error al crear beneficiario o miembro:', error);
-        const errorMessage = manejarErrorServidor(error);
-        alert(`Error al crear la organización: ${errorMessage}`);
-      } finally {
-        setIsUpdatingBeneficiario(false);
-      }
-    } else if (currentStep === 3) {
-      // Si estamos en el paso 3 (último paso), validar credenciales y guardar datos completos en sessionStorage
-      if (createdUsuarioId && userEmail && userPassword) {
+      setCurrentStep(getNextStep(currentStep));
+    }
+    else if (currentStep === 3) {
+      if (correo && contrasena) {
         try {
-          // Llamar a la API de validación de credenciales de empresa para obtener todos los datos
-          const resultado = await ValidarCredencialesDeEmpresaAsync({ 
-            email: userEmail, 
-            password: userPassword 
-          });
-          
-          if (resultado.success && resultado.usuario) {
-            // Guardar todos los datos de empresa en sessionStorage (igual que en login)
-            sessionStorage.setItem('usuario', JSON.stringify(resultado.usuario));
-            console.log('Datos completos de empresa guardados en sessionStorage (SignUp):', resultado.usuario);
-            
-            // Redirigir al home
-            navigate('/Home-i');
-          } else {
-            // Si no se pueden validar las credenciales, usar datos básicos como respaldo
-            const userData = {
-              ID: createdUsuarioId,
-              Correo: userEmail,
-              NombreDeUsuario: userEmail,
-              // Agregar otros datos si están disponibles
-              ...(formData.firstName && formData.lastName && {
-                Nombre: `${formData.firstName} ${formData.lastName}`
-              })
-            };
-            sessionStorage.setItem('usuario', JSON.stringify(userData));
-            console.log('Datos básicos guardados en sessionStorage (SignUp - respaldo):', userData);
-            navigate('/Home-i');
-          }
-        } catch (error) {
+          var registro = await Registrarse(formData, correo, contrasena, correo);
+          var auth = await Autorizar(correo, contrasena);
+          console.log(`Datos del formulario: ${formData}`);
+          console.log(`Registro: ${registro}`);
+          console.log(`Auth: ${auth}`);
+          navigate('/Home-i');
+        }
+        catch (error) {
           console.error('Error al validar credenciales después del registro:', error);
-          // En caso de error, usar datos básicos como respaldo
           const userData = {
             ID: createdUsuarioId,
-            Correo: userEmail,
-            NombreDeUsuario: userEmail,
-            // Agregar otros datos si están disponibles
-            ...(formData.firstName && formData.lastName && {
-              Nombre: `${formData.firstName} ${formData.lastName}`
+            Correo: correo,
+            NombreDeUsuario: correo,
+            ...(formData.Nombre && formData.Apellido && {
+              Nombre: `${formData.Nombre} ${formData.Apellido}`
             })
           };
           sessionStorage.setItem('usuario', JSON.stringify(userData));
           console.log('Datos básicos guardados en sessionStorage (SignUp - error):', userData);
           navigate('/Home-i');
         }
-      } else {
-        console.error('Faltan datos del usuario para validar credenciales');
-        navigate('/Home-i');
       }
-    } else {
-      // Para otros pasos, simplemente avanzar
+      else {
+        console.error('Faltan datos del usuario para validar credenciales');
+      }
+    }
+    else {
       setCurrentStep(getNextStep(currentStep));
     }
   };
@@ -461,7 +320,6 @@ const SignUp: React.FC = () => {
 
   return (
     <div className="signup-container">
-      {/* Vista de carga (puede volverse un componente separado) */}
       {isLoading ? (
         <div className="loading-container">
           <div className="loading-content">
@@ -479,7 +337,7 @@ const SignUp: React.FC = () => {
               Resgistrate hoy para poder ocupar los beneficios que ofrecemos
             </p>
             {/* Inputs */}
-            <form className="signup-form" onSubmit={handleFormSubmit}>
+            <form className="signup-form" onSubmit={HandleFormSubmit}>
               {/* Email */}
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
@@ -489,9 +347,7 @@ const SignUp: React.FC = () => {
                   onBlur={(e) => {
                     const email = e.target.value.trim().toLowerCase();
                     validateField('email', email);
-                    // Verificar inmediatamente en onBlur
                     if (isValidEmail(email)) {
-                      // Limpiar timeout si existe y verificar inmediatamente
                       if (emailCheckTimeout) {
                         clearTimeout(emailCheckTimeout);
                         setEmailCheckTimeout(null);
@@ -502,11 +358,9 @@ const SignUp: React.FC = () => {
                   onChange={(e) => {
                     const email = e.target.value.trim().toLowerCase();
                     validateField('email', email);
-                    // Reset del estado de email existe cuando el usuario está escribiendo
                     if (emailExists) {
                       setEmailExists(false);
                     }
-                    // Usar debounce para verificar mientras escribe
                     if (isValidEmail(email)) {
                       checkEmailExists(email);
                     }
@@ -519,7 +373,6 @@ const SignUp: React.FC = () => {
                   <p className="email-error">{fieldErrors.email}</p>
                 )}
               </div>
-              {/* Contraseña */}
               <div className="form-group">
                 <div className="password-group">
                   <label htmlFor="password" className="form-label">
@@ -527,25 +380,18 @@ const SignUp: React.FC = () => {
                   </label>
                 </div>
                 <div className="password-input-container">
-                  {/* Input para insertar contraseña */}
                   <input id="password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="contraseña" defaultValue="" required className="form-input" placeholder="Min 8 carácteres" onChange={(e) => validateField('password', e.target.value)} onBlur={(e) => validateField('password', e.target.value)} />
-                  {/* Boton para mostrar/ocultar contraseña */}
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="password-toggle-btn" aria-label={showPassword ? "Hide password" : "Show password"} >
                     {showPassword ? (
-                      // Visible
                       <img src="/svgs/eye-off.svg" alt="Hide password" width="22" height="22" />
                     ) : (
-                      // No visible
                       <img src="/svgs/eye-on.svg" alt="Show password" width="22" height="22" />
                     )}
                   </button>
                 </div>
-                
-                {/* Botón para generar contraseña */}
                 <button type="button" onClick={generarContrasena} className="generate-password-btn">
                   Generar contraseña segura
                 </button>
-                {/* Mensaje de error para la contraseña */}
                 {fieldErrors.password && (
                   <p className="email-error">{fieldErrors.password}</p>
                 )}
@@ -593,186 +439,149 @@ const SignUp: React.FC = () => {
           </div>
         </div>
       ) : (
-        // Formulario de 3 pasos después del registro
         <div className="step-form-container">
-          {/* Pasos (literalmente) */}
           <div className="progress-container">
             <div className="progress-steps">
-              {/* Paso 1 */}
               <div className={`step-circle ${ currentStep >= 1 ? 'active' : 'inactive'}`}>
                 1
               </div>
-              {/* Línea entre paso 1 y 2 */}
               <div className={`step-connector ${currentStep >= 2 ? 'active' : 'inactive'}`}></div>
-              {/* Paso 2 */}
               <div className={`step-circle ${ currentStep >= 2 ? 'active' : 'inactive' }`}>
                 2
               </div>
-              {/* Línea entre paso 2 y 3 */}
               <div className={`step-connector ${currentStep >= 3 ? 'active' : 'inactive'}`}></div>
-              {/* Paso 3 */}
               <div className={`step-circle ${ currentStep >= 3 ? 'active' : 'inactive' }`}>
                 3
               </div>
             </div>
           </div>
-
-          {/* Formulario de los pasos */}
           <div className="step-form-main">
             <div className="form-panel">
-              {/* Paso 1 */}
               {currentStep === 1 && (
                 <div>
-                  {/* Título */}
                   <h1 className="step-title">Cuéntanos un poco sobre ti</h1>
                   <p className="subtitle">
                     Completa la información para personalizar tu experiencia
                   </p>
-                  {/* Formulario */}
                   <form className="signup-form" onSubmit={(e) => e.preventDefault()}>
-                    {/* Input nombre */}
                     <div className="form-group">
-                      <label htmlFor="firstName" className="form-label">
+                      <label htmlFor="Nombre" className="form-label">
                         Nombre
                       </label>
                       <input
-                        id="firstName" name="firstName" type="text" value={formData.firstName} onChange={(e) => handleInputChange('firstName', e.target.value)} onBlur={(e) => validateField('firstName', e.target.value)} className="form-input" placeholder="Ej: Juan" />
-                      {fieldErrors.firstName && (
-                        <p className="email-error">{fieldErrors.firstName}</p>
+                        id="Nombre" name="Nombre" type="text" value={formData.Nombre} onChange={(e) => handleInputChange('Nombre', e.target.value)} onBlur={(e) => validateField('Nombre', e.target.value)} className="form-input" placeholder="Ej: Juan" />
+                      {fieldErrors.Nombre && (
+                        <p className="email-error">{fieldErrors.Nombre}</p>
                       )}
                     </div>
-                    {/* Input apellido */}
                     <div className="form-group">
-                      <label htmlFor="lastName" className="form-label">
+                      <label htmlFor="Apellido" className="form-label">
                         Apellido
                       </label>
-                      <input id="lastName" name="lastName" type="text" value={formData.lastName} onChange={(e) => handleInputChange('lastName', e.target.value)} onBlur={(e) => validateField('lastName', e.target.value)} className="form-input" placeholder="Ej: Pérez" />
-                      {fieldErrors.lastName && (
-                        <p className="email-error">{fieldErrors.lastName}</p>
+                      <input id="Apellido" name="Apellido" type="text" value={formData.Apellido} onChange={(e) => handleInputChange('Apellido', e.target.value)} onBlur={(e) => validateField('Apellido', e.target.value)} className="form-input" placeholder="Ej: Pérez" />
+                      {fieldErrors.Apellido && (
+                        <p className="email-error">{fieldErrors.Apellido}</p>
                       )}
                     </div>
-                    {/* Input fecha de nacimiento */}
                     <div className="form-group">
-                      <label htmlFor="birthDate" className="form-label">
+                      <label htmlFor="FechaDeNacimiento" className="form-label">
                         Fecha de nacimiento
                       </label>
-                      <input id="birthDate" name="birthDate" type="date" value={formData.birthDate} onChange={(e) => handleInputChange('birthDate', e.target.value)} onBlur={(e) => validateField('birthDate', e.target.value)} className="form-input" />
-                      {fieldErrors.birthDate && (
-                        <p className="email-error">{fieldErrors.birthDate}</p>
+                      <input id="FechaDeNacimiento" name="FechaDeNacimiento" type="date" value={formData.FechaDeNacimiento} onChange={(e) => handleInputChange('FechaDeNacimiento', e.target.value)} onBlur={(e) => validateField('FechaDeNacimiento', e.target.value)} className="form-input" />
+                      {fieldErrors.FechaDeNacimiento && (
+                        <p className="email-error">{fieldErrors.FechaDeNacimiento}</p>
                       )}
                     </div>
-                    {/* Input RUT */}
                     <div className="form-group">
-                      <label htmlFor="rut" className="form-label">
+                      <label htmlFor="RUT" className="form-label">
                         RUT
                       </label>
-                      <input id="rut" name="rut" type="text" value={formData.rut} onChange={(e) => handleInputChange('rut', e.target.value)} onBlur={(e) => validateField('rut', e.target.value)} placeholder="12.345.678-9" className="form-input" />
-                      {fieldErrors.rut && (
-                        <p className="email-error">{fieldErrors.rut}</p>
+                      <input id="RUT" name="RUT" type="text" value={formData.RUT} onChange={(e) => handleInputChange('RUT', e.target.value)} onBlur={(e) => validateField('RUT', e.target.value)} placeholder="12.345.678-9" className="form-input" />
+                      {fieldErrors.RUT && (
+                        <p className="email-error">{fieldErrors.RUT}</p>
                       )}
                     </div>
-                    {/* Input sexo */}
-                    <CustomDropdown field="gender" label="Sexo" options={dropdownOptions.gender} value={formData.gender} />
+                    <CustomDropdown field="Sexo" label="Sexo" options={dropdownOptions.Sexo} value={formData.Sexo} />
                   </form>
                 </div>
               )}
-              {/* Paso 2 */}
               {currentStep === 2 && (
                 <div>
-                  {/* Título */}
                   <h1 className="step-title">Háblanos de tu organización</h1>
                   <p className="subtitle">
                     Información básica sobre tu empresa u organización
                   </p>
-                  {/* Formulario */}
                   <form className="signup-form" onSubmit={(e) => e.preventDefault()}>
-                    {/* Nombre de la empresa/organización */}
                     <div className="form-group">
-                      <label htmlFor="companyName" className="form-label">
+                      <label htmlFor="NombreCompania" className="form-label">
                         Nombre de la empresa/organización
                       </label>
-                      <input id="companyName" name="companyName" type="text" value={formData.companyName} onChange={(e) => handleInputChange('companyName', e.target.value)} onBlur={(e) => validateField('companyName', e.target.value)} className="form-input" placeholder="Ingresa el nombre de tu organización" />
-                      {fieldErrors.companyName && (
-                        <p className="email-error">{fieldErrors.companyName}</p>
+                      <input id="NombreCompania" name="NombreCompania" type="text" value={formData.NombreCompania} onChange={(e) => handleInputChange('NombreCompania', e.target.value)} onBlur={(e) => validateField('NombreCompania', e.target.value)} className="form-input" placeholder="Ingresa el nombre de tu organización" />
+                      {fieldErrors.NombreCompania && (
+                        <p className="email-error">{fieldErrors.NombreCompania}</p>
                       )}
                     </div>
-                    {/* Fecha de creación */}
                     <div className="form-group">
-                      <label htmlFor="companyCreationDate" className="form-label">
+                      <label htmlFor="CreacionCompania" className="form-label">
                         Fecha de creación
                       </label>
-                      <input id="companyCreationDate" name="companyCreationDate" type="date" value={formData.companyCreationDate} onChange={(e) => handleInputChange('companyCreationDate', e.target.value)} onBlur={(e) => validateField('companyCreationDate', e.target.value)} className="form-input" />
-                      {fieldErrors.companyCreationDate && (
-                        <p className="email-error">{fieldErrors.companyCreationDate}</p>
+                      <input id="CreacionCompania" name="CreacionCompania" type="date" value={formData.CreacionCompania} onChange={(e) => handleInputChange('CreacionCompania', e.target.value)} onBlur={(e) => validateField('CreacionCompania', e.target.value)} className="form-input" />
+                      {fieldErrors.CreacionCompania && (
+                        <p className="email-error">{fieldErrors.CreacionCompania}</p>
                       )}
                     </div>
-                    {/* Región */}
-                    <CustomDropdown field="companyCreationRegion" label="Región de creación" options={dropdownOptions.regions} value={formData.companyCreationRegion} />
-                    {/* Dirección */}
+                    <CustomDropdown field="RegionCompania" label="Región de creación" options={dropdownOptions.regions} value={formData.RegionCompania} />
                     <div className="form-group">
-                      <label htmlFor="companyAddress" className="form-label">
+                      <label htmlFor="DireccionCompania" className="form-label">
                         Dirección
                       </label>
-                      <input id="companyAddress" name="companyAddress" type="text" value={formData.companyAddress} onChange={(e) => setFormData(prev => ({ ...prev, companyAddress: e.target.value }))} className="form-input" placeholder="Ej: Av. Providencia 123, Providencia, Santiago" />
+                      <input id="DireccionCompania" name="DireccionCompania" type="text" value={formData.DireccionCompania} onChange={(e) => setFormData(prev => ({ ...prev, DireccionCompania: e.target.value }))} className="form-input" placeholder="Ej: Av. Providencia 123, Providencia, Santiago" />
                     </div>
-                    {/* Tipo de persona */}
-                    <CustomDropdown field="companyPersonType" label="Tipo de persona" options={dropdownOptions.companyPersonType} value={formData.companyPersonType} />
-                    {/* Tipo de empresa */}
-                    <CustomDropdown field="companyType" label="Tipo de empresa" options={dropdownOptions.companyType} value={formData.companyType} />
-                    {/* Perfil */}
-                    <CustomDropdown field="companyProfile" label="Perfil" options={dropdownOptions.companyProfile} value={formData.companyProfile} />
-                    {/* Rut de la empresa */}
+                    <CustomDropdown field="TipoPersonaCompania" label="Tipo de persona" options={dropdownOptions.TipoPersonaCompania} value={formData.TipoPersonaCompania} />
+                    <CustomDropdown field="TipoEmpresaCompania" label="Tipo de empresa" options={dropdownOptions.TipoEmpresaCompania} value={formData.TipoEmpresaCompania} />
+                    <CustomDropdown field="PerfilCompania" label="Perfil" options={dropdownOptions.PerfilCompania} value={formData.PerfilCompania} />
                     <div className="form-group">
-                      <label htmlFor="companyRut" className="form-label">
+                      <label htmlFor="RUTCompania" className="form-label">
                         RUT de la empresa
                       </label>
-                      <input id="companyRut" name="companyRut" type="text" value={formData.companyRut} onChange={(e) => handleInputChange('companyRut', e.target.value)} onBlur={(e) => validateField('companyRut', e.target.value)} placeholder="Ej: 76.123.456-7" className="form-input" />
-                      {fieldErrors.companyRut && (
-                        <p className="email-error">{fieldErrors.companyRut}</p>
+                      <input id="RUTCompania" name="RUTCompania" type="text" value={formData.RUTCompania} onChange={(e) => handleInputChange('RUTCompania', e.target.value)} onBlur={(e) => validateField('RUTCompania', e.target.value)} placeholder="Ej: 76.123.456-7" className="form-input" />
+                      {fieldErrors.RUTCompania && (
+                        <p className="email-error">{fieldErrors.RUTCompania}</p>
                       )}
                     </div>
-                    {/* Rut del representante legal */}
                     <div className="form-group">
-                      <label htmlFor="legalRepresentativeRut" className="form-label">
+                      <label htmlFor="RUTRepresentanteCompania" className="form-label">
                         RUT del representante legal
                       </label>
-                      <input id="legalRepresentativeRut" name="legalRepresentativeRut" type="text" value={formData.legalRepresentativeRut} onChange={(e) => handleInputChange('legalRepresentativeRut', e.target.value)} onBlur={(e) => validateField('legalRepresentativeRut', e.target.value)} placeholder="Ej: 12.345.678-9" className="form-input" />
-                      {fieldErrors.legalRepresentativeRut && (
-                        <p className="email-error">{fieldErrors.legalRepresentativeRut}</p>
+                      <input id="RUTRepresentanteCompania" name="RUTRepresentanteCompania" type="text" value={formData.RUTRepresentanteCompania} onChange={(e) => handleInputChange('RUTRepresentanteCompania', e.target.value)} onBlur={(e) => validateField('RUTRepresentanteCompania', e.target.value)} placeholder="Ej: 12.345.678-9" className="form-input" />
+                      {fieldErrors.RUTRepresentanteCompania && (
+                        <p className="email-error">{fieldErrors.RUTRepresentanteCompania}</p>
                       )}
                     </div>
                   </form>
                 </div>
               )}
-              {/* Paso 3 */}
               {currentStep === 3 && (
                 <div>
-                  {/* Título */}
                   <h1 className="step-title">¿Qué tipo de apoyos buscas?</h1>
                   <p className="subtitle">
                     Ayúdanos a perfilar las mejores oportunidades
                   </p>
-                  {/* Formulario */}
                   <form className="signup-form" onSubmit={(e) => e.preventDefault()}>
-                    {/* Monto aproximado */}
                     <div className="form-group">
                       <label htmlFor="approximateAmount" className="form-label">
                         Monto aproximado que buscas
                       </label>
                       <input id="approximateAmount" name="approximateAmount" type="number" value={formData.approximateAmount} onChange={(e) => setFormData(prev => ({ ...prev, approximateAmount: e.target.value }))} placeholder="Monto en pesos chilenos" className="form-input" />
                     </div>
-                    {/* Beneficios */}
                     <CustomDropdown field="benefitsOfInterest" label="Beneficios o apoyos de interés" options={dropdownOptions.benefits} value={formData.benefitsOfInterest} />
-                    {/* Regiones del proyecto */}
                     <CustomDropdown field="projectRegions" label="Regiones donde quieres desarrollar el proyecto" options={dropdownOptions.regions} value={formData.projectRegions} />
-                    {/* Duración del proyecto */}
                     <div className="form-group">
                       <label htmlFor="projectDuration" className="form-label">
                         Duración estimada del proyecto
                       </label>
                       <input id="projectDuration" name="projectDuration" type="number" value={formData.projectDuration} onChange={(e) => setFormData(prev => ({ ...prev, projectDuration: e.target.value }))} placeholder="Duración en meses" className="form-input" />
                     </div>
-                    {/* Numero de personas a colaborar */}
                     <div className="form-group">
                       <label htmlFor="collaborators" className="form-label">
                         Número de personas con las que planea colaborar
@@ -782,14 +591,13 @@ const SignUp: React.FC = () => {
                   </form>
                 </div>
               )}
-              {/* Botones de navegación */}
               <div className="navigation-container">
                 <button onClick={handlePrevStep} disabled={currentStep === 1} className={`nav-btn ${currentStep === 1 ? 'secondary' : 'secondary'}`} >
                   Anterior
                 </button>
                 <div className="nav-spacer"></div>
                 <button
-                  onClick={handleNextStep}
+                  onClick={HandleNextStep}
                   disabled={
                     isUpdatingPersona || 
                     isUpdatingBeneficiario || 

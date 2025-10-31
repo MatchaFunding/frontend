@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CambiarInstrumentoAsync(id: number, data: Instrumento) {
   try {
-    const response = await fetch(`https://backend.matchafunding.com/cambiarinstrumento/${id}`, {
+    const response = await fetch(`http://127.0.0.1:8000/cambiarinstrumento/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

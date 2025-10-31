@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function VerTodosLosColaboradoresAsync(): Promise<Colaborador[]> {
   try {
-    const response = await fetch(`https://backend.matchafunding.com/vertodosloscolaboradores/`, {
+    const response = await fetch(`http://127.0.0.1:8000/vertodosloscolaboradores/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

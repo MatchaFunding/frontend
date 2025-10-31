@@ -1,21 +1,21 @@
 export interface FormData {
-  // Paso 1
-  firstName: string;
-  lastName: string;
-  birthDate: string;
-  rut: string;
-  gender: string;
-  // Paso 2 - Beneficiario (campos editables por el usuario)
-  companyName: string; // Nombre
-  companyCreationDate: string; // FechaDeCreacion
-  companyCreationRegion: string; // RegionDeCreacion
-  companyAddress: string; // Direccion
-  companyPersonType: string; // TipoDePersona
-  companyType: string; // TipoDeEmpresa
-  companyProfile: string; // Perfil
-  companyRut: string; // RUTdeEmpresa
-  legalRepresentativeRut: string; // RUTdeRepresentante
-  // Paso 3
+  // Paso 1: Persona
+  Nombre: string;
+  Apellido: string;
+  FechaDeNacimiento: string;
+  RUT: string;
+  Sexo: string;
+  // Paso 2: Beneficiario
+  NombreCompania: string;
+  CreacionCompania: string;
+  RegionCompania: string;
+  DireccionCompania: string;
+  TipoPersonaCompania: string;
+  TipoEmpresaCompania: string;
+  PerfilCompania: string;
+  RUTCompania: string;
+  RUTRepresentanteCompania: string;
+  // Paso 3: Opcional
   approximateAmount: string;
   benefitsOfInterest: string;
   projectRegions: string;
@@ -38,23 +38,23 @@ export interface CustomDropdownProps {
 
 // Estado inicial del formulario
 export const initialFormData: FormData = {
-  // Paso 1
-  firstName: '',
-  lastName: '',
-  birthDate: '',
-  rut: '',
-  gender: '',
-  // Paso 2 - Beneficiario (campos editables)
-  companyName: '',
-  companyCreationDate: '',
-  companyCreationRegion: '',
-  companyAddress: '',
-  companyPersonType: '',
-  companyType: '',
-  companyProfile: '',
-  companyRut: '',
-  legalRepresentativeRut: '',
-  // Paso 3
+  // Paso 1: Persona
+  Nombre: '',
+  Apellido: '',
+  FechaDeNacimiento: '',
+  RUT: '',
+  Sexo: '',
+  // Paso 2 - Beneficiario 
+  NombreCompania: '',
+  CreacionCompania: '',
+  RegionCompania: '',
+  DireccionCompania: '',
+  TipoPersonaCompania: '',
+  TipoEmpresaCompania: '',
+  PerfilCompania: '',
+  RUTCompania: '',
+  RUTRepresentanteCompania: '',
+  // Paso 3: Opcional
   approximateAmount: '',
   benefitsOfInterest: '',
   projectRegions: '',
@@ -64,61 +64,61 @@ export const initialFormData: FormData = {
 
 // Opciones para los dropdowns
 export const dropdownOptions = {
-  gender: [
+  Sexo: [
     { value: '', label: 'Seleccionar' },
-    { value: 'masculino', label: 'Masculino' },
-    { value: 'femenino', label: 'Femenino' },
-    { value: 'prefiero-no-decir', label: 'Prefiero no decir' }
+    { value: 'Hombre', label: 'Masculino' },
+    { value: 'Mujer', label: 'Femenino' },
+    { value: 'Otro', label: 'Prefiero no decir' }
   ],
-  companyPersonType: [
+  TipoPersonaCompania: [
     { value: '', label: 'Seleccionar tipo de persona' },
-    { value: 'JU', label: 'Jurídica' },
-    { value: 'NA', label: 'Natural' }
+    { value: 'Juridica', label: 'Jurídica' },
+    { value: 'Natural', label: 'Natural' }
   ],
-  companyType: [
+  TipoEmpresaCompania: [
     { value: '', label: 'Seleccionar tipo de empresa' },
-    { value: 'SA', label: 'Sociedad Anónima' },
-    { value: 'SRL', label: 'Sociedad de Responsabilidad Limitada' },
-    { value: 'SPA', label: 'Sociedad por Acciones' },
-    { value: 'EIRL', label: 'Empresa Individual de Responsabilidad Limitada' }
+    { value: 'Sociedad Anonima', label: 'Sociedad Anónima' },
+    { value: 'Sociedad de Responsabilidad Limitada', label: 'Sociedad de Responsabilidad Limitada' },
+    { value: 'Sociedad por Acciones', label: 'Sociedad por Acciones' },
+    { value: 'Empresa Individual de Responsabilidad Limitada', label: 'Empresa Individual de Responsabilidad Limitada' }
   ],
-  companyProfile: [
+  PerfilCompania: [
     { value: '', label: 'Seleccionar perfil' },
-    { value: 'EMP', label: 'Empresa' },
-    { value: 'EXT', label: 'Extranjero' },
-    { value: 'INS', label: 'Institución' },
-    { value: 'MED', label: 'Intermediario' },
-    { value: 'ORG', label: 'Organización' },
-    { value: 'PER', label: 'Persona' }
+    { value: 'Empresa', label: 'Empresa' },
+    { value: 'Extranjero', label: 'Extranjero' },
+    { value: 'Institucion', label: 'Institución' },
+    { value: 'Intermediario', label: 'Intermediario' },
+    { value: 'Organizacion', label: 'Organización' },
+    { value: 'Persona', label: 'Persona' }
   ],
   regions: [
     { value: '', label: 'Seleccionar región' },
-    { value: 'AP', label: 'Arica y Parinacota' },
-    { value: 'TA', label: 'Tarapacá' },
-    { value: 'AN', label: 'Antofagasta' },
-    { value: 'AT', label: 'Atacama' },
-    { value: 'CO', label: 'Coquimbo' },
-    { value: 'VA', label: 'Valparaíso' },
-    { value: 'RM', label: 'Metropolitana' },
-    { value: 'LI', label: 'O\'Higgins' },
-    { value: 'ML', label: 'Maule' },
-    { value: 'NB', label: 'Ñuble' },
-    { value: 'BI', label: 'Biobío' },
-    { value: 'AR', label: 'La Araucanía' },
-    { value: 'LR', label: 'Los Ríos' },
-    { value: 'LL', label: 'Los Lagos' },
-    { value: 'AI', label: 'Aysén' },
-    { value: 'MA', label: 'Magallanes' }
+    { value: 'Arica y Parinacota', label: 'Arica y Parinacota' },
+    { value: 'Tarapaca', label: 'Tarapacá' },
+    { value: 'Antofagasta', label: 'Antofagasta' },
+    { value: 'Atacama', label: 'Atacama' },
+    { value: 'Coquimbo', label: 'Coquimbo' },
+    { value: 'Valparaiso', label: 'Valparaíso' },
+    { value: 'Santiago', label: 'Metropolitana' },
+    { value: 'O\'Higgins', label: 'O\'Higgins' },
+    { value: 'Maule', label: 'Maule' },
+    { value: 'Nuble', label: 'Ñuble' },
+    { value: 'Biobio', label: 'Biobío' },
+    { value: 'La Araucania', label: 'La Araucanía' },
+    { value: 'Los Rios', label: 'Los Ríos' },
+    { value: 'Los Lagos', label: 'Los Lagos' },
+    { value: 'Aysen', label: 'Aysén' },
+    { value: 'Magallanes', label: 'Magallanes' }
   ],
   benefits: [
     { value: '', label: 'Seleccionar beneficio' },
-    { value: 'CAP', label: 'Capacitación' },
-    { value: 'RIE', label: 'Capital de riesgo' },
-    { value: 'CRE', label: 'Créditos' },
-    { value: 'GAR', label: 'Garantías' },
-    { value: 'MUJ', label: 'Incentivo mujeres' },
-    { value: 'OTR', label: 'Otros incentivos' },
-    { value: 'SUB', label: 'Subsidios' }
+    { value: 'Capacitacion', label: 'Capacitación' },
+    { value: 'Capital de riesgo', label: 'Capital de riesgo' },
+    { value: 'Creditos', label: 'Créditos' },
+    { value: 'Garantias', label: 'Garantías' },
+    { value: 'Incentivo mujeres', label: 'Incentivo mujeres' },
+    { value: 'Otros incentivos', label: 'Otros incentivos' },
+    { value: 'Subsidios', label: 'Subsidios' }
   ]
 };
 
@@ -132,16 +132,16 @@ export const getPrevStep = (currentStep: number): number => {
 };
 
 // Funciones para validación de formulario
-export const isValidRut = (rut: string): boolean => {
-  if (!rut) return false;
+export const isValidRut = (RUT: string): boolean => {
+  if (!RUT) return false;
   
   // Verificar que el RUT tenga el formato correcto con puntos
   // Formato esperado: XX.XXX.XXX-X o X.XXX.XXX-X
-  const rutFormatRegex = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
-  if (!rutFormatRegex.test(rut)) return false;
+  const RUTFormatRegex = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
+  if (!RUTFormatRegex.test(RUT)) return false;
   
   // Limpiar el RUT: eliminar puntos y guiones para validación
-  let cleanRut = rut.replace(/[.-]/g, '');
+  let cleanRut = RUT.replace(/[.-]/g, '');
   
   // Debe tener entre 8 y 9 caracteres
   if (cleanRut.length < 8 || cleanRut.length > 9) return false;
@@ -261,66 +261,73 @@ export const isValidCompanyName = (name: string): boolean => {
 export const getFieldErrorMessage = (field: string, value: string): string => {
   switch (field) {
     case 'email':
-      if (!value) return '';
+      if (!value)
+        return '';
       if (!isValidEmail(value)) {
-        // Dar mensajes más específicos según el tipo de error
-        if (value.length > 254) return 'El correo electrónico es demasiado largo (máximo 254 caracteres)';
-        if (value.includes('..')) return 'El correo no puede contener puntos consecutivos';
-        if (value.startsWith('.') || value.endsWith('.')) return 'El correo no puede empezar o terminar con punto';
-        if (value.includes('@.') || value.includes('.@')) return 'Formato de correo inválido cerca del símbolo @';
-        if (!value.includes('@')) return 'El correo debe contener el símbolo @';
-        if (value.split('@').length !== 2) return 'El correo debe contener exactamente un símbolo @';
-        
+        if (value.length > 254)
+          return 'El correo electrónico es demasiado largo (máximo 254 caracteres)';
+        if (value.includes('..'))
+          return 'El correo no puede contener puntos consecutivos';
+        if (value.startsWith('.') || value.endsWith('.'))
+          return 'El correo no puede empezar o terminar con punto';
+        if (value.includes('@.') || value.includes('.@'))
+          return 'Formato de correo inválido cerca del símbolo @';
+        if (!value.includes('@'))
+          return 'El correo debe contener el símbolo @';
+        if (value.split('@').length !== 2)
+          return 'El correo debe contener exactamente un símbolo @';
         const [localPart, domainPart] = value.split('@');
-        if (localPart.length > 64) return 'La parte antes del @ es demasiado larga (máximo 64 caracteres)';
-        if (!domainPart.includes('.')) return 'El dominio debe contener al menos un punto';
-        
+        if (localPart.length > 64)
+          return 'La parte antes del @ es demasiado larga (máximo 64 caracteres)';
+        if (!domainPart.includes('.'))
+          return 'El dominio debe contener al menos un punto';
         return 'Por favor, ingresa un correo electrónico válido (ej: usuario@ejemplo.com)';
       }
       return '';
-    
     case 'password':
-      if (!value) return '';
-      if (!isValidPassword(value)) return 'La contraseña debe tener al menos 8 caracteres';
+      if (!value)
+        return '';
+      if (!isValidPassword(value))
+        return 'La contraseña debe tener al menos 8 caracteres';
       return '';
-    
-    case 'firstName':
-    case 'lastName':
-      if (!value) return '';
-      if (!isValidName(value)) return 'Debe contener solo letras y tener al menos 2 caracteres';
+    case 'Nombre':
+    case 'Apellido':
+      if (!value)
+        return '';
+      if (!isValidName(value))
+        return 'Debe contener solo letras y tener al menos 2 caracteres';
       return '';
-    
-    case 'rut':
-    case 'companyRut':
-    case 'legalRepresentativeRut':
-      if (!value) return '';
+    case 'RUT':
+    case 'RUTCompania':
+    case 'RUTRepresentanteCompania':
+      if (!value)
+        return '';
       if (!isValidRut(value)) {
-        // Verificar primero si tiene el formato correcto con puntos
-        const rutFormatRegex = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
-        if (!rutFormatRegex.test(value)) {
+        const RUTFormatRegex = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
+        if (!RUTFormatRegex.test(value)) {
           return 'RUT debe tener formato XX.XXX.XXX-X (ej: 12.345.678-9)';
         }
-        
-        // Si tiene el formato pero el dígito verificador es incorrecto
         return 'RUT inválido. El dígito verificador no coincide. Verifica tu RUT';
       }
       return '';
-    
-    case 'birthDate':
-      if (!value) return '';
-      if (!isValidDate(value)) return 'Debe ser mayor de 18 años y una fecha válida';
+    case 'FechaDeNacimiento':
+      if (!value)
+        return '';
+      if (!isValidDate(value))
+        return 'Debe ser mayor de 18 años y una fecha válida';
       return '';
-    
-    case 'companyCreationDate':
-      if (!value) return '';
-      if (!isValidCompanyDate(value)) return 'Debe ser una fecha válida y no futura';
+    case 'CreacionCompania':
+      if (!value)
+        return '';
+      if (!isValidCompanyDate(value))
+        return 'Debe ser una fecha válida y no futura';
       return '';
-    
-    case 'companyName':
-      if (!value) return '';
-      if (!isValidCompanyName(value)) return 'Debe tener al menos 2 caracteres';
+    case 'NombreCompania':
+      if (!value)
+        return '';
+      if (!isValidCompanyName(value))
+        return 'Debe tener al menos 2 caracteres';
       return '';
-    
     default:
       return '';
   }
@@ -330,21 +337,21 @@ export const getFieldErrorMessage = (field: string, value: string): string => {
 export const isStepValid = (step: number, formData: FormData): boolean => {
   switch (step) {
     case 1:
-      return isValidName(formData.firstName) &&
-             isValidName(formData.lastName) &&
-             isValidRut(formData.rut) &&
-             isValidDate(formData.birthDate) &&
-             formData.gender !== '';
+      return isValidName(formData.Nombre) &&
+             isValidName(formData.Apellido) &&
+             isValidRut(formData.RUT) &&
+             isValidDate(formData.FechaDeNacimiento) &&
+             formData.Sexo !== '';
     
     case 2:
-      return isValidCompanyName(formData.companyName) &&
-             isValidCompanyDate(formData.companyCreationDate) &&
-             formData.companyCreationRegion !== '' &&
-             formData.companyPersonType !== '' &&
-             formData.companyType !== '' &&
-             formData.companyProfile !== '' &&
-             isValidRut(formData.companyRut) &&
-             isValidRut(formData.legalRepresentativeRut);
+      return isValidCompanyName(formData.NombreCompania) &&
+             isValidCompanyDate(formData.CreacionCompania) &&
+             formData.RegionCompania !== '' &&
+             formData.TipoPersonaCompania !== '' &&
+             formData.TipoEmpresaCompania !== '' &&
+             formData.PerfilCompania !== '' &&
+             isValidRut(formData.RUTCompania) &&
+             isValidRut(formData.RUTRepresentanteCompania);
     
     default:
       return true;
@@ -371,16 +378,16 @@ export const getSelectedOption = (options: DropdownOption[], value: string): Dro
 // Función para mapear valores del formulario a códigos del backend
 export const mapearSexoParaBackend = (sexoFormulario: string): string => {
   const mapeo: { [key: string]: string } = {
-    'masculino': 'VAR',
-    'femenino': 'MUJ', 
-    'prefiero-no-decir': 'NA',
-    'otro': 'NA',
-    'hombre': 'VAR',
-    'mujer': 'MUJ',
-    'male': 'VAR',
-    'female': 'MUJ',
-    'other': 'NA',
-    '': 'NA' // Valor por defecto si está vacío
+    'masculino': 'Hombre',
+    'femenino': 'Mujer', 
+    'prefiero-no-decir': 'Otro',
+    'otro': 'Otro',
+    'hombre': 'Hombre',
+    'mujer': 'Mujer',
+    'male': 'Hombre',
+    'female': 'Mujer',
+    'other': 'Otro',
+    '': 'Otro'
   };
   
   const sexoLowerCase = sexoFormulario.toLowerCase();
@@ -390,90 +397,75 @@ export const mapearSexoParaBackend = (sexoFormulario: string): string => {
 // Validaciones específicas para el registro
 export const validarCamposStep1 = (formData: FormData): { valid: boolean; errors: string[] } => {
   const errors: string[] = [];
-  
-  if (!formData.firstName?.trim()) {
+  if (!formData.Nombre?.trim()) {
     errors.push('El nombre es requerido');
   }
-  
-  if (!formData.lastName?.trim()) {
+  if (!formData.Apellido?.trim()) {
     errors.push('El apellido es requerido');
   }
-  
-  if (!formData.birthDate) {
+  if (!formData.FechaDeNacimiento) {
     errors.push('La fecha de nacimiento es requerida');
   }
-  
-  if (!formData.rut?.trim()) {
+  if (!formData.RUT?.trim()) {
     errors.push('El RUT es requerido');
-  } else if (!isValidRut(formData.rut)) {
+  }
+  else if (!isValidRut(formData.RUT)) {
     errors.push('El RUT debe tener formato XX.XXX.XXX-X (ej: 12.345.678-9)');
   }
-  
-  if (!formData.gender?.trim()) {
+  if (!formData.Sexo?.trim()) {
     errors.push('El sexo es requerido');
   }
-  
   return { valid: errors.length === 0, errors };
 };
 
 export const validarCamposStep2 = (formData: FormData): { valid: boolean; errors: string[] } => {
   const errors: string[] = [];
-  
-  if (!formData.companyName?.trim()) {
+  if (!formData.NombreCompania?.trim()) {
     errors.push('El nombre de la empresa es requerido');
   }
-  
-  if (!formData.companyCreationRegion?.trim()) {
+  if (!formData.RegionCompania?.trim()) {
     errors.push('La región de creación es requerida');
   }
-  
-  if (!formData.companyRut?.trim()) {
+  if (!formData.RUTCompania?.trim()) {
     errors.push('El RUT de la empresa es requerido');
-  } else if (formData.companyRut.length < 8) {
+  }
+  else if (formData.RUTCompania.length < 8) {
     errors.push('El RUT de la empresa debe tener formato XX.XXX.XXX-X (ej: 12.345.678-9)');
   }
-  
-  if (!formData.legalRepresentativeRut?.trim()) {
+  if (!formData.RUTRepresentanteCompania?.trim()) {
     errors.push('El RUT del representante legal es requerido');
-  } else if (formData.legalRepresentativeRut.length < 8) {
+  }
+  else if (formData.RUTRepresentanteCompania.length < 8) {
     errors.push('El RUT del representante debe tener formato XX.XXX.XXX-X (ej: 12.345.678-9)');
   }
-  
   return { valid: errors.length === 0, errors };
 };
 
 // Función para manejar errores del servidor
 export const manejarErrorServidor = (error: unknown): string => {
   let errorMessage = 'Un error inesperado ha ocurrido';
-  
   if (error instanceof Error) {
     errorMessage = error.message;
-    
     console.log('Error completo:', error);
-    
-    // Si el error viene del servidor, mostrar más detalles
     if (errorMessage.includes('Error 400')) {
       errorMessage = 'Los datos enviados no son válidos. Por favor, revisa que todos los campos estén completos y en el formato correcto. Detalles: ' + errorMessage;
-    } else if (errorMessage.includes('Error 500')) {
+    }
+    else if (errorMessage.includes('Error 500')) {
       errorMessage = 'Error interno del servidor. Por favor, inténtalo de nuevo más tarde.';
     }
   }
-  
   return errorMessage;
 };
 
 // Función para obtener datos del formulario de manera consistente
-export const obtenerDatosFormulario = (formElement: HTMLFormElement): { email: string; password: string } => {
+export const ObtenerDatosFormulario = (formElement: HTMLFormElement): { email: string; password: string } => {
   const formData = new FormData(formElement);
   let email = formData.get('email') as string;
   const password = formData.get('password') as string;
-  
-  // Limpiar y normalizar el email
   if (email) {
     email = email.trim().toLowerCase(); // Eliminar espacios y convertir a minúsculas
   }
-  
-  return { email, password };
+  return {email, password};
 };
 
 // Función para validar campos básicos del formulario inicial
@@ -544,15 +536,22 @@ export const verificarEmailPuro = async (
   if (!email || email.trim() === '') {
     return { error: '', isChecking: false };
   }
-  
   try {
     const existe = await VerificarEmailExiste(email);
     if (existe) {
-      return { error: 'Este correo electrónico ya está registrado', isChecking: false };
-    } else {
-      return { error: '', isChecking: false };
+      return {
+        error: 'Este correo electrónico ya está registrado',
+        isChecking: false 
+      };
     }
-  } catch (error) {
+    else {
+      return {
+        error: '',
+        isChecking: false
+      };
+    }
+  }
+  catch (error) {
     console.error('Error al verificar email:', error);
     return { error: '', isChecking: false };
   }
@@ -585,8 +584,8 @@ export const generarContrasenaNueva = (length: number = 8): string => {
 };
 
 // Función para crear nombre completo
-export const crearNombreCompleto = (firstName: string, lastName: string): string => {
-  return `${firstName?.trim() || ''} ${lastName?.trim() || ''}`.trim() || 'Usuario Temporal';
+export const crearNombreCompleto = (Nombre: string, Apellido: string): string => {
+  return `${Nombre?.trim() || ''} ${Apellido?.trim() || ''}`.trim() || 'Usuario Temporal';
 };
 
 // Función para procesar respuesta del servidor (Persona o Array)

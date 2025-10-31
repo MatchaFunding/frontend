@@ -2,7 +2,7 @@ import Postulacion from '../models/Postulacion';
 
 export async function VerificarPostulacionAsync(empresaId: number, instrumentoId: number): Promise<boolean> {
   try {
-    const response = await fetch(`https://backend.matchafunding.com/vertodaslaspostulaciones/`, {
+    const response = await fetch(`http://127.0.0.1:8000/vertodaslaspostulaciones/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -31,7 +31,7 @@ export async function VerificarPostulacionAsync(empresaId: number, instrumentoId
 
 export async function ObtenerPostulacionAsync(empresaId: number, instrumentoId: number): Promise<Postulacion | null> {
   try {
-    const response = await fetch(`https://backend.matchafunding.com/vertodaslaspostulaciones/`, {
+    const response = await fetch(`http://127.0.0.1:8000/vertodaslaspostulaciones/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

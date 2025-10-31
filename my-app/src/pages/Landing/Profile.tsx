@@ -68,8 +68,8 @@ const ProfileI: React.FC = () => {
 
       
         const [membersRes, personasRes] = await Promise.all([
-            fetch('https://backend.matchafunding.com/vertodoslosmiembros/'),
-            fetch('https://backend.matchafunding.com/vertodaslaspersonas/')
+            fetch('http://127.0.0.1:8000/vertodoslosmiembros/'),
+            fetch('http://127.0.0.1:8000/vertodaslaspersonas/')
         ]);
 
         if (!membersRes.ok || !personasRes.ok) throw new Error("Error al obtener datos del servidor.");

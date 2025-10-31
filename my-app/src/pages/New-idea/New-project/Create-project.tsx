@@ -129,7 +129,7 @@ const NuevoProyecto: React.FC = () => {
         return;
     }
     try {
-        const resPersona = await fetch("https://backend.matchafunding.com/crearpersona/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevaPersonaData) });
+        const resPersona = await fetch("http://127.0.0.1:8000/crearpersona/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevaPersonaData) });
         if (!resPersona.ok) throw new Error("No se pudo crear la persona. Verifique los datos.");
         const personaCreada = await resPersona.json();
         setFormData(prev => ({ ...prev, Miembros: [...prev.Miembros, personaCreada.Nombre] }));

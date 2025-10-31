@@ -77,8 +77,8 @@ const Members: React.FC = () => {
                 }
 
                 const [membersRes, personasRes] = await Promise.all([
-                    fetch('https://backend.matchafunding.com/vertodoslosmiembros/'),
-                    fetch('https://backend.matchafunding.com/vertodaslaspersonas/')
+                    fetch('http://127.0.0.1:8000/vertodoslosmiembros/'),
+                    fetch('http://127.0.0.1:8000/vertodaslaspersonas/')
                 ]);
 
                 if (!membersRes.ok || !personasRes.ok) {
@@ -143,8 +143,8 @@ const fetchMembers = async () => {
         }
 
         const [membersRes, personasRes] = await Promise.all([
-            fetch('https://backend.matchafunding.com/vertodoslosmiembros/'),
-            fetch('https://backend.matchafunding.com/vertodaslaspersonas/')
+            fetch('http://127.0.0.1:8000/vertodoslosmiembros/'),
+            fetch('http://127.0.0.1:8000/vertodaslaspersonas/')
         ]);
 
         if (!membersRes.ok || !personasRes.ok) {
@@ -222,7 +222,7 @@ const handleSaveMember = async () => {
     const formattedRut = formatRut(newMemberRut);
 
     try {
-        const personaResponse = await fetch(`https://backend.matchafunding.com/crearpersona/`, {
+        const personaResponse = await fetch(`http://127.0.0.1:8000/crearpersona/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -249,7 +249,7 @@ const handleSaveMember = async () => {
         
         const newPersona: Persona = await personaResponse.json();
 
-        const miembroResponse = await fetch(`https://backend.matchafunding.com/crearmiembro/`, {
+        const miembroResponse = await fetch(`http://127.0.0.1:8000/crearmiembro/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -277,7 +277,7 @@ const handleSaveMember = async () => {
         if (!window.confirm("¿Estás seguro de que quieres eliminar a este miembro?")) return;
 
         try {
-            const response = await fetch(`https://backend.matchafunding.com/borrarmiembro/${memberIdToRemove}/`, {
+            const response = await fetch(`http://127.0.0.1:8000/borrarmiembro/${memberIdToRemove}/`, {
                 method: 'DELETE',
             });
 

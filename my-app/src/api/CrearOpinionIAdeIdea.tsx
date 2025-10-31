@@ -7,7 +7,7 @@ export async function CrearOpinionIAdeIdeaAsync(usuarioId: number, resumenLLM: s
   try {
     console.log('Enviando datos al backend para crear opinión IA:', { Usuario: usuarioId, ResumenLLM: resumenLLM });
     
-    const response = await fetch(`https://backend.matchafunding.com/crearopinioniadeidea/`, {
+    const response = await fetch(`http://127.0.0.1:8000/crearopinioniadeidea/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -280,7 +280,7 @@ const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparac
         setLoadingProyectos(true);
         setErrorProyectos(null);
         try {
-            const response = await fetch(`https://backend.matchafunding.com/verproyectosdeempresa/${empresaId}`);
+            const response = await fetch(`http://127.0.0.1:8000/verproyectosdeempresa/${empresaId}`);
             if (!response.ok) throw new Error(`Error ${response.status}`);
             const data: Proyecto[] = await response.json();
             const proyectosConFondo: ProyectoConFondo[] = await Promise.all(
@@ -326,8 +326,8 @@ const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparac
 
       try {
         const [postulacionesResponse, proyectosResponse] = await Promise.all([
-            fetch(`https://backend.matchafunding.com/vertodaslaspostulaciones`),
-            fetch(`https://backend.matchafunding.com/verproyectosdeempresa/${empresaId}`)
+            fetch(`http://127.0.0.1:8000/vertodaslaspostulaciones`),
+            fetch(`http://127.0.0.1:8000/verproyectosdeempresa/${empresaId}`)
         ]);
 
         if (!postulacionesResponse.ok) throw new Error(`Error al obtener postulaciones: ${postulacionesResponse.statusText}`);

@@ -73,8 +73,8 @@ const EditProfile: React.FC = () => {
                 if (!userId || !personaId) throw new Error("Datos de sesión incompletos.");
 
                 const [usersRes, personasRes] = await Promise.all([
-                    fetch('https://backend.matchafunding.com/vertodoslosusuarios/'),
-                    fetch('https://backend.matchafunding.com/vertodaslaspersonas/')
+                    fetch('http://127.0.0.1:8000/vertodoslosusuarios/'),
+                    fetch('http://127.0.0.1:8000/vertodaslaspersonas/')
                 ]);
 
                 if (!usersRes.ok || !personasRes.ok) throw new Error("Error al cargar datos del servidor.");
@@ -137,12 +137,12 @@ const EditProfile: React.FC = () => {
         try {
             // .
             const [personaResponse, usuarioResponse] = await Promise.all([
-                fetch(`https://backend.matchafunding.com/cambiarpersona/${originalPersona.ID}/`, {
+                fetch(`http://127.0.0.1:8000/cambiarpersona/${originalPersona.ID}/`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(personaPayload),
                 }),
-                fetch(`https://backend.matchafunding.com/cambiarusuario/${originalUser.ID}/`, {
+                fetch(`http://127.0.0.1:8000/cambiarusuario/${originalUser.ID}/`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(usuarioPayload),

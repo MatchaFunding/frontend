@@ -63,7 +63,7 @@ const MisProyectos: React.FC = () => {
         }
 
         // Llamada a la API
-        const response = await fetch(`https://backend.matchafunding.com/verproyectosdeempresa/${empresaId}`);
+        const response = await fetch(`http://127.0.0.1:8000/verproyectosdeempresa/${empresaId}`);
         if (!response.ok) {
           throw new Error(`Error al cargar los proyectos: ${response.statusText}`);
         }

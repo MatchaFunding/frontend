@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function BorrarIdeaAsync(id: number) {
   try {
-    const response = await fetch(`https://backend.matchafunding.com/borraridea/${id}/`, {
+    const response = await fetch(`http://127.0.0.1:8000/borraridea/${id}/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

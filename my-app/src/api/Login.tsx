@@ -14,7 +14,7 @@ export async function ValidarCredencialesAsync(credentials: LoginCredentials): P
   try {
     console.log('Validando credenciales para:', credentials.email);
     
-    const response = await fetch(`https://backend.matchafunding.com/validarcredenciales/`, {
+    const response = await fetch(`http://127.0.0.1:8000/validarcredenciales/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ export async function ValidarCredencialesDeEmpresaAsync(credentials: LoginCreden
   try {
     console.log('Validando credenciales de empresa para:', credentials.email);
     
-    const response = await fetch(`https://backend.matchafunding.com/validarcredencialesdeempresa/`, {
+    const response = await fetch(`http://127.0.0.1:8000/validarcredencialesdeempresa/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

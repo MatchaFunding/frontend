@@ -6,7 +6,7 @@ export interface PropuestaEmpresa {
 
 export async function VerPropuestasDeEmpresaAsync(empresaId: number): Promise<PropuestaEmpresa[]> {
   try {
-    const response = await fetch(`https://backend.matchafunding.com/verpropuestasdeempresa/${empresaId}`, {
+    const response = await fetch(`http://127.0.0.1:8000/verpropuestasdeempresa/${empresaId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

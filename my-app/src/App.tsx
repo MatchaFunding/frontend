@@ -24,6 +24,8 @@ import ProyectosHistoricosConPorcentaje from './pages/New-idea/Historico/Histori
 import DetalleProyecto from './pages/New-idea/Historico/HistoricoDetalle.tsx';
 import SelectChange from './pages/edit-profile/ChooseToEdit.tsx';
 import EditmyProfile from './pages/edit-profile/EditMyprofile.tsx';
+import PremiumOptions from './pages/Premium/Premium-options.tsx';
+import PremiumRag from './pages/Premium/Premium-rag.tsx';
 
 function App() {
   return (
@@ -39,6 +41,8 @@ function App() {
         <Route path="/Home-i" element={<MatchaHomePage />} />
         <Route path="/Proyectos" element={<MyProjects />} />
         <Route path="/Perfil" element={<ProfileI />} />
+        <Route path="/premium" element={<PremiumOptions />} />
+        <Route path="/premium/rag" element={<PremiumRag />} />
         <Route path="/Matcha/Select-Idea" element={<SelectIdea />} />
         <Route path="/Matcha/Select-Project" element={<MisProyectos />} />
         <Route path="/Matcha/Select-Project/fondos" element={<FondosconPorcentaje />} />

@@ -77,6 +77,7 @@
   margin: 0 auto;
   margin-top: 15px;
   margin-bottom: 15px;
+  min-height: 580px;
 }
 
 .main-title {
@@ -104,6 +105,7 @@
 .form-group {
   display: flex;
   flex-direction: column;
+  margin-bottom: 0.5rem;
 }
 
 .form-label {
@@ -511,6 +513,8 @@
   color: #8BA888;
   margin-top: 0.25rem;
   margin-bottom: 0;
+  min-height: 1.125rem;
+  display: block;
 }
 
 .email-error {
@@ -519,6 +523,8 @@
   margin-top: 0.25rem;
   margin-bottom: 0;
   font-weight: 500;
+  min-height: 1.125rem;
+  display: block;
 }
 
 /* Estilos para el botón de generar contraseña */
@@ -574,6 +580,7 @@
   font-size: 0.875rem;
   margin-top: 0.25rem;
   display: block;
+  min-height: 1.125rem;
 }
 
 .email-checking {
@@ -582,4 +589,5 @@
   margin-top: 0.25rem;
   display: block;
   font-style: italic;
+  min-height: 1.125rem;
 }

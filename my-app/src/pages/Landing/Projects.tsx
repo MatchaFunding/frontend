@@ -490,7 +490,7 @@ const colorPalette = {
       <main className="p-6 md:p-10 mt-10 mt-[0%]">
         <NavBar />
         <div className=" w-[80%] mx-auto my-auto grid grid-cols-1 lg:grid-cols-4 gap-8 mt-[10%]">
-          <aside className="lg:col-span-1">
+          <aside className="lg:col-span-1 lg:pt-16">
             <nav className="space-y-2">
               <button onClick={() => setActiveSection('ideas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'ideas' ? colorPalette.softGreen : 'transparent', color: activeSection === 'ideas' ? 'white' : colorPalette.oliveGray }}><LightBulbIcon />Mis Ideas</button>
               <button onClick={() => setActiveSection('historial')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'historial' ? colorPalette.softGreen : 'transparent', color: activeSection === 'historial' ? 'white' : colorPalette.oliveGray }}><ClockIcon />Historial</button>
@@ -504,12 +504,12 @@ const colorPalette = {
             {activeSection === 'ideas' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <h1 className="text-3xl font-bold" style={{ color: colorPalette.darkGreen }}>Mis Ideas Guardadas</h1>
+                  <h1 className="text-3xl font-bold" style={{ color: colorPalette.darkGreen }}>Mis ideas guardadas</h1>
                 
                   <div className="flex items-center gap-4">
                     <button
                       onClick={reloadIdeas}
-                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 h-10"
                       title="Refrescar ideas"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -523,7 +523,7 @@ const colorPalette = {
                     />
                     <button
                       onClick={() => navigate('/Matcha/New-idea')}
-                      className="px-5 py-2 font-semibold text-white rounded-lg shadow-md transition-transform duration-300 hover:scale-105 flex items-center gap-2"
+                      className="px-5 py-2 font-semibold text-white rounded-lg shadow-md transition-transform duration-300 hover:scale-105 flex items-center gap-2 h-10"
                       style={{ backgroundColor: colorPalette.darkGreen }}
                     >
                       Generar Nueva Idea
@@ -682,7 +682,7 @@ const colorPalette = {
                                     </div>
                                 ) : (
                                     <>  {/* Títulos de las columnas */}
-                                        <div className="flex border-b border-slate-200 bg-slate-50" style={{ paddingLeft: '12px', paddingRight: '76px', paddingTop: '16px', paddingBottom: '16px' }}>
+                                        <div className="flex border-b border-slate-200 bg-slate-50 px-6 py-4">
                                             <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '45%', paddingRight: '8px' }}>Proyecto</div>
                                             <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '40%', paddingRight: '8px' }}>Fondo(s)</div>
                                             <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '15%' }}>Estado</div>
@@ -690,13 +690,13 @@ const colorPalette = {
                                         {proyectos.map((proyecto) => (
                                             <div key={proyecto.ID} className="relative py-4 border-b border-slate-200 last:border-b-0 hover:bg-slate-50 transition-colors">
                                                 {/* Botones de acciones en la esquina superior derecha */}
-                                                <div className="absolute top-1 right-2 flex space-x-1">
+                                                <div className="absolute top-1 right-6 flex space-x-1">
                                                     <button onClick={() => handleEditProyecto(proyecto)} title="Editar Proyecto" className="p-1 rounded-full hover:bg-slate-200 transition-colors"><PencilIcon className="h-4 w-4 text-[#505143]" /></button>
                                                     <button onClick={() => handleDeleteProyecto(proyecto.ID)} title="Eliminar Proyecto" className="p-1 rounded-full hover:bg-red-100 transition-colors"><TrashIcon className="h-4 w-4 text-red-500" /></button>
                                                 </div>
                                                 
                                                 {/* Tabla */}
-                                                <div className="flex items-start pt-2" style={{ paddingLeft: '12px', paddingRight: '76px' }}>
+                                                <div className="flex items-start pt-2 px-6">
                                                     {/* Proyecto */}
                                                     <div style={{ textAlign: 'left', width: '45%', paddingRight: '8px' }}>
                                                         <p className="font-medium" style={{ color: colorPalette.darkGreen, textAlign: 'left' }}>{proyecto.Titulo}</p>

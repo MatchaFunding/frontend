@@ -175,8 +175,8 @@
   color: rgba(80, 81, 67, 1);
 }
 
-.filter-btn {
-  padding: 8px 12px;
+.filter-btn-idea {
+  padding: 0.5rem 0.75rem;
   background: rgba(139, 168, 136, 0.2);
   color: rgba(80, 81, 67, 1);
   border: none;
@@ -189,9 +189,10 @@
   width: 100px;
   justify-content: space-between;
   gap: 5px;
+  height: 2.5rem;
 }
 
-.filter-btn img {
+.filter-btn-idea img {
   width: 15px;
   height: 15px;
   margin-left: 0;
@@ -200,24 +201,24 @@
 }
 
 /* Ajuste específico para el icono de filtro */
-.filter-btn img[src="/svgs/filter.svg"] {
+.filter-btn-idea img[src="/svgs/filter.svg"] {
   width: 12px;
   height: 12px;
 }
 
 /* Ajuste para las flechas de ordenar */
-.filter-btn img[src="/svgs/arrow-up-down.svg"] {
+.filter-btn-idea img[src="/svgs/arrow-up-down.svg"] {
   width: 14px;
   height: 14px;
 }
 
 /* Ajuste para los 3 puntos */
-.filter-btn img[src="/svgs/3-points.svg"] {
+.filter-btn-idea img[src="/svgs/3-points.svg"] {
   width: 15px;
   height: 15px;
 }
 
-.filter-btn:hover {
+.filter-btn-idea:hover {
   background: rgba(139, 168, 136, 0.3);
 }
 

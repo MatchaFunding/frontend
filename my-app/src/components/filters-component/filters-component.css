@@ -171,9 +171,9 @@
 }
 
 .filter-btn {
-  padding: 8px 12px;
+  padding: 12px;
   background: rgba(139, 168, 136, 0.2);
-  color: rgba(80, 81, 67, 1);
+  color: #44624a;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -184,6 +184,7 @@
   width: 100px;
   justify-content: space-between;
   gap: 5px;
+  height: 48px;
 }
 
 .filter-btn img {
@@ -191,7 +192,7 @@
   height: 15px;
   margin-left: 0;
   flex-shrink: 0;
-  filter: brightness(0) saturate(100%) invert(25%) sepia(10%) saturate(1093%) hue-rotate(52deg) brightness(99%) contrast(87%);
+  filter: brightness(0) saturate(100%) invert(28%) sepia(18%) saturate(892%) hue-rotate(86deg) brightness(95%) contrast(87%);
 }
 
 /* Ajuste específico para el icono de filtro (Y) que visualmente es más ancho */

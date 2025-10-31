@@ -512,12 +512,9 @@ const SignUp: React.FC = () => {
                     }
                   }}
                 />
-                {isCheckingEmail && (
-                  <p className="email-checking">Verificando disponibilidad del correo...</p>
-                )}
-                {fieldErrors.email && (
-                  <p className="email-error">{fieldErrors.email}</p>
-                )}
+                <p className="email-error">
+                  {isCheckingEmail ? 'Verificando disponibilidad del correo...' : (fieldErrors.email || '\u00A0')}
+                </p>
               </div>
               {/* Contraseña */}
               <div className="form-group">
@@ -546,9 +543,7 @@ const SignUp: React.FC = () => {
                   Generar contraseña segura
                 </button>
                 {/* Mensaje de error para la contraseña */}
-                {fieldErrors.password && (
-                  <p className="email-error">{fieldErrors.password}</p>
-                )}
+                <p className="email-error">{fieldErrors.password || '\u00A0'}</p>
               </div>
               {/* Checkbox */}
               <div className="checkbox-group">

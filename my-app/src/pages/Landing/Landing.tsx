@@ -35,7 +35,7 @@ const Navbar: React.FC = () => {
   ]; */}
 
   return (
-    <nav className="b-transparent text-white shadow-md fixed top-0 left-0 right-0 z-50">
+    <nav className="bg-[#44624a] text-white shadow-md fixed top-0 left-0 right-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
@@ -179,10 +179,6 @@ const LandingPageTailwind: React.FC = () => {
       <section className="py-16 md:py-24 px-5 bg-[#f1ebe1] relative">
        
         <div className="container mx-auto max-w-4xl relative mt-12 md:mt-0">
-          <div className="hidden md:block absolute top-[-40px] left-[15%] w-[70%] h-[50px] z-0">
-            <div className="w-full h-full border-t-2 border-dashed border-blue-400 rounded-t-[100px]"></div>
-          </div>
-
           <div className="flex flex-col md:flex-row justify-around items-start md:items-center gap-10 md:gap-0 relative z-10">
             {/* Feature 1 */}
             <div className="flex-1 max-w-xs mx-auto text-center p-5">

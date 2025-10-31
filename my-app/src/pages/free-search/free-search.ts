@@ -1,4 +1,5 @@
 import type { FreeSearchCard as FreeSearchCardType } from '../../components/free-search-card/free-search-card.ts';
+import type { FreeSearchCardProject as FreeSearchCardProjectType } from '../../components/free-search-card-project/free-search-card.ts';
 import type { FiltersValues, OrderOption } from '../../components/filters-component/filters-component.ts';
 import { regionMapping, tipoBeneficioMapping, estadoMapping, estadoMappingInverse } from '../../components/filters-component/filters-component.ts';
 
@@ -102,24 +103,17 @@ export function filterCards(
   // Filtrar por estado
   if (filters.status && filters.status !== '') {
     const statusCode = estadoMapping[filters.status];
-    console.log(`Filtrando por estado: "${filters.status}" → código: "${statusCode}"`);
     
     filteredCards = filteredCards.filter(card => {
       // Si el instrumento tiene estado directo del backend, usar ese
       if (card.estado && card.estado.trim() !== '') {
-        const match = card.estado === statusCode;
-        if (!match) {
-          console.log(`Estado no coincide: card.estado="${card.estado}" vs statusCode="${statusCode}"`);
-        }
-        return match;
+        return card.estado === statusCode;
       }
       
       // Si no tiene estado directo, calcular basado en fechas como fallback
       const now = new Date();
       const fechaApertura = card.fechaApertura ? new Date(card.fechaApertura) : null;
       const fechaCierre = card.fechaCierre ? new Date(card.fechaCierre) : null;
-      
-      console.log(`Card sin estado directo, usando fechas. Título: "${card.title}"`);
       
       // Solo usar cálculo de fechas para estados básicos
       if (statusCode === 'ABI') { // Abierto
@@ -133,8 +127,6 @@ export function filterCards(
       // Para otros estados (EVA, ADJ, SUS, PAY, DES), solo filtrar si tiene estado directo
       return false;
     });
-    
-    console.log(`Después del filtro de estado: ${filteredCards.length} cards restantes`);
   }
 
   // Filtrar por monto
@@ -232,11 +224,6 @@ export function mapInstrumentToCard(instrumento: any): FreeSearchCardType {
   const benefit = formatAmount(instrumento.MontoMaximo);
   const imageUrl = validateImageUrl(instrumento.EnlaceDeLaFoto);
 
-  // Debug: verificar el estado que viene del backend
-  if (instrumento.Estado) {
-    console.log(`Instrumento "${instrumento.Titulo}" - Estado backend: "${instrumento.Estado}"`);
-  }
-
   const mappedCard = {
     id: instrumento.ID, // Agregar el ID del instrumento
     title: instrumento.Titulo || 'Título no disponible',
@@ -325,4 +312,44 @@ export function createHandlePageChange(
       }
     }
   };
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Funciones para manejar Proyectos
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export function mapProyectoToCard(proyecto: any): FreeSearchCardProjectType {
+  return {
+    id: proyecto.ID,
+    title: proyecto.Titulo || 'Título no disponible',
+    description: proyecto.Descripcion || 'Descripción no disponible',
+    area: proyecto.Area || 'General',
+    alcance: proyecto.Alcance || 'No especificado',
+    duracionMinima: proyecto.DuracionEnMesesMinimo,
+    duracionMaxima: proyecto.DuracionEnMesesMaximo,
+    beneficiarioId: proyecto.Beneficiario,
+    image: '/sin-foto.png'
+  };
+}
+
+export function mapProyectosToCards(proyectos: any[]): FreeSearchCardProjectType[] {
+  if (!proyectos || proyectos.length === 0) {
+    return [];
+  }
+  return proyectos.map(mapProyectoToCard);
+}
+
+export function searchProjectsByText(cards: FreeSearchCardProjectType[], searchTerm: string): FreeSearchCardProjectType[] {
+  if (!searchTerm || searchTerm.trim() === '') {
+    return cards;
+  }
+
+  const normalizedSearchTerm = searchTerm.toLowerCase().trim();
+  
+  return cards.filter(card => 
+    card.title?.toLowerCase().includes(normalizedSearchTerm) ||
+    card.description?.toLowerCase().includes(normalizedSearchTerm) ||
+    card.area?.toLowerCase().includes(normalizedSearchTerm) ||
+    card.alcance?.toLowerCase().includes(normalizedSearchTerm)
+  );
 }

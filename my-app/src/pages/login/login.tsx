@@ -125,9 +125,7 @@ const Login: React.FC = () => {
                   onBlur={(e) => validateField('email', e.target.value)}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                 />
-                {fieldErrors.email && (
-                  <p className="email-error">{fieldErrors.email}</p>
-                )}
+                <p className="email-error">{fieldErrors.email || '\u00A0'}</p>
               </div>
               
               {/* Contraseña */}
@@ -166,9 +164,7 @@ const Login: React.FC = () => {
                 </div>
                 
                 {/* Mensaje de error para la contraseña */}
-                {fieldErrors.password && (
-                  <p className="email-error">{fieldErrors.password}</p>
-                )}
+                <p className="email-error">{fieldErrors.password || '\u00A0'}</p>
                 
                 {/* Enlace de olvidé mi contraseña */}
                 <a href="#" className="forgot-password-link">
@@ -191,11 +187,9 @@ const Login: React.FC = () => {
                 </button>
                 
                 {/* Mensaje de error de login */}
-                {loginError && (
-                  <p className="email-error" style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-                    {loginError}
-                  </p>
-                )}
+                <p className="email-error" style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+                  {loginError || '\u00A0'}
+                </p>
               </div>
             </form>
             

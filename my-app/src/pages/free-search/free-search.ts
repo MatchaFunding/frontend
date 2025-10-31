@@ -1,6 +1,7 @@
 import type { FreeSearchCard as FreeSearchCardType } from '../../components/free-search-card/free-search-card.ts';
 import type { FiltersValues, OrderOption } from '../../components/filters-component/filters-component.ts';
-import { regionMapping, tipoBeneficioMapping, estadoMapping, estadoMappingInverse } from '../../components/filters-component/filters-component.ts';
+import { regionMapping, tipoBeneficioMapping } from '../../components/filters-component/filters-component.ts';
+import { estadoMapping, estadoMappingInverse } from '../../components/filters-component/filters-component.ts';
 
 // Crear mappings inversos para mostrar nombres legibles en la UI
 const regionMappingInverse = Object.fromEntries(
@@ -233,9 +234,9 @@ export function mapInstrumentToCard(instrumento: any): FreeSearchCardType {
   const imageUrl = validateImageUrl(instrumento.EnlaceDeLaFoto);
 
   // Debug: verificar el estado que viene del backend
-  if (instrumento.Estado) {
-    console.log(`Instrumento "${instrumento.Titulo}" - Estado backend: "${instrumento.Estado}"`);
-  }
+  //if (instrumento.Estado) {
+  //  console.log(`Instrumento "${instrumento.Titulo}" - Estado backend: "${instrumento.Estado}"`);
+  //}
 
   const mappedCard = {
     id: instrumento.ID, // Agregar el ID del instrumento

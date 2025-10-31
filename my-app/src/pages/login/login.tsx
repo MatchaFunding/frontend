@@ -2,10 +2,16 @@ import type { LoginFormData } from './login';
 import { initialLoginFormData, ValidarFormularioLogin, ObtenerDatosFormulario, isLoginFormValid, ValidateFieldPure, handleInputChangePure } from './login';
 import { Link, useNavigate } from 'react-router-dom';
 import { IniciarSesion } from '../../api/IniciarSesion';
+import { VerMiUsuario } from '../../api/VerMiUsuario';
 import { Autorizar } from '../../api/Autorizar';
 import { useState } from 'react';
 import React from 'react';
 import './login.css';
+import { VerMiBeneficiario } from '../../api/VerMiBeneficiario';
+import { VerMisProyectos } from '../../api/VerMisProyectos';
+import { VerMisPostulaciones } from '../../api/VerMisPostulaciones';
+import { VerMisMiembros } from '../../api/VerMisMiembros';
+
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -48,9 +54,24 @@ const Login: React.FC = () => {
       }
 
       const resultado = await IniciarSesion(email, password);
-      var auth = await Autorizar(email, password);
-      console.log(`Resultado: ${JSON.stringify(resultado)}`);
-      console.log(`Auth: ${JSON.stringify(auth)}`);
+      const auth = await Autorizar(email, password);
+
+      const token = resultado.message;
+      const id = auth[0].ID;
+
+      const usuario = await VerMiUsuario(id);
+      const beneficiario = await VerMiBeneficiario(id);
+      const proyectos = await VerMisProyectos(id);
+      const postulaciones = await VerMisPostulaciones(id);
+      const miembros = await VerMisMiembros(id);
+
+      console.log(`JSON Web Token: ${token}`);
+      
+      console.log(`Usuario: ${JSON.stringify(usuario)}`);
+      console.log(`Beneficiario: ${JSON.stringify(beneficiario)}`);
+      console.log(`Proyectos: ${JSON.stringify(proyectos)}`);
+      console.log(`Postulaciones: ${JSON.stringify(postulaciones)}`);
+      console.log(`Miembros: ${JSON.stringify(miembros)}`);
 
       if (resultado.message) {
         navigate('/Home-i');

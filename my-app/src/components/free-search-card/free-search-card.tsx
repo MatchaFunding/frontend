@@ -20,13 +20,12 @@ const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ id, title, description,
 
   // Verificar si existe postulación al montar el componente
   useEffect(() => {
-    const verificarPostulacion = async () => {
+    const VerificarPostulacion = async () => {
       const storedUser = sessionStorage.getItem("usuario");
       if (!storedUser) {
         setIsCheckingPostulacion(false);
         return;
       }
-
       try {
         const userData = JSON.parse(storedUser);
         const empresaId = userData?.Beneficiario?.ID;
@@ -34,17 +33,18 @@ const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ id, title, description,
           setIsCheckingPostulacion(false);
           return;
         }
-
         const existe = await VerificarPostulacionAsync(empresaId, id || 0);
         setHasPostulacion(existe);
-      } catch (error) {
+      }
+      catch (error) {
         console.error('Error al verificar postulación:', error);
-      } finally {
+      }
+      finally {
         setIsCheckingPostulacion(false);
       }
     };
 
-    verificarPostulacion();
+    VerificarPostulacion();
   }, [id]);
 
   const handleBookmarkClick = (e: React.MouseEvent) => {

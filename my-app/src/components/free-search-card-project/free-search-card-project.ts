@@ -14,7 +14,28 @@ export interface FreeSearchCardProject {
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Constantes
-export const DEFAULT_IMAGE = "/sin-foto.png";
+export const DEFAULT_IMAGE = "/svgs/sin-foto.svg";
+
+// Diccionario de regiones de Chile (sincronizado con el backend)
+export const REGIONES: { [key: string]: string } = {
+  "AP": "Arica y Parinacota",
+  "TA": "Tarapacá",
+  "AN": "Antofagasta",
+  "AT": "Atacama",
+  "CO": "Coquimbo",
+  "VA": "Valparaíso",
+  "RM": "Santiago",
+  "LI": "O'Higgins",
+  "ML": "Maule",
+  "NB": "Ñuble",
+  "BI": "Biobío",
+  "AR": "La Araucanía",
+  "LR": "Los Ríos",
+  "LL": "Los Lagos",
+  "AI": "Aysén",
+  "MA": "Magallanes",
+  "NA": "Nacional"
+};
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Función para formatear la duración del proyecto

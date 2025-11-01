@@ -7,7 +7,7 @@ import type { FiltersValues, OrderOption, CardsPerPageOption } from '../../compo
 import { initialFilters, filterCards, sortCards, mapInstrumentsToCards, getPaginatedCards, calculatePagination, searchCardsByText, createHandlePageChange, mapProyectosToCards, searchProjectsByText } from './free-search';
 import VerTodosLosInstrumentos from '../../api/VerTodosLosInstrumentos.tsx';
 import VerTodosLosProyectos from '../../api/VerTodosLosProyectos.tsx';
-import FreeSearchCardProject from '../../components/free-search-card-project/free-search-card.tsx';
+import FreeSearchCardProject from '../../components/free-search-card-project/free-search-card-project.tsx';
 import './free-search.css';
 
 function FreeSearch() {

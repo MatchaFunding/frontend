@@ -1,7 +1,8 @@
 import type { FreeSearchCard as FreeSearchCardType } from '../../components/free-search-card/free-search-card.ts';
-import type { FreeSearchCardProject as FreeSearchCardProjectType } from '../../components/free-search-card-project/free-search-card.ts';
+import type { FreeSearchCardProject as FreeSearchCardProjectType } from '../../components/free-search-card-project/free-search-card-project.ts';
 import type { FiltersValues, OrderOption } from '../../components/filters-component/filters-component.ts';
 import { regionMapping, tipoBeneficioMapping, estadoMapping, estadoMappingInverse } from '../../components/filters-component/filters-component.ts';
+import { REGIONES } from '../../components/free-search-card-project/free-search-card-project.ts';
 
 // Crear mappings inversos para mostrar nombres legibles en la UI
 const regionMappingInverse = Object.fromEntries(
@@ -217,7 +218,7 @@ export function formatAmount(amount: number): string {
 }
 
 export function validateImageUrl(imageUrl: string): string {
-  return imageUrl && imageUrl.trim() !== '' ? imageUrl : '/sin-foto.png';
+  return imageUrl && imageUrl.trim() !== '' ? imageUrl : '/svgs/sin-foto.svg';
 }
 
 export function mapInstrumentToCard(instrumento: any): FreeSearchCardType {
@@ -324,11 +325,11 @@ export function mapProyectoToCard(proyecto: any): FreeSearchCardProjectType {
     title: proyecto.Titulo || 'Título no disponible',
     description: proyecto.Descripcion || 'Descripción no disponible',
     area: proyecto.Area || 'General',
-    alcance: proyecto.Alcance || 'No especificado',
+    alcance: REGIONES[proyecto.Alcance] || proyecto.Alcance || 'No especificado',
     duracionMinima: proyecto.DuracionEnMesesMinimo,
     duracionMaxima: proyecto.DuracionEnMesesMaximo,
     beneficiarioId: proyecto.Beneficiario,
-    image: '/sin-foto.png'
+    image: '/svgs/sin-foto.svg'
   };
 }
 

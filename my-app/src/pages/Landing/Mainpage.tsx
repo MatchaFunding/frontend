@@ -141,21 +141,20 @@ const MatchaHomePage: React.FC = () => {
       >
       <div 
         className="bg-white p-6 rounded-2xl shadow-lg flex items-center cursor-pointer hover:shadow-2xl transition-shadow min-h-[240px] lg:min-h-[280px] w-full"
-        onClick={() => navigate("/Perfil")}
+        onClick={() => navigate("/premium")}
         >
           <div className="flex-shrink-0 mr-4">
             <img 
-              src="./image.png"
-              alt="Mejora tu perfil"
+              src="./premium-icon.jpg"
+              alt="Servicios Premium"
               className="w-32 h-32 lg:w-36 lg:h-36 object-cover rounded-full shadow-lg" 
             />
           </div>
           <div className="flex-1 min-w-0"> 
-            <span className="text-gray-500 text-lg">Mejora tu</span>
-            <h2 className="text-3xl lg:text-4xl xl:text-5xl font-semibold text-black">Perfil</h2>
+            <span className="text-gray-500 text-lg">¡Desbloquea todo tu potencial!</span>
+            <h2 className="text-3xl lg:text-4xl xl:text-5xl font-semibold text-black">Premium</h2>
             <p className="text-gray-600 mt-3 text-sm lg:text-base leading-relaxed">
-             Con IA, recibe recomendaciones personalizadas que fortalecen tu perfil y aumentan tus chances de adjudicarte un fondo o beneficio.
-
+             ¡Estás a un paso de acceder a nuestras herramientas más poderosas! Con el plan Premium, tu asistente se vuelve más inteligente y personalizado.
             </p>
           </div>
         </div>

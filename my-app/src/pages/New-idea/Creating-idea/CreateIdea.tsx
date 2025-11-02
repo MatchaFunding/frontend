@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useState, useRef, useEffect } from "react"; 
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/NavBar/navbar";
 import { CrearIdeaAsync } from "../../../api/CrearIdea";
@@ -64,6 +64,7 @@ const CreateIdea: React.FC = () => {
   const [refinedIdea, setRefinedIdea] = useState<string>("");
   const [showRefinedIdea, setShowRefinedIdea] = useState(false);
   const navigate = useNavigate();
+  const refinedIdeaRef = useRef<HTMLDivElement>(null);
 
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState<IdeaData>({
@@ -72,6 +73,13 @@ const CreateIdea: React.FC = () => {
     audience: "",
     uniqueness: "",
   });
+
+  // Scroll automático cuando se muestra la idea refinada
+  useEffect(() => {
+    if (showRefinedIdea && refinedIdeaRef.current) {
+      refinedIdeaRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [showRefinedIdea]);
 
   // Maneja el input principal con límite
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -298,11 +306,11 @@ const CreateIdea: React.FC = () => {
       <Navbar />
       <div className="flex-grow flex flex-col lg:flex-row justify-center items-center p-4 lg:p-12 gap-8 mt-[5%]">
         {/* Imagen - Hidden on mobile */}
-        <div className="hidden lg:flex w-full lg:w-[40%] justify-center items-center">
+        <div className="hidden lg:flex w-full lg:w-[40%] justify-center items-center h-[70vh]">
           <img
             src="/ideamatch.png"
             alt="Idea creativa"
-            className="w-[80%] max-w-md rounded-2xl shadow-lg"
+            className="h-full w-auto object-contain rounded-2xl shadow-lg"
           />
         </div>
 
@@ -345,7 +353,7 @@ const CreateIdea: React.FC = () => {
                 
                 {/* Mostrar idea refinada */}
                 {showRefinedIdea && refinedIdea && (
-                  <div className="space-y-2">
+                  <div className="space-y-2" ref={refinedIdeaRef}>
                     <div className="p-3 rounded-lg w-fit max-w-[80%]" style={{ backgroundColor: colorPalette.bubbleBot, color: colorPalette.textPrimary }}>
                       ¡Excelente! He refinado tu idea. Aquí tienes una versión mejorada: 🚀
                     </div>

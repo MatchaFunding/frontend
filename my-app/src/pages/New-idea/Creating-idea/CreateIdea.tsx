@@ -9,13 +9,13 @@ import Idea from '../../../models/Idea.tsx';
 
 
 const colorPalette = {
-  primary: "#4c7500",
-  secondary: "#a3ae3e",
+  primary: "#44624a",
+  secondary: "#8ba888",
   background: "#f8fafc",
   card: "#ffffff",
   textPrimary: "#1e293b",
-  textSecondary: "#64748b",
-  bubbleUser: "#a3ae3e",
+  textSecondary: "#505143",
+  bubbleUser: "#8ba888",
   bubbleBot: "#f1f5f9",
 };
 
@@ -422,7 +422,7 @@ const CreateIdea: React.FC = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <button onClick={() => navigate(-1)} className="px-6 py-3 font-semibold border rounded-lg" style={{ color: colorPalette.primary, borderColor: colorPalette.primary }}>
-                  ⬅ Regresar
+                  Regresar
                 </button>
                 <button onClick={handleCreateAnother} className="px-6 py-3 font-semibold border rounded-lg" style={{ color: colorPalette.primary, borderColor: colorPalette.primary }}>
                   Crear Otra Idea

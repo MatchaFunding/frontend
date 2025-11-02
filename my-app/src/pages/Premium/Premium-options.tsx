@@ -1,62 +1,53 @@
 import React from 'react';
 import NavBar from '../../components/NavBar/navbar';
 import { useNavigate } from 'react-router-dom';
-import { Card } from '../../components/UI/cards';
-
-const colorPalette = {
-  darkGreen: '#44624a',
-  softGreen: '#8ba888',
-  oliveGray: '#505143',
-  lightGray: '#f1f5f9',
-};
+import './Premium-options.css';
 
 const PremiumOptions: React.FC = () => {
   const navigate = useNavigate();
     
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: colorPalette.lightGray }}>
+    <div className="premium-options-container">
       <NavBar />
 
-      <main className="flex-grow p-6 md:p-10 flex items-center justify-center pt-20 md:pt-24">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <main className="premium-options-main">
+        <div className="premium-options-grid">
 
-          <Card className="flex flex-col items-center p-8 max-w-sm text-center">
-            <div className="flex-grow">
-              <img src="/fine-tuning-icon.png" alt="Fine Tuning Premium" className="hidden md:block w-30 h-auto mb-4 mx-auto" />
-              <h2 className="text-2xl font-bold" style={{ color: colorPalette.oliveGray }}>
+          <div className="premium-card">
+            <div className="premium-card__content">
+              <img src="/fine-tuning-icon.png" alt="Fine Tuning Premium" className="premium-card__icon" />
+              <h2 className="premium-card__title">
                 Asistente Experto 
               </h2>
-              <p className="text-slate-600 mt-2 text-base mt-5">
+              <p className="premium-card__description">
                 Utiliza nuestra IA entrenada para formular proyectos robustos para acceder al financiamiento.
               </p>
             </div>
             <button
-              className="mt-5 font-bold py-3 px-8 rounded-2xl transition-transform transform hover:scale-105" 
-              style={{ backgroundColor: '#c5d888', color: colorPalette.darkGreen }}
+              className="premium-card__button"
               onClick={() => navigate("/premium/fine-tuning")}
             >
               Acceder Fine Tuning
             </button>
-          </Card>
+          </div>
 
-          <Card className="flex flex-col items-center p-8 max-w-sm text-center">
-            <div className="flex-grow">
-              <img src="/rag-icon.png" alt="RAG Premium" className="hidden md:block w-30 h-auto mb-4 mx-auto" />
-              <h2 className="text-2xl font-bold" style={{ color: colorPalette.oliveGray }}>
+          <div className="premium-card">
+            <div className="premium-card__content">
+              <img src="/rag-icon.png" alt="RAG Premium" className="premium-card__icon" />
+              <h2 className="premium-card__title">
                 Chatea con tus Documentos
               </h2>
-              <p className="text-slate-600 mt-2 text-base mt-5">
+              <p className="premium-card__description">
                 Pregúntale directo al documento. Asegura tu elegibilidad y no te pierdas nada.
               </p>
             </div>
             <button
-              className="mt-5 font-bold py-3 px-8 rounded-2xl transition-transform transform hover:scale-105" 
-              style={{ backgroundColor: '#c5d888', color: colorPalette.darkGreen }}
+              className="premium-card__button"
               onClick={() => navigate("/premium/rag")}
             >
               Acceder RAG
             </button>
-          </Card>
+          </div>
 
         </div>
       </main>

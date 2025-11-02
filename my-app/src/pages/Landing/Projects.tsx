@@ -256,6 +256,13 @@ const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparac
     setFilteredIdeas(filtered);
   }, [ideas, filtersIdea]);
 
+  // Auto-select first idea when entering ideas section
+  useEffect(() => {
+    if (activeSection === 'ideas' && filteredIdeas.length > 0 && !selectedIdea) {
+      setSelectedIdea(filteredIdeas[0]);
+    }
+  }, [activeSection, filteredIdeas]);
+
   // Listener para detectar cuando se regresa de crear una idea
   useEffect(() => {
     const handleFocus = () => {
@@ -531,12 +538,22 @@ const colorPalette = {
     <div style={{ backgroundColor: colorPalette.background }} className="min-h-screen">
       <main className="p-6 md:p-10 mt-10 mt-[0%]">
         <NavBar />
-        <div className=" w-[80%] mx-auto my-auto grid grid-cols-1 lg:grid-cols-4 gap-8 mt-[10%]">
+        <div className="w-[80%] mx-auto my-auto grid grid-cols-1 lg:grid-cols-4 gap-8 mt-[10%]">
+          {/* Navigation - Responsive: horizontal mobile, vertical desktop */}
           <aside className="lg:col-span-1 lg:pt-16">
-            <nav className="space-y-2">
+            {/* Mobile: Horizontal menu */}
+            <nav className="lg:hidden flex overflow-x-auto space-x-2 pt-8 pb-4 mb-6 border-b border-slate-200">
+              <button onClick={() => setActiveSection('ideas')} className={`flex items-center px-4 py-3 font-semibold rounded-lg transition-colors duration-200 whitespace-nowrap`} style={{ backgroundColor: activeSection === 'ideas' ? colorPalette.softGreen : 'transparent', color: activeSection === 'ideas' ? 'white' : colorPalette.oliveGray }}><LightBulbIcon className="h-5 w-5 mr-2" />Ideas</button>
+              <button onClick={() => setActiveSection('historial')} className={`flex items-center px-4 py-3 font-semibold rounded-lg transition-colors duration-200 whitespace-nowrap`} style={{ backgroundColor: activeSection === 'historial' ? colorPalette.softGreen : 'transparent', color: activeSection === 'historial' ? 'white' : colorPalette.oliveGray }}><ClockIcon className="h-5 w-5 mr-2" />Historial</button>
+              <button onClick={() => setActiveSection('proyectos')} className={`flex items-center px-4 py-3 font-semibold rounded-lg transition-colors duration-200 whitespace-nowrap`} style={{ backgroundColor: activeSection === 'proyectos' ? colorPalette.softGreen : 'transparent', color: activeSection === 'proyectos' ? 'white' : colorPalette.oliveGray }}><PaperAirplaneIcon className="h-5 w-5 mr-2" />Proyectos</button>
+              <button onClick={() => setActiveSection('estadisticas')} className={`flex items-center px-4 py-3 font-semibold rounded-lg transition-colors duration-200 whitespace-nowrap`} style={{ backgroundColor: activeSection === 'estadisticas' ? colorPalette.softGreen : 'transparent', color: activeSection === 'estadisticas' ? 'white' : colorPalette.oliveGray }}><ChartBarIcon className="h-5 w-5 mr-2" />Estadísticas</button>
+            </nav>
+            
+            {/* Desktop: Vertical menu */}
+            <nav className="hidden lg:block space-y-2">
               <button onClick={() => setActiveSection('ideas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'ideas' ? colorPalette.softGreen : 'transparent', color: activeSection === 'ideas' ? 'white' : colorPalette.oliveGray }}><LightBulbIcon />Mis Ideas</button>
               <button onClick={() => setActiveSection('historial')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'historial' ? colorPalette.softGreen : 'transparent', color: activeSection === 'historial' ? 'white' : colorPalette.oliveGray }}><ClockIcon />Historial</button>
-              <button onClick={() => setActiveSection('proyectos')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'proyectos' ? colorPalette.softGreen : 'transparent', color: activeSection === 'proyectos' ? 'white' : colorPalette.oliveGray }}><PaperAirplaneIcon  />Mis Proyectos</button>
+              <button onClick={() => setActiveSection('proyectos')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'proyectos' ? colorPalette.softGreen : 'transparent', color: activeSection === 'proyectos' ? 'white' : colorPalette.oliveGray }}><PaperAirplaneIcon />Mis Proyectos</button>
               <button onClick={() => setActiveSection('estadisticas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'estadisticas' ? colorPalette.softGreen : 'transparent', color: activeSection === 'estadisticas' ? 'white' : colorPalette.oliveGray }}><ChartBarIcon />Estadísticas</button>
             </nav>
           </aside>
@@ -545,17 +562,17 @@ const colorPalette = {
           
             {activeSection === 'ideas' && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <h1 className="text-3xl font-bold" style={{ color: colorPalette.darkGreen }}>Mis ideas guardadas</h1>
                 
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
                     <FiltersIdea 
                       filters={filtersIdea}
                       onApplyFilters={handleFiltersIdeaChange}
                     />
                     <button
                       onClick={() => navigate('/Matcha/New-idea')}
-                      className="px-5 py-2 font-semibold text-white rounded-lg shadow-md transition-transform duration-300 hover:scale-105 flex items-center gap-2 h-10"
+                      className="px-5 py-2 font-semibold text-white rounded-lg shadow-md transition-transform duration-300 hover:scale-105 flex items-center justify-center gap-2 h-10"
                       style={{ backgroundColor: colorPalette.darkGreen }}
                     >
                       Generar Nueva Idea
@@ -663,40 +680,149 @@ const colorPalette = {
                 )}
                 
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                  {/* Títulos de las columnas */}
-                  <div className="flex border-b border-slate-200 bg-slate-50 px-6 py-4">
-                    <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '35%', paddingRight: '8px' }}>Idea / Problema</div>
-                    <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '15%', paddingRight: '8px' }}>Campo</div>
-                    <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '12%', paddingRight: '8px' }}>Fecha</div>
-                    <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '33%', paddingRight: '8px' }}>Propuesta Refinada</div>
-                    <div className="text-sm font-semibold text-center" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '5%' }}>Acciones</div>
+                  {/* DESKTOP: Table view (hidden on mobile) */}
+                  <div className="hidden md:block">
+                    {/* Títulos de las columnas */}
+                    <div className="flex border-b border-slate-200 bg-slate-50 px-6 py-4">
+                      <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '35%', paddingRight: '8px' }}>Idea / Problema</div>
+                      <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '15%', paddingRight: '8px' }}>Campo</div>
+                      <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '12%', paddingRight: '8px' }}>Fecha</div>
+                      <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '33%', paddingRight: '8px' }}>Propuesta Refinada</div>
+                      <div className="text-sm font-semibold text-center" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '5%' }}>Acciones</div>
+                    </div>
+                    
+                    {filteredIdeas.length > 0 ? (
+                      filteredIdeas.map((idea) => (
+                        <div 
+                          key={idea.ID} 
+                          className={`relative py-4 border-b border-slate-200 last:border-b-0 transition-all duration-200 ${
+                            selectedIdea?.ID === idea.ID 
+                              ? 'bg-green-50 shadow-inner' 
+                              : 'hover:bg-slate-50 cursor-pointer hover:shadow-sm'
+                          }`}
+                          onClick={() => setSelectedIdea(idea)}
+                        >
+                          {/* Indicador visual de selección */}
+                          {selectedIdea?.ID === idea.ID && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: colorPalette.softGreen }}></div>
+                          )}
+                          
+                          {/* Botón de acción en la esquina superior derecha */}
+                          <div className="absolute top-2 right-6">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteIdea(idea.ID);
+                              }}
+                              title="Eliminar Idea" 
+                              className="p-1 rounded-full hover:bg-red-100 transition-colors"
+                              disabled={deletingIdeaId === idea.ID}
+                            >
+                              {deletingIdeaId === idea.ID ? (
+                                <svg className="animate-spin h-4 w-4 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                              ) : (
+                                <TrashIcon className="h-4 w-4 text-red-600" />
+                              )}
+                            </button>
+                          </div>
+                          
+                          {/* Contenido de la tabla */}
+                          <div className="flex items-start pt-2 px-6">
+                            {/* Idea / Problema */}
+                            <div style={{ textAlign: 'left', width: '35%', paddingRight: '8px' }}>
+                              <p className="font-medium" style={{ color: colorPalette.darkGreen, textAlign: 'left' }}>{idea.Problema}</p>
+                              <p className="text-sm truncate" style={{ color: colorPalette.oliveGray, textAlign: 'left' }}>{idea.Innovacion}</p>
+                            </div>
+                            
+                            {/* Campo */}
+                            <div style={{ textAlign: 'left', width: '15%', paddingRight: '8px', display: 'flex', alignItems: 'center' }}>
+                              <span className="inline-block px-3 py-1 text-sm font-semibold rounded-full truncate" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen, maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'left' }}>
+                                {idea.Campo}
+                              </span>
+                            </div>
+                            
+                            {/* Fecha */}
+                            <div style={{ textAlign: 'left', width: '12%', paddingRight: '8px', display: 'flex', alignItems: 'center' }}>
+                              <span className="text-sm" style={{ color: colorPalette.oliveGray }}>
+                                {idea.FechaDeCreacion ? (() => {
+                                  const [year, month, day] = idea.FechaDeCreacion.split('-');
+                                  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                                  return date.toLocaleDateString();
+                                })() : 'Sin fecha'}
+                              </span>
+                            </div>
+                            
+                            {/* Propuesta Refinada */}
+                            <div style={{ textAlign: 'left', width: '33%', paddingRight: '8px' }}>
+                              {idea.Propuesta ? (
+                                <div className="relative">
+                                  <p className="text-sm leading-relaxed" style={{ color: colorPalette.oliveGray }}>
+                                    {truncateText(idea.Propuesta, 150)}
+                                  </p>
+                                  {idea.Propuesta.length > 150 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleViewIdeaDetails(idea);
+                                    }}
+                                    className="text-xs mt-1 font-medium hover:underline"
+                                    style={{ color: colorPalette.darkGreen }}
+                                  >
+                                    Leer más →
+                                  </button>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="flex items-center space-x-2 text-sm" style={{ color: colorPalette.oliveGray }}>
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  <span className="italic">Sin refinamiento IA</span>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Espacio para acciones (ocupado por el botón absolute) */}
+                            <div style={{ width: '5%' }}></div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-center py-20 space-y-4">
+                        <EmptyBoxIcon />
+                        <p style={{ color: colorPalette.oliveGray }}>
+                          {ideas.length === 0 
+                            ? 'Aún no has guardado ideas. ¡Genera una nueva!' 
+                            : 'No hay ideas que coincidan con los filtros aplicados.'
+                          }
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  
-                  {filteredIdeas.length > 0 ? (
-                    filteredIdeas.map((idea) => (
-                      <div 
-                        key={idea.ID} 
-                        className={`relative py-4 border-b border-slate-200 last:border-b-0 transition-all duration-200 ${
-                          selectedIdea?.ID === idea.ID 
-                            ? 'bg-green-50 shadow-inner' 
-                            : 'hover:bg-slate-50 cursor-pointer hover:shadow-sm'
-                        }`}
-                        onClick={() => setSelectedIdea(idea)}
-                      >
-                        {/* Indicador visual de selección */}
-                        {selectedIdea?.ID === idea.ID && (
-                          <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: colorPalette.softGreen }}></div>
-                        )}
-                        
-                        {/* Botón de acción en la esquina superior derecha */}
-                        <div className="absolute top-2 right-6">
-                          <button 
+
+                  {/* MOBILE: Card view */}
+                  <div className="md:hidden space-y-4 p-4">
+                    {filteredIdeas.length > 0 ? (
+                      filteredIdeas.map((idea) => (
+                        <div
+                          key={idea.ID}
+                          className={`relative p-4 rounded-lg border-2 transition-all duration-200 ${
+                            selectedIdea?.ID === idea.ID
+                              ? 'border-green-500 bg-green-50 shadow-md'
+                              : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
+                          }`}
+                          onClick={() => setSelectedIdea(idea)}
+                        >
+                          {/* Delete button */}
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDeleteIdea(idea.ID);
                             }}
-                            title="Eliminar Idea" 
-                            className="p-1 rounded-full hover:bg-red-100 transition-colors"
+                            className="absolute top-2 right-2 p-2 rounded-full hover:bg-red-100 transition-colors"
                             disabled={deletingIdeaId === idea.ID}
                           >
                             {deletingIdeaId === idea.ID ? (
@@ -708,52 +834,47 @@ const colorPalette = {
                               <TrashIcon className="h-4 w-4 text-red-600" />
                             )}
                           </button>
-                        </div>
-                        
-                        {/* Contenido de la tabla */}
-                        <div className="flex items-start pt-2 px-6">
-                          {/* Idea / Problema */}
-                          <div style={{ textAlign: 'left', width: '35%', paddingRight: '8px' }}>
-                            <p className="font-medium" style={{ color: colorPalette.darkGreen, textAlign: 'left' }}>{idea.Problema}</p>
-                            <p className="text-sm truncate" style={{ color: colorPalette.oliveGray, textAlign: 'left' }}>{idea.Innovacion}</p>
-                          </div>
-                          
-                          {/* Campo */}
-                          <div style={{ textAlign: 'left', width: '15%', paddingRight: '8px', display: 'flex', alignItems: 'center' }}>
-                            <span className="inline-block px-3 py-1 text-sm font-semibold rounded-full truncate" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen, maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'left' }}>
-                              {idea.Campo}
-                            </span>
-                          </div>
-                          
-                          {/* Fecha */}
-                          <div style={{ textAlign: 'left', width: '12%', paddingRight: '8px', display: 'flex', alignItems: 'center' }}>
-                            <span className="text-sm" style={{ color: colorPalette.oliveGray }}>
-                              {idea.FechaDeCreacion ? (() => {
-                                const [year, month, day] = idea.FechaDeCreacion.split('-');
-                                const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                                return date.toLocaleDateString();
-                              })() : 'Sin fecha'}
-                            </span>
-                          </div>
-                          
-                          {/* Propuesta Refinada */}
-                          <div style={{ textAlign: 'left', width: '33%', paddingRight: '8px' }}>
+
+                          {/* Card content */}
+                          <div className="space-y-3 pr-8">
+                            <div>
+                              <p className="font-bold text-lg" style={{ color: colorPalette.darkGreen }}>
+                                {idea.Problema}
+                              </p>
+                              <p className="text-sm mt-1" style={{ color: colorPalette.oliveGray }}>
+                                {idea.Innovacion}
+                              </p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="inline-block px-3 py-1 text-xs font-semibold rounded-lg" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen }}>
+                                {idea.Campo}
+                              </span>
+                              <span className="text-xs" style={{ color: colorPalette.oliveGray }}>
+                                {idea.FechaDeCreacion ? (() => {
+                                  const [year, month, day] = idea.FechaDeCreacion.split('-');
+                                  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                                  return date.toLocaleDateString();
+                                })() : 'Sin fecha'}
+                              </span>
+                            </div>
+
                             {idea.Propuesta ? (
-                              <div className="relative">
+                              <div>
                                 <p className="text-sm leading-relaxed" style={{ color: colorPalette.oliveGray }}>
-                                  {truncateText(idea.Propuesta, 150)}
+                                  {truncateText(idea.Propuesta, 100)}
                                 </p>
-                                {idea.Propuesta.length > 150 && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleViewIdeaDetails(idea);
-                                  }}
-                                  className="text-xs mt-1 font-medium hover:underline"
-                                  style={{ color: colorPalette.darkGreen }}
-                                >
-                                  Leer más →
-                                </button>
+                                {idea.Propuesta.length > 100 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleViewIdeaDetails(idea);
+                                    }}
+                                    className="text-xs mt-1 font-medium hover:underline"
+                                    style={{ color: colorPalette.darkGreen }}
+                                  >
+                                    Leer más →
+                                  </button>
                                 )}
                               </div>
                             ) : (
@@ -761,27 +882,24 @@ const colorPalette = {
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span className="italic">Sin refinamiento IA</span>
+                                <span className="italic text-xs">Sin refinamiento IA</span>
                               </div>
                             )}
                           </div>
-                          
-                          {/* Espacio para acciones (ocupado por el botón absolute) */}
-                          <div style={{ width: '5%' }}></div>
                         </div>
+                      ))
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-center py-20 space-y-4">
+                        <EmptyBoxIcon />
+                        <p style={{ color: colorPalette.oliveGray }}>
+                          {ideas.length === 0
+                            ? 'Aún no has guardado ideas. ¡Genera una nueva!'
+                            : 'No hay ideas que coincidan con los filtros aplicados.'
+                          }
+                        </p>
                       </div>
-                    ))
-                  ) : (
-                    <div className="flex flex-col items-center justify-center text-center py-20 space-y-4">
-                      <EmptyBoxIcon />
-                      <p style={{ color: colorPalette.oliveGray }}>
-                        {ideas.length === 0 
-                          ? 'Aún no has guardado ideas. ¡Genera una nueva!' 
-                          : 'No hay ideas que coincidan con los filtros aplicados.'
-                        }
-                      </p>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -811,7 +929,10 @@ const colorPalette = {
                                         <p style={{ color: colorPalette.oliveGray }}>Aún no tienes proyectos guardados.</p>
                                     </div>
                                 ) : (
-                                    <>  {/* Títulos de las columnas */}
+                                    <>
+                                      {/* DESKTOP: Table view (hidden on mobile) */}
+                                      <div className="hidden md:block">
+                                        {/* Títulos de las columnas */}
                                         <div className="flex border-b border-slate-200 bg-slate-50 px-6 py-4">
                                             <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '45%', paddingRight: '8px' }}>Proyecto</div>
                                             <div className="text-sm font-semibold" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '40%', paddingRight: '8px' }}>Fondo(s)</div>
@@ -872,6 +993,65 @@ const colorPalette = {
                                                 </div>
                                             </div>
                                         ))}
+                                      </div>
+
+                                      {/* MOBILE: Card view */}
+                                      <div className="md:hidden space-y-4 p-4">
+                                        {proyectos.map((proyecto) => (
+                                          <div key={proyecto.ID} className="relative p-4 rounded-lg border-2 border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm transition-all">
+                                            {/* Action buttons */}
+                                            <div className="absolute top-2 right-2 flex space-x-1">
+                                              <button onClick={() => handleEditProyecto(proyecto)} className="p-2 rounded-full hover:bg-slate-200 transition-colors">
+                                                <PencilIcon className="h-4 w-4 text-[#505143]" />
+                                              </button>
+                                              <button onClick={() => handleDeleteProyecto(proyecto.ID)} className="p-2 rounded-full hover:bg-red-100 transition-colors">
+                                                <TrashIcon className="h-4 w-4 text-red-500" />
+                                              </button>
+                                            </div>
+
+                                            {/* Card content */}
+                                            <div className="space-y-3 pr-16">
+                                              <div>
+                                                <p className="font-bold text-lg" style={{ color: colorPalette.darkGreen }}>
+                                                  {proyecto.Titulo}
+                                                </p>
+                                                <p className="text-sm mt-1" style={{ color: colorPalette.oliveGray }}>
+                                                  {proyecto.Descripcion}
+                                                </p>
+                                              </div>
+
+                                              <div>
+                                                <p className="text-xs font-semibold mb-2" style={{ color: colorPalette.oliveGray }}>
+                                                  Fondo(s):
+                                                </p>
+                                                {proyecto.fondosAsignados.length > 0 ? (
+                                                  <div className="space-y-2">
+                                                    {proyecto.fondosAsignados.map((fondo, index) => (
+                                                      <div key={index} className="flex items-center justify-between gap-4">
+                                                        <span className="inline-block px-3 py-1 text-xs font-semibold rounded-lg" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen }}>
+                                                          {fondo.nombreFondo}
+                                                        </span>
+                                                        <span className="text-xs font-medium whitespace-nowrap" style={{ color: colorPalette.darkGreen }}>
+                                                          {obtenerEstadoTexto(fondo.estado)}
+                                                        </span>
+                                                      </div>
+                                                    ))}
+                                                  </div>
+                                                ) : (
+                                                  <div className="flex items-center justify-between gap-4">
+                                                    <span className="inline-block px-3 py-1 text-xs font-semibold rounded-lg" style={{ backgroundColor: colorPalette.lightGreen, color: colorPalette.darkGreen }}>
+                                                      No asignado
+                                                    </span>
+                                                    <span className="text-xs font-medium whitespace-nowrap" style={{ color: colorPalette.darkGreen }}>
+                                                      En preparación
+                                                    </span>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
                                     </>
                                 )}
                             </>
@@ -879,7 +1059,6 @@ const colorPalette = {
                     </div>
                 </div>
             )}
-            
             
             {activeSection === 'estadisticas' && (
               <div className="space-y-8">
@@ -896,7 +1075,7 @@ const colorPalette = {
                            <p style={{ color: colorPalette.oliveGray }}>Aún no tienes datos de postulación para mostrar.</p>
                        </div>
                     ) : (
-                      <div className="grid grid-cols-1 w-[110%] md:grid-cols-2 w-[100%] gap-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                           <h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Distribución por Resultado</h3>
@@ -914,22 +1093,20 @@ const colorPalette = {
                         </div>
 
                  
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 ">
-  <h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Rendimiento General</h3>
-  <div style={{ height: 450 }} className='mx-[-4%]'>
-    <ResponsiveContainer width="100%" height="100%">
-    
-      <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarChartData}>
-        <PolarGrid />
-        <PolarAngleAxis className= "" dataKey="categoria" tick={{ fontSize: 14, fill: colorPalette.oliveGray }} />
-        <PolarRadiusAxis angle={30} domain={[0, 100]} />
-        <Radar name="Puntaje" dataKey="A" stroke={colorPalette.darkGreen} fill={colorPalette.softGreen} fillOpacity={0.6} />
-        <Tooltip />
-      </RadarChart>
-    </ResponsiveContainer>
-  </div>
-</div>
-
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                          <h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Rendimiento General</h3>
+                          <div style={{ height: 450 }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarChartData}>
+                                <PolarGrid />
+                                <PolarAngleAxis dataKey="categoria" tick={{ fontSize: 14, fill: colorPalette.oliveGray }} />
+                                <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                                <Radar name="Puntaje" dataKey="A" stroke={colorPalette.darkGreen} fill={colorPalette.softGreen} fillOpacity={0.6} />
+                                <Tooltip />
+                              </RadarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
                        
                       </div>
                     )}

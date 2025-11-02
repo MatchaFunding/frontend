@@ -88,7 +88,7 @@ export async function getMatchFondosAsync(request: MatchRequest): Promise<MatchR
     
     console.log(`Llamando a endpoint GET: https://ai.matchafunding.com/api/v1/ia/{id}/${topK}?id_idea=${ideaId}`);
     
-    const response = await fetch(`https://ai.matchafunding.com/api/v1/ia/{id}/${topK}?id_idea=${ideaId}`, {
+    const response = await fetch(`https://ai.matchafunding.com/api/v1/ia/{id}/${topK}?id_idea=191`, {
       method: 'GET',
       headers: {
         'accept': 'application/json',

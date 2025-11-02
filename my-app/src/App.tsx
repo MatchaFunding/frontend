@@ -26,6 +26,7 @@ import SelectChange from './pages/edit-profile/ChooseToEdit.tsx';
 import EditmyProfile from './pages/edit-profile/EditMyprofile.tsx';
 import PremiumOptions from './pages/Premium/Premium-options.tsx';
 import PremiumRag from './pages/Premium/Premium-rag.tsx';
+import RagChat from './pages/Premium/RagChat.tsx';
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
         <Route path="/Perfil" element={<ProfileI />} />
         <Route path="/premium" element={<PremiumOptions />} />
         <Route path="/premium/rag" element={<PremiumRag />} />
+        <Route path="/premium/rag/:nombreFondo" element={<RagChat />} />
         <Route path="/Matcha/Select-Idea" element={<SelectIdea />} />
         <Route path="/Matcha/Select-Project" element={<MisProyectos />} />
         <Route path="/Matcha/Select-Project/fondos" element={<FondosconPorcentaje />} />

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import FreeSearchCard from '../../components/free-search-card/free-search-card.tsx';
+import RagSearchCard from '../../components/free-search-card/rag-search-card.tsx';
 import FiltersComponent from '../../components/filters-component/filters-component.tsx';
 import NavBar from '../../components/NavBar/navbar';
 import type { FiltersValues, OrderOption, CardsPerPageOption } from '../../components/filters-component/filters-component.ts';
@@ -157,7 +157,7 @@ function PremiumRag() {
 									card === null ? (
 										<div key={`ghost-${idx}`} className="w-full sm:w-[19rem] max-w-[20rem] invisible"></div>
 									) : (
-										<FreeSearchCard key={idx + (page - 1) * cardsPerPage} {...card} />
+										<RagSearchCard key={idx + (page - 1) * cardsPerPage} {...card} />
 									)
 								))
 							) : (

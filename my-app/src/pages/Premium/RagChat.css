@@ -1,0 +1,420 @@
+/* RagChat.css - Estilos para la interfaz de chat RAG */
+
+.rag-chat-container {
+  min-height: 100vh;
+  background-color: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+}
+
+.rag-chat-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+  margin-top: 80px;
+}
+
+.rag-chat-wrapper {
+  width: 100%;
+  max-width: 1400px;
+  display: grid;
+  grid-template-columns: 65% 35%;
+  grid-auto-rows: 1fr; /* Hacer que las filas tengan la misma altura */
+  gap: 2rem;
+  padding: 0 1rem;
+  align-items: stretch; /* Estirar ambas columnas al mismo alto */
+}
+
+/* Columna del Chat */
+.chat-column {
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Tomar toda la altura disponible del grid */
+  min-height: 600px; /* Altura mínima */
+  max-height: calc(100vh - 200px); /* Adaptarse a la pantalla */
+}
+
+.chat-header {
+  margin-bottom: 1.5rem;
+}
+
+.chat-header h1 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #44624a;
+  margin-bottom: 0.5rem;
+}
+
+.chat-header p {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.chatbot-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Columna de Sugerencias */
+.suggestions-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%; /* Tomar toda la altura disponible del grid */
+}
+
+.suggestions-card {
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 2rem;
+}
+
+.suggestions-card h2 {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #44624a;
+  margin-bottom: 1rem;
+}
+
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.suggestion-button {
+  text-align: left;
+  padding: 1rem;
+  background: #f1f5f9;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  color: #505143;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.suggestion-button:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
+  background: #e2e8f0;
+  color: #94a3b8;
+}
+
+.suggestion-button:not(:disabled):hover {
+  background: #8ba888;
+  color: white;
+  border-color: #8ba888;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(139, 168, 136, 0.3);
+}
+
+.suggestion-button:not(:disabled):active {
+  transform: translateY(0);
+}
+
+/* Info Card */
+.info-card {
+  background: linear-gradient(135deg, #44624a 0%, #8ba888 100%);
+  color: white;
+}
+
+.info-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.info-card p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+/* Estilos del Chatbot */
+.react-chatbot-kit-chat-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1rem;
+  max-height: 100%; /* No exceder el contenedor padre */
+}
+
+.react-chatbot-kit-chat-inner-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.react-chatbot-kit-chat-header {
+  background: linear-gradient(135deg, #44624a 0%, #8ba888 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  border-radius: 1rem 1rem 0 0;
+}
+
+.react-chatbot-kit-chat-message-container {
+  padding: 1.5rem;
+  background: #f8fafc;
+  /* Scroll automático al final */
+}
+
+/* Wrapper para que los mensajes empujen hacia abajo */
+.react-chatbot-kit-chat-message-container::after {
+  content: '';
+  margin-top: auto;
+}
+
+/* Asegurar que los mensajes aparezcan desde arriba */
+.react-chatbot-kit-chat-message-container > * {
+  flex-shrink: 0;
+}
+
+.react-chatbot-kit-chat-bot-message-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start; /* Bot a la izquierda */
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  animation: fadeIn 0.3s ease;
+  width: 100%;
+}
+
+.react-chatbot-kit-chat-bot-avatar-container {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #44624a 0%, #8ba888 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+  align-self: flex-start; /* Mantener avatar arriba */
+}
+
+.react-chatbot-kit-chat-bot-avatar-icon {
+  width: 20px;
+  height: 20px;
+  fill: white;
+}
+
+.react-chatbot-kit-chat-bot-avatar-letter {
+  color: white;
+  font-weight: normal;
+  font-size: 1rem;
+}
+
+.react-chatbot-kit-chat-bot-message {
+  background: linear-gradient(135deg, #44624a 0%, #8ba888 100%);
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  max-width: calc(100% - 56px); /* CRÍTICO: Resta avatar + gap */
+  color: white;
+  line-height: 1.5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  flex: 0 1 auto; /* CRÍTICO: Evita expansión infinita */
+  text-align: left; /* Alinear texto a la izquierda */
+  align-self: flex-start; /* Alinear el div a la izquierda del contenedor */
+  margin-right: auto; /* Forzar a la izquierda, no centrado */
+  margin-left: 0; /* Asegurar que no haya margen izquierdo */
+}
+
+.react-chatbot-kit-user-chat-message-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  animation: fadeIn 0.3s ease;
+  width: 100%;
+}
+
+.react-chatbot-kit-user-chat-message {
+  background: linear-gradient(135deg, #44624a 0%, #8ba888 100%);
+  color: white;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  max-width: 70%;
+  line-height: 1.5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  word-wrap: break-word;
+  align-self: flex-end; /* Alinear a la derecha */
+}
+
+.react-chatbot-kit-chat-input-container {
+  padding: 1rem 1.5rem;
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0 0 1rem 1rem;
+}
+
+.react-chatbot-kit-chat-input-form {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.react-chatbot-kit-chat-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.react-chatbot-kit-chat-input:disabled {
+  background-color: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.react-chatbot-kit-chat-input:focus {
+  border-color: #8ba888;
+}
+
+.react-chatbot-kit-chat-input:disabled:focus {
+  border-color: #e2e8f0;
+}
+
+.react-chatbot-kit-chat-btn-send {
+  background: linear-gradient(135deg, #44624a 0%, #8ba888 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.react-chatbot-kit-chat-btn-send:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.react-chatbot-kit-chat-btn-send:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(68, 98, 74, 0.3);
+}
+
+.react-chatbot-kit-chat-btn-send:not(:disabled):active {
+  transform: translateY(0);
+}
+
+.react-chatbot-kit-chat-btn-send-icon {
+  fill: white;
+}
+
+/* Loading animation */
+.chatbot-loader {
+  display: flex;
+  gap: 0.3rem;
+  padding: 1rem;
+  align-items: center;
+}
+
+.chatbot-loader span {
+  width: 8px;
+  height: 8px;
+  background: #8ba888;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: dotFade 1.4s infinite ease-in-out;
+}
+
+.chatbot-loader span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.chatbot-loader span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.chatbot-loader span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dotFade {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .rag-chat-wrapper {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .chat-column {
+    height: 600px;
+    max-height: 600px;
+  }
+
+  .suggestions-column {
+    order: -1;
+  }
+  
+  .react-chatbot-kit-chat-message-container {
+    min-height: 450px;
+    max-height: 450px;
+  }
+}
+
+@media (max-width: 640px) {
+  .rag-chat-content {
+    padding: 1rem 0.5rem;
+    margin-top: 60px;
+  }
+
+  .chat-column {
+    padding: 1.5rem;
+    height: 500px;
+    max-height: 500px;
+  }
+
+  .suggestions-card {
+    padding: 1.5rem;
+  }
+
+  .chat-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .react-chatbot-kit-chat-message-container {
+    min-height: 350px;
+    max-height: 350px;
+  }
+}

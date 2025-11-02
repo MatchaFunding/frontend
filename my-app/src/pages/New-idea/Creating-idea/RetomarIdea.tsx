@@ -187,99 +187,6 @@ const RetomarIdea: React.FC = () => {
     }
   };
 
-  const handleGenerateNewSummary = async () => {
-    setIsProcessing(true);
-    try {
-      // Obtener el ID del usuario
-      let usuarioId = 1; // fallback
-      try {
-        const storedUser = sessionStorage.getItem("usuario");
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          usuarioId = userData.Usuario?.ID || 1;
-        }
-      } catch (userError) {
-        console.error('Error al obtener usuario:', userError);
-      }
-
-      // Primero, limpiar el resumen actual editando la idea sin propuesta
-      const ideaSinResumen = new Idea({
-        ID: formData.ID,
-        Usuario: usuarioId,
-        Campo: formData.Campo,
-        Problema: formData.Problema,
-        Publico: formData.Publico,
-        Innovacion: formData.Innovacion,
-        Propuesta: "", // Limpiar resumen actual
-        Oculta: false,
-        FechaDeCreacion: new Date().toISOString().split('T')[0]
-      });
-
-      console.log('Limpiando resumen actual...');
-      await CambiarIdeaAsync(formData.ID!, ideaSinResumen);
-
-      // Crear idea con los datos actualizados para enviar a la API de IA
-      const ideaParaIA = new Idea({
-        ID: formData.ID,
-        Usuario: usuarioId,
-        Campo: formData.Campo,
-        Problema: formData.Problema,
-        Publico: formData.Publico,
-        Innovacion: formData.Innovacion,
-        Propuesta: "", // Sin resumen para generar uno completamente nuevo
-        Oculta: false,
-        FechaDeCreacion: new Date().toISOString().split('T')[0]
-      });
-
-      console.log('Generando resumen LLM completamente nuevo con IA...', ideaParaIA);
-      
-      // Llamar a la API de IA para generar el resumen LLM
-      const aiResponse = await CrearIdeaIAAsync(ideaParaIA);
-      console.log('Resumen LLM generado:', aiResponse);
-      
-      // Ahora actualizar la idea existente con el nuevo resumen LLM
-      const ideaActualizada = new Idea({
-        ID: formData.ID,
-        Usuario: usuarioId,
-        Campo: formData.Campo,
-        Problema: formData.Problema,
-        Publico: formData.Publico,
-        Innovacion: formData.Innovacion,
-        Propuesta: aiResponse.ResumenLLM, // Usar el resumen generado por IA
-        Oculta: false,
-        FechaDeCreacion: new Date().toISOString().split('T')[0]
-      });
-
-      // Usar la API de cambiar idea para actualizar (no crear nueva)
-      const ideaGuardada = await CambiarIdeaAsync(formData.ID!, ideaActualizada);
-      
-      if (!ideaGuardada) {
-        throw new Error('Error al actualizar la idea');
-      }
-      
-      alert('¡Nueva idea refinada generada exitosamente!');
-      
-      // Guardar la idea actualizada para usar en fondos
-      localStorage.setItem('selectedIdea', JSON.stringify({
-        ID: formData.ID,
-        Campo: formData.Campo,
-        Problema: formData.Problema,
-        Publico: formData.Publico,
-        Innovacion: formData.Innovacion,
-        Propuesta: aiResponse.ResumenLLM
-      }));
-      
-      // Navegar a ver fondos compatibles
-      navigate('/Matcha/New-idea/Creating-idea/FondoIdea');
-      
-    } catch (error) {
-      console.error('Error al generar nuevo resumen:', error);
-      alert(`Error al generar nuevo resumen con IA: ${error}`);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   const handleUpdateIdea = async () => {
     setIsUpdating(true);
     try {
@@ -337,7 +244,7 @@ const RetomarIdea: React.FC = () => {
       <main className="flex flex-col items-center justify-center px-4 py-10 mt-[5%]">
         <div className="w-full max-w-3xl mb-8">
           <h1 className="text-3xl font-bold text-center mb-4" style={{ color: colorPalette.darkGreen }}>
-            Retomar y Editar Idea
+            Retomar y editar idea
           </h1>
           <p className="text-center text-lg" style={{ color: colorPalette.oliveGray }}>
             Edita tu idea y genera un nuevo resumen con IA
@@ -349,7 +256,7 @@ const RetomarIdea: React.FC = () => {
         <Card className="w-full max-w-3xl px-9 py-8">
           {step === 1 && (
             <CardContent className="space-y-6">
-              <h2 className="text-2xl font-semibold text-center text-slate-800">Campo de la Idea</h2>
+              <h2 className="text-2xl font-semibold text-center text-slate-800">Campo de la idea</h2>
               <p className="text-center text-gray-600">¿En qué área se enfoca tu idea?</p>
               
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -379,7 +286,7 @@ const RetomarIdea: React.FC = () => {
 
           {step === 2 && (
             <CardContent className="space-y-6">
-              <h2 className="text-2xl font-semibold text-center text-slate-800">Problema a Resolver</h2>
+              <h2 className="text-2xl font-semibold text-center text-slate-800">Problema a resolver</h2>
               <p className="text-center text-gray-600">Describe el problema que tu idea va a solucionar</p>
               
               <div>
@@ -404,12 +311,12 @@ const RetomarIdea: React.FC = () => {
 
           {step === 3 && (
             <CardContent className="space-y-6">
-              <h2 className="text-2xl font-semibold text-center text-slate-800">Público Objetivo</h2>
+              <h2 className="text-2xl font-semibold text-center text-slate-800">Público objetivo</h2>
               <p className="text-center text-gray-600">¿A quién está dirigida tu solución?</p>
               
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Público Objetivo (mínimo 5 caracteres)
+                  Público objetivo (mínimo 5 caracteres)
                 </label>
                 <Textarea
                   name="Publico"
@@ -434,7 +341,7 @@ const RetomarIdea: React.FC = () => {
               
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Diferenciador/Innovación (mínimo 10 caracteres)
+                  Diferenciador/innovación (mínimo 10 caracteres)
                 </label>
                 <Textarea
                   name="Innovacion"
@@ -454,7 +361,7 @@ const RetomarIdea: React.FC = () => {
 
           {step === 5 && (
             <CardContent className="space-y-6">
-              <h2 className="text-2xl font-semibold text-center text-slate-800">Resumen de tu Idea</h2>
+              <h2 className="text-2xl font-semibold text-center text-slate-800">Resumen de tu idea</h2>
               
               <div className="space-y-4 p-6 bg-gray-50 rounded-lg">
                 <div>
@@ -475,7 +382,7 @@ const RetomarIdea: React.FC = () => {
                 </div>
                 {formData.Propuesta && (
                   <div>
-                    <h3 className="font-semibold text-gray-800">Propuesta Actual (IA):</h3>
+                    <h3 className="font-semibold text-gray-800">Propuesta actual (IA):</h3>
                     <p className="text-gray-600">{formData.Propuesta}</p>
                   </div>
                 )}
@@ -483,21 +390,12 @@ const RetomarIdea: React.FC = () => {
 
               <div className="flex flex-col gap-4">
                 <Button
-                  onClick={handleGenerateNewSummary}
-                  disabled={isProcessing}
-                  className="w-full"
-                  style={{ backgroundColor: colorPalette.darkGreen }}
-                >
-                  {isProcessing ? 'Generando con IA...' : 'Generar Nueva Idea Refinada y Ver Fondos'}
-                </Button>
-                
-                <Button
                   onClick={handleGenerateAndSave}
                   disabled={isProcessing}
-                  variant="outline"
-                  className="w-full border-green-500 text-green-600 hover:bg-green-50"
+                  style={{ backgroundColor: colorPalette.darkGreen }}
+                  className="w-full"
                 >
-                  {isProcessing ? 'Generando con IA...' : 'Solo Generar Nueva Idea Refinada (Guardar)'}
+                  {isProcessing ? 'Generando con IA...' : 'Generar nueva idea refinada (guardar)'}
                 </Button>
                 
                 <Button
@@ -506,7 +404,7 @@ const RetomarIdea: React.FC = () => {
                   variant="outline"
                   className="w-full"
                 >
-                  {isUpdating ? 'Actualizando...' : 'Solo Actualizar Idea (Sin IA)'}
+                  {isUpdating ? 'Actualizando...' : 'Solo actualizar idea (sin IA)'}
                 </Button>
               </div>
             </CardContent>

@@ -68,14 +68,14 @@ const FiltersIdea: React.FC<FiltersIdeaProps> = ({ filters, onApplyFilters }) =>
       <div className="filters-container">
         
         {/* Botón de Filtros */}
-        <button className="filter-btn" onClick={() => { setOpenFilters(true); setTempFilters(filters); }}>
+        <button className="filter-btn-idea" onClick={() => { setOpenFilters(true); setTempFilters(filters); }}>
           Filtros
           <img src="/svgs/filter.svg" alt="Filter icon" />
         </button>
 
         {/* Botón de Ordenar */}
         <div className="filter-dropdown" ref={dropdownOrderRef}>
-          <button className="filter-btn" type="button" onClick={() => setOpenOrder(o => !o)} aria-haspopup="listbox" aria-expanded={openOrder}>
+          <button className="filter-btn-idea" type="button" onClick={() => setOpenOrder(o => !o)} aria-haspopup="listbox" aria-expanded={openOrder}>
             Ordenar
             <img src="/svgs/arrow-up-down.svg" alt="Sort icon" />
           </button>

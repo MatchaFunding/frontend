@@ -326,9 +326,6 @@ const CrearProyectoMatch: React.FC = () => {
                   <Input name="Titulo" value={formData.Titulo} onChange={handleChange} minLength={10} required 
                     placeholder={formData.isFromConvertedIdea ? "Ingresa un título descriptivo para tu proyecto..." : "Título del proyecto"}
                   />
-                  {formData.isFromConvertedIdea && formData.Titulo === "" && (
-                    <p className="text-xs text-gray-500 mt-1">💡 Sugerencia: Incluye el área y objetivo principal de tu proyecto</p>
-                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -345,12 +342,6 @@ const CrearProyectoMatch: React.FC = () => {
                     placeholder={formData.isFromConvertedIdea ? "Descripción generada por IA - edítala si es necesario..." : "Descripción del proyecto"}
                     onFocus={() => console.log('TEXTAREA FOCUS - Valor actual:', formData.Descripcion)}
                   />
-                  {/* Debug temporal */}
-                  {formData.isFromConvertedIdea && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      💡 Tip: Revisa que la descripción refleje exactamente lo que quieres lograr con tu proyecto
-                    </p>
-                  )}
                 </div>
               </CardContent>
             )}

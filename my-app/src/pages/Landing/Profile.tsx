@@ -185,7 +185,7 @@ const ProfileI: React.FC = () => {
             <h1 className="text-3xl font-bold text-slate-800">Perfil General</h1>
             <button 
               className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow-md transition-transform hover:scale-105" 
-              style={{ backgroundColor: colorPalette.softGreen }} 
+              style={{ backgroundColor: colorPalette.darkGreen }} 
               onClick={() => navigate("/edit")} 
             >
               <Edit className="w-5 h-5" />

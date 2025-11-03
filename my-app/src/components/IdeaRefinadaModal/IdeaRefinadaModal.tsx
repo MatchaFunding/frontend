@@ -28,7 +28,7 @@ const IdeaRefinadaModal: React.FC<IdeaRefinadaModalProps> = ({ idea, isOpen, onC
         <div className="p-6 border-b border-slate-200">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold" style={{ color: colorPalette.darkGreen }}>
-              Detalle de la Idea
+              Detalle de la idea
             </h2>
             <button
               onClick={onClose}
@@ -45,7 +45,7 @@ const IdeaRefinadaModal: React.FC<IdeaRefinadaModalProps> = ({ idea, isOpen, onC
           {/* Idea Original */}
           <div className="bg-slate-50 rounded-lg p-4">
             <h3 className="text-lg font-semibold mb-3" style={{ color: colorPalette.darkGreen }}>
-              💡 Idea Original
+              Idea original
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -56,19 +56,19 @@ const IdeaRefinadaModal: React.FC<IdeaRefinadaModalProps> = ({ idea, isOpen, onC
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>
-                  Público Objetivo
+                  Público objetivo
                 </label>
                 <p className="p-2 bg-white rounded border text-sm">{idea.Publico}</p>
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>
-                  Problema que Resuelve
+                  Problema que resuelve
                 </label>
                 <p className="p-3 bg-white rounded border">{idea.Problema}</p>
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>
-                  Elemento Único/Diferenciador
+                  Elemento único/diferenciador
                 </label>
                 <p className="p-3 bg-white rounded border">{idea.Innovacion}</p>
               </div>
@@ -79,7 +79,7 @@ const IdeaRefinadaModal: React.FC<IdeaRefinadaModalProps> = ({ idea, isOpen, onC
           {idea.Propuesta && (
             <div className="bg-blue-50 rounded-lg p-4 border-l-4" style={{ borderLeftColor: colorPalette.primary }}>
               <h3 className="text-lg font-semibold mb-3" style={{ color: colorPalette.primary }}>
-                🚀 Idea Refinada por IA
+                🚀 Idea refinada por IA
               </h3>
               <div className="bg-white rounded-lg p-4 shadow-sm">
                 <p className="whitespace-pre-wrap leading-relaxed text-gray-800">
@@ -105,50 +105,23 @@ const IdeaRefinadaModal: React.FC<IdeaRefinadaModalProps> = ({ idea, isOpen, onC
             </div>
           )}
 
-          {/* Información adicional */}
-          <div className="bg-slate-50 rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-3" style={{ color: colorPalette.darkGreen }}>
-              📊 Información Adicional
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>
-                  Fecha de Creación
-                </label>
-                <p className="text-sm">
-                  {idea.FechaDeCreacion ? (() => {
-                    const [year, month, day] = idea.FechaDeCreacion.split('-');
-                    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                    return date.toLocaleDateString();
-                  })() : 'Sin fecha'}
-                </p>
-              </div>
-{/*               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>
-                  ID de la Idea
-                </label>
-                <p className="text-sm font-mono">#{idea.ID}</p>
-              </div> */}
-            </div>
+          {/* Fecha de creación */}
+          <div className="text-sm" style={{ color: colorPalette.oliveGray }}>
+            <span className="font-medium">Fecha de creación: </span>
+            {idea.FechaDeCreacion ? (() => {
+              const [year, month, day] = idea.FechaDeCreacion.split('-');
+              const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+              return date.toLocaleDateString();
+            })() : 'Sin fecha'}
           </div>
         </div>
 
-        <div className="p-6 border-t border-slate-200 flex justify-end space-x-3">
+        <div className="p-6 border-t border-slate-200 flex justify-end">
           <button
             onClick={onClose}
             className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Cerrar
-          </button>
-          <button
-            onClick={() => {
-              // Aquí podrías añadir funcionalidad para editar o crear proyecto
-              console.log('Crear proyecto desde idea:', idea.ID);
-            }}
-            className="px-6 py-2 text-white rounded-lg hover:scale-105 transition-transform"
-            style={{ backgroundColor: colorPalette.primary }}
-          >
-            Crear Proyecto
           </button>
         </div>
       </div>

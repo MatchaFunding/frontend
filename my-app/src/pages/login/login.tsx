@@ -130,9 +130,7 @@ const Login: React.FC = () => {
                   onBlur={(e) => ValidateField('email', e.target.value)}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                 />
-                {fieldErrors.email && (
-                  <p className="email-error">{fieldErrors.email}</p>
-                )}
+                <p className="email-error">{fieldErrors.email || '\u00A0'}</p>
               </div>
               <div className="form-group">
                 <div className="password-group">
@@ -166,9 +164,17 @@ const Login: React.FC = () => {
                     )}
                   </button>
                 </div>
+<<<<<<< HEAD
                 {fieldErrors.password && (
                   <p className="email-error">{fieldErrors.password}</p>
                 )}
+=======
+                
+                {/* Mensaje de error para la contraseña */}
+                <p className="email-error">{fieldErrors.password || '\u00A0'}</p>
+                
+                {/* Enlace de olvidé mi contraseña */}
+>>>>>>> main
                 <a href="#" className="forgot-password-link">
                   ¿Olvidaste tu contraseña?
                 </a>
@@ -185,11 +191,19 @@ const Login: React.FC = () => {
                   <span>{isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}</span>
                   <img src="/svgs/guy-in.svg" alt="" width="15" height="15" className="submit-btn-icon" />
                 </button>
+<<<<<<< HEAD
                 {loginError && (
                   <p className="email-error" style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                     {loginError}
                   </p>
                 )}
+=======
+                
+                {/* Mensaje de error de login */}
+                <p className="email-error" style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+                  {loginError || '\u00A0'}
+                </p>
+>>>>>>> main
               </div>
             </form>
             <p className="bottom-text">

@@ -1,0 +1,107 @@
+/* Animaciones para los botones de Fondos y Proyectos */
+
+/* Animación: Fondos se desactiva (verde claro entra de izquierda a derecha / verde sale hacia la derecha) */
+@keyframes swipeOutLeft {
+  0% {
+    background: linear-gradient(to right, rgba(139, 168, 136, 0.2) 50%, #44624a 50%);
+    background-size: 200% 100%;
+    background-position: 100% 0%;
+    color: white;
+  }
+  99% {
+    color: white;
+  }
+  100% {
+    background: linear-gradient(to right, rgba(139, 168, 136, 0.2) 50%, #44624a 50%);
+    background-size: 200% 100%;
+    background-position: 0% 0%;
+    color: #44624a;
+  }
+}
+
+/* Animación: Proyectos se desactiva (verde claro entra de derecha a izquierda / verde sale hacia la izquierda) */
+@keyframes swipeOutRight {
+  0% {
+    background: linear-gradient(to right, #44624a 50%, rgba(139, 168, 136, 0.2) 50%);
+    background-size: 200% 100%;
+    background-position: 0% 0%;
+    color: white;
+  }
+  99% {
+    color: white;
+  }
+  100% {
+    background: linear-gradient(to right, #44624a 50%, rgba(139, 168, 136, 0.2) 50%);
+    background-size: 200% 100%;
+    background-position: 100% 0%;
+    color: #44624a;
+  }
+}
+
+/* Animación: Proyectos se activa (verde entra de izquierda a derecha) */
+@keyframes swipeInLeft {
+  0% {
+    background: linear-gradient(to right, #44624a 50%, rgba(139, 168, 136, 0.2) 50%);
+    background-size: 200% 100%;
+    background-position: 100% 0%;
+    color: #44624a;
+  }
+  1% {
+    color: white;
+  }
+  100% {
+    background: linear-gradient(to right, #44624a 50%, rgba(139, 168, 136, 0.2) 50%);
+    background-size: 200% 100%;
+    background-position: 0% 0%;
+    color: white;
+  }
+}
+
+/* Animación: Fondos se activa (verde entra de derecha a izquierda) */
+@keyframes swipeInRight {
+  0% {
+    background: linear-gradient(to right, rgba(139, 168, 136, 0.2) 50%, #44624a 50%);
+    background-size: 200% 100%;
+    background-position: 0% 0%;
+    color: #44624a;
+  }
+  1% {
+    color: white;
+  }
+  100% {
+    background: linear-gradient(to right, rgba(139, 168, 136, 0.2) 50%, #44624a 50%);
+    background-size: 200% 100%;
+    background-position: 100% 0%;
+    color: white;
+  }
+}
+
+.btn-swipe-out-left {
+  animation: swipeOutLeft 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+  background: linear-gradient(to right, rgba(139, 168, 136, 0.2) 50%, #44624a 50%);
+  background-size: 200% 100%;
+  background-position: 100% 0%;
+}
+
+.btn-swipe-out-right {
+  animation: swipeOutRight 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+  background: linear-gradient(to right, #44624a 50%, rgba(139, 168, 136, 0.2) 50%);
+  background-size: 200% 100%;
+  background-position: 0% 0%;
+}
+
+.btn-swipe-in-left {
+  animation: swipeInLeft 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+  background: linear-gradient(to right, #44624a 50%, rgba(139, 168, 136, 0.2) 50%);
+  background-size: 200% 100%;
+  background-position: 100% 0%;
+  color: #44624a;
+}
+
+.btn-swipe-in-right {
+  animation: swipeInRight 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+  background: linear-gradient(to right, rgba(139, 168, 136, 0.2) 50%, #44624a 50%);
+  background-size: 200% 100%;
+  background-position: 0% 0%;
+  color: #44624a;
+}

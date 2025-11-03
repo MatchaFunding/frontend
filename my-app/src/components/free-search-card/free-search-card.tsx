@@ -15,9 +15,6 @@ const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ id, title, description,
   const [hasPostulacion, setHasPostulacion] = useState(false);
   const [isCheckingPostulacion, setIsCheckingPostulacion] = useState(true);
 
-  // Mostrar por consola para que compile con Vite
-  console.log(isCheckingPostulacion);
-
   // Verificar si existe postulación al montar el componente
   useEffect(() => {
     const VerificarPostulacion = async () => {
@@ -110,7 +107,7 @@ const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ id, title, description,
           <div className="free-search-card__metadata">
             <div className="free-search-card__topic-bookmark">
               <span className="free-search-card__topic">{topic || 'General'}</span>
-              <div title={hasPostulacion ? "Desvincular postulación de este fondo" : "Crear postulación a este fondo"} onClick={handleBookmarkClick} style={{ cursor: 'pointer' }}>
+              <div title={hasPostulacion ? "Desvincular postulación de este fondo" : "Crear postulación a este fondo"} onClick={handleBookmarkClick} style={{ cursor: isCheckingPostulacion ? 'wait' : 'pointer', opacity: isCheckingPostulacion ? 0.5 : 1 }}>
                 <img src={hasPostulacion ? "/svgs/bookmark-fill.svg" : "/svgs/bookmark-empty.svg"} alt={hasPostulacion ? "Postulación existente" : "Crear postulación"} className="free-search-card__bookmark"/>
               </div>
             </div>

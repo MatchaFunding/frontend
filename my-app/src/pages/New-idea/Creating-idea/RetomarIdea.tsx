@@ -5,7 +5,7 @@ import { Button } from "../../../components/UI/buttons";
 import { Card, CardContent } from "../../../components/UI/cards";
 import { Textarea } from "../../../components/UI/textarea";
 import { StepIndicator } from "../../../components/Shared/StepIndicator";
-import { CambiarIdeaAsync } from "../../../api/CambiarIdea";
+import { CambiarIdea } from "../../../api/CambiarIdea";
 import { CrearIdeaIAAsync } from "../../../api/CrearIdeaIa";
 import Idea from "../../../models/Idea";
 
@@ -130,7 +130,7 @@ const RetomarIdea: React.FC = () => {
       });
 
       console.log('Limpiando resumen actual...');
-      await CambiarIdeaAsync(formData.ID!, ideaSinResumen);
+      await CambiarIdea(formData.ID!, ideaSinResumen);
 
       // Crear idea con los datos actualizados para enviar a la API de IA
       const ideaParaIA = new Idea({
@@ -165,7 +165,7 @@ const RetomarIdea: React.FC = () => {
       });
 
       // Usar la API de cambiar idea para actualizar (no crear nueva)
-      const ideaGuardada = await CambiarIdeaAsync(formData.ID!, ideaActualizada);
+      const ideaGuardada = await CambiarIdea(formData.ID!, ideaActualizada);
       
       if (!ideaGuardada) {
         throw new Error('Error al actualizar la idea');
@@ -216,7 +216,7 @@ const RetomarIdea: React.FC = () => {
       });
 
       // Usar la API de cambiar idea para actualizar (no crear nueva)
-      const ideaGuardada = await CambiarIdeaAsync(formData.ID!, ideaToUpdate);
+      const ideaGuardada = await CambiarIdea(formData.ID!, ideaToUpdate);
       
       if (!ideaGuardada) {
         throw new Error('Error al actualizar la idea');

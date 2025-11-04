@@ -1,7 +1,6 @@
 import Idea from '../models/Idea.tsx'
-import { useEffect, useState } from 'react';
 
-export async function CambiarIdeaAsync(id: number, data: Idea): Promise<Idea | null> {
+export async function CambiarIdea(id: number, data: Idea): Promise<Idea | null> {
   try {
     const response = await fetch(`http://127.0.0.1:8000/ideas/${id}/`, {
       method: 'PUT',
@@ -16,9 +15,8 @@ export async function CambiarIdeaAsync(id: number, data: Idea): Promise<Idea | n
         'Problema':data.Problema,
         'Publico':data.Publico,
         'Innovacion':data.Innovacion,
-        'Oculta':data.Oculta,
         'FechaDeCreacion':data.FechaDeCreacion,
-        'Propuesta':data.Propuesta,
+        'Propuesta':data.Propuesta
       }),
     });
     if (!response.ok) {
@@ -35,16 +33,3 @@ export async function CambiarIdeaAsync(id: number, data: Idea): Promise<Idea | n
     return null;
   }
 }
-export function CambiarIdea(id: number, data: Idea) {
-  const [Idea, setIdea] = useState<Idea>();
-
-  useEffect(() => {
-      CambiarIdeaAsync(id, data).then((out) => {
-        if (out) {
-          setIdea(out);
-        }
-      });
-  }, );
-  return Idea;
-}
-export default CambiarIdea;

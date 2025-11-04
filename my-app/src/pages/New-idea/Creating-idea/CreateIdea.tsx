@@ -1,11 +1,17 @@
-import React, { useState, useRef, useEffect } from "react"; 
+import { useState, useRef, useEffect } from "react"; 
 import { useNavigate } from "react-router-dom";
-import Navbar from "../../../components/NavBar/navbar";
-import { CrearIdeaAsync } from "../../../api/CrearIdea";
+import { CrearIdea } from "../../../api/CrearIdea";
+import { CambiarIdea } from "../../../api/CambiarIdea";
 import { CrearIdeaIAAsync } from "../../../api/CrearIdeaIa";
-import { CambiarIdeaAsync } from "../../../api/CambiarIdea";
-import { VerEmpresaCompletaAsync } from "../../../api/VerEmpresaCompleta";
+import { VerMiUsuario } from '../../../api/VerMiUsuario';
+import { VerMiBeneficiario } from '../../../api/VerMiBeneficiario';
+import { VerMisProyectos } from '../../../api/VerMisProyectos';
+import { VerMisPostulaciones } from '../../../api/VerMisPostulaciones';
+import { VerMisMiembros } from '../../../api/VerMisMiembros';
+import { VerMisIdeas } from '../../../api/VerMisIdeas';
+import Navbar from "../../../components/NavBar/navbar";
 import Idea from '../../../models/Idea.tsx';
+import React from "react"; 
 
 
 const colorPalette = {
@@ -128,92 +134,72 @@ const CreateIdea: React.FC = () => {
   async function handleCreateIdea(IdeaDato:Idea) {
     try {
       setIsProcessing(true);
-      console.log('Creando idea con datos:', IdeaDato);
-      const ideaBackend = await CrearIdeaAsync(IdeaDato);
-      console.log('Idea creada en backend:', ideaBackend);
-
+      const ideaBackend = await CrearIdea(IdeaDato);
+      
       if (ideaBackend && ideaBackend.ID) {
         IdeaDato.ID = ideaBackend.ID;
-        
-        // Obtener el refinamiento de IA
-        console.log('Solicitando refinamiento de IA para idea:', IdeaDato);
         const ideaRespuesta = await CrearIdeaIAAsync(IdeaDato);
-        console.log('Respuesta de IA recibida:', ideaRespuesta);
         
         if (ideaRespuesta && ideaRespuesta.ResumenLLM) {
           try {
-            // Obtener el usuario actual para crear el objeto Idea completo
             const storedUser = localStorage.getItem("usuario");
             if (storedUser) {
               const datos = JSON.parse(storedUser);
-              const usuarioId = datos.Usuario?.ID;
-              
-              // Crear una idea completa con todos los campos necesarios
+              const id = datos.Usuario?.ID;
+
               const ideaCompleta = new Idea({
                 ID: ideaBackend.ID,
-                Usuario: usuarioId,
                 Campo: ideaBackend.Campo,
                 Problema: ideaBackend.Problema,
                 Publico: ideaBackend.Publico,
                 Innovacion: ideaBackend.Innovacion,
-                Oculta: ideaBackend.Oculta || false,
                 FechaDeCreacion: ideaBackend.FechaDeCreacion,
-                Propuesta: ideaRespuesta.ResumenLLM
+                Propuesta: ideaRespuesta.ResumenLLM,
+                Usuario: id
               });
               
-              console.log('Datos de la idea que se enviará al backend:');
-              console.log('- ID:', ideaCompleta.ID);
-              console.log('- Usuario:', ideaCompleta.Usuario);
-              console.log('- Campo:', ideaCompleta.Campo);
-              console.log('- Problema:', ideaCompleta.Problema);
-              console.log('- Publico:', ideaCompleta.Publico);
-              console.log('- Innovacion:', ideaCompleta.Innovacion);
-              console.log('- Oculta:', ideaCompleta.Oculta);
-              console.log('- FechaDeCreacion:', ideaCompleta.FechaDeCreacion);
-              console.log('- Propuesta:', ideaCompleta.Propuesta?.substring(0, 100) + '...');
+              const resultado = await CambiarIdea(ideaBackend.ID, ideaCompleta);
               
-              console.log('Actualizando idea completa con propuesta IA:', ideaCompleta);
-              const resultadoActualizacion = await CambiarIdeaAsync(ideaBackend.ID, ideaCompleta);
-              console.log('Resultado de actualización:', resultadoActualizacion);
-              
-              if (resultadoActualizacion) {
-                console.log('Propuesta IA guardada correctamente en la idea:', ideaBackend.ID);
+              if (resultado) {
+                console.log('Idea y propuesta IA guardada:', ideaBackend.ID);
+
+                const usuario = await VerMiUsuario(id);
+                const beneficiario = await VerMiBeneficiario(id);
+                const proyectos = await VerMisProyectos(id);
+                const postulaciones = await VerMisPostulaciones(id);
+                const miembros = await VerMisMiembros(id);
+                const ideas = await VerMisIdeas(id);
                 
-                // Actualizar el localStorage
-                const resultado = await VerEmpresaCompletaAsync(usuarioId);
-                if (resultado) {
-                  localStorage.setItem('usuario', JSON.stringify(resultado));
-                  console.log('localStorage actualizado con nueva idea');
+                const datos = {
+                  "Usuario":usuario,
+                  "Beneficiario":beneficiario,
+                  "Proyectos":proyectos,
+                  "Postulaciones":postulaciones,
+                  "Miembros":miembros,
+                  "Ideas":ideas
                 }
 
-                // Actualizar localStorage con la idea completa
-                try {
-                  const existingIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
-                  existingIdeas.push(resultadoActualizacion);
-                  localStorage.setItem("userIdeas", JSON.stringify(existingIdeas));
-                  console.log('Idea guardada en localStorage userIdeas:', resultadoActualizacion.ID);
-                } catch (localStorageError) {
-                  console.error('Error al guardar en localStorage:', localStorageError);
-                }
-                
-              } else {
+                localStorage.setItem("usuario", JSON.stringify(datos));
+                console.log(`Datos completos: ${localStorage.getItem("usuario")}`);
+              }
+              else {
                 console.error('No se recibió respuesta de la actualización de propuesta');
               }
             }
-            
-          } catch (error) {
-            console.error('Error al guardar la propuesta IA:', error);
-            // Continuar aunque falle el guardado de la propuesta
           }
-        } else {
+          catch (error) {
+            console.error('Error al guardar la propuesta IA:', error);
+          }
+        }
+        else {
           console.log('No se recibió refinamiento de IA o ResumenLLM está vacío');
         }
-        
         console.log(ideaRespuesta);
         setIsProcessing(false);
         return ideaRespuesta;
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error("Error creating idea:", error);
       setIsProcessing(false);
       throw error;
@@ -244,7 +230,6 @@ const CreateIdea: React.FC = () => {
         Problema : previewData.problem,
         Publico : previewData.audience,
         Innovacion : previewData.uniqueness,
-        Oculta : false,
         FechaDeCreacion : fechaActual,
         Propuesta : null // Se llenará después con la IA
       }
@@ -286,20 +271,25 @@ const CreateIdea: React.FC = () => {
 
   const handleNavigateToFondos = () => {
     try {
-      const userIdeas = JSON.parse(localStorage.getItem("userIdeas") || "[]");
-      if (userIdeas.length > 0) {
-        const lastIdea = userIdeas[userIdeas.length - 1];
-        console.log('Navegando a fondos con idea:', lastIdea);
-        localStorage.setItem("selectedIdea", JSON.stringify(lastIdea));
-        navigate("/Matcha/New-idea/Fondo-idea");
-      } else {
-        console.error('No hay ideas guardadas para hacer match');
-        // Opcionalmente mostrar un mensaje de error al usuario
+      const usuario = localStorage.getItem("usuario");
+      if (usuario) {
+        const parsed = JSON.parse(usuario);
+        const ideas = parsed.Ideas;
+        if (ideas.length > 0) {
+          const lastIdea = ideas[ideas.length - 1];
+          console.log('Navegando a fondos con idea:', lastIdea);
+          localStorage.setItem("selectedIdea", JSON.stringify(lastIdea));
+          navigate("/Matcha/New-idea/Fondo-idea");
+        }
+        else {
+          console.error('No hay ideas guardadas para hacer match');
       }
-    } catch (error) {
-      console.error('Error al acceder a userIdeas:', error);
     }
-  };
+  }
+  catch (error) {
+    console.error('Error al acceder a userIdeas:', error);
+  }
+};
 
   return (
     <div className="flex flex-col min-h-screen" style={{ backgroundColor: colorPalette.background }}>

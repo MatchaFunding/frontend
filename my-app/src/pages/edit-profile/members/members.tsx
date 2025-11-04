@@ -16,7 +16,7 @@ interface Tag {
   text: string;
 }
 
-const colorPalette = {
+const ColorPalette = {
   darkGreen: '#44624a',
   softGreen: '#8ba888',
   mediumGreen: '#c0d4ad',
@@ -362,7 +362,7 @@ const handleSaveMember = async () => {
                                         onClick={handleSaveMember} 
                                         disabled={isSaving} 
                                         className="px-4 py-2 text-white rounded-md hover:scale-105 transition-transform disabled:opacity-50 disabled:scale-100" 
-                                        style={{ backgroundColor: colorPalette.darkGreen }}
+                                        style={{ backgroundColor: ColorPalette.darkGreen }}
                                     >
                                         {isSaving ? 'Guardando...' : 'Guardar'}
                                     </button>
@@ -395,7 +395,7 @@ const handleSaveMember = async () => {
                             <button onClick={handleCloseTagModal} className="px-4 py-2 bg-slate-200 text-slate-800 rounded-md hover:bg-slate-300 transition-colors">
                                 Cancelar
                             </button>
-                            <button onClick={handleSaveTag} className="px-4 py-2 text-white rounded-md hover:scale-105 transition-transform" style={{ backgroundColor: colorPalette.darkGreen }}>
+                            <button onClick={handleSaveTag} className="px-4 py-2 text-white rounded-md hover:scale-105 transition-transform" style={{ backgroundColor: ColorPalette.darkGreen }}>
                                 Guardar Etiqueta
                             </button>
                         </div>

@@ -175,7 +175,8 @@ const CrearProyectoMatch: React.FC = () => {
         
         console.log('CONVERSION COMPLETADA');
         return;
-      } catch (e) {
+      }
+      catch (e) {
         console.error('Error al parsear idea para convertir:', e);
         setIsFromConvertedIdea(false);
       }
@@ -188,13 +189,11 @@ const CrearProyectoMatch: React.FC = () => {
   // useEffect separado para flujo normal (cuando NO hay conversión)
   useEffect(() => {
     // Solo ejecutar si ya se verificó conversión y no hay conversión pendiente
-    if (!isDataLoaded || formData.isFromConvertedIdea) return;
-    
+    if (!isDataLoaded || formData.isFromConvertedIdea)
+      return;
     console.log('INICIO FLUJO NORMAL');
-    
     // Procesamiento normal para ideas que vienen del flujo estándar
     const ideaActiva = idea || JSON.parse(localStorage.getItem("selectedIdea") || JSON.stringify(defaultIdea));
-
     // Solo usar descripción sugerida si hay respuesta de IA guardada
     let descripcionSugerida = "";
     const storedApiResponse = localStorage.getItem('ideaRespuestaIA');
@@ -205,11 +204,11 @@ const CrearProyectoMatch: React.FC = () => {
         if (respuestaParseada && respuestaParseada.ResumenLLM) {
           descripcionSugerida = respuestaParseada.ResumenLLM;
         }
-      } catch (e) {
+      }
+      catch (e) {
         console.error("No se pudo parsear la respuesta de la IA desde localStorage.", e);
       }
     }
-
     // Solo precargar datos si tenemos información válida de la idea y fondo
     const tituloSugerido = (ideaActiva.field && fondo.nombre) ? 
       `Proyecto de ${ideaActiva.field}: Aplicación a ${fondo.nombre}` : "";
@@ -221,13 +220,9 @@ const CrearProyectoMatch: React.FC = () => {
       Area: ideaActiva.field || "",
       isFromConvertedIdea: false
     }));
-    
     // Limpiar localStorage de respuesta IA
     localStorage.removeItem('ideaRespuestaIA');
-
   }, [idea, fondo, isDataLoaded]); // Solo depende de idea/fondo para flujo normal
-
-
 
   useEffect(() => {
     // Solo actualizar datos de usuario si NO viene de conversión de idea
@@ -235,8 +230,9 @@ const CrearProyectoMatch: React.FC = () => {
       const usuario = JSON.parse(storedUser);
       setFormData((prev) => ({ ...prev, Beneficiario: usuario.Beneficiario.ID }));
       setPersonas(usuario.Miembros.map((m: any) => new PersonaClass(m)));
-    } else if (storedUser && isFromConvertedIdea) {
-      // Si viene de conversión, solo actualizar el Beneficiario sin tocar otros campos
+    }
+    // Si viene de conversión, solo actualizar el Beneficiario sin tocar otros campos
+    else if (storedUser && isFromConvertedIdea) {
       const usuario = JSON.parse(storedUser);
       setFormData((prev) => ({ ...prev, Beneficiario: usuario.Beneficiario.ID }));
       setPersonas(usuario.Miembros.map((m: any) => new PersonaClass(m)));

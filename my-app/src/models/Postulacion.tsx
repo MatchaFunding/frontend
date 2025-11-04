@@ -8,6 +8,7 @@ class Postulacion {
     FechaDePostulacion: string;
     FechaDeResultado: string | null;
     Detalle: string;
+    Usuario: number;
     constructor(json: any) {
         this.ID = json.ID;
         this.Beneficiario = json.Beneficiario;
@@ -18,6 +19,7 @@ class Postulacion {
         this.FechaDePostulacion = json.FechaDePostulacion;
         this.FechaDeResultado = json.FechaDeResultado !== undefined ? json.FechaDeResultado : null;
         this.Detalle = json.Detalle;
+        this.Usuario =  json.Usuario;
     }
 }
 export default Postulacion;

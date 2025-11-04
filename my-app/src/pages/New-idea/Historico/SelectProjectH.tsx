@@ -51,12 +51,12 @@ const MisProyectosH: React.FC = () => {
         
         const userData = JSON.parse(storedUser);
         // Usamos la misma ruta que en el código de referencia para obtener el ID
-        const empresaId = userData?.Beneficiario?.ID;
+        const empresaId = userData?.Usuario?.ID;
         if (!empresaId) {
           throw new Error("No se pudo obtener el ID de la empresa del usuario.");
         }
 
-        const response = await fetch(`http://127.0.0.1:8000/verproyectosdeempresa/${empresaId}`);
+        const response = await fetch(`http://127.0.0.1:8000/usuarios/${empresaId}/proyectos`);
         if (!response.ok) {
           throw new Error(`Error al cargar los proyectos: ${response.statusText}`);
         }

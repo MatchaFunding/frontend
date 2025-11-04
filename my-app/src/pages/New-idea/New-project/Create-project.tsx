@@ -56,7 +56,7 @@ const NuevoProyecto: React.FC = () => {
   const [personas, setPersonas] = useState<PersonaClass[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [nuevaPersonaData, setNuevaPersonaData] = useState<PersonaPayload>({
-    Nombre: "", Sexo: "OTR", RUT: "", FechaDeNacimiento: ""
+    Nombre: "", Sexo: "Otro", RUT: "", FechaDeNacimiento: ""
   });
   const navigate = useNavigate();
   const storedUser = localStorage.getItem("usuario");
@@ -136,7 +136,7 @@ const NuevoProyecto: React.FC = () => {
         setPersonas(prev => [...prev, new PersonaClass(personaCreada)]);
         alert("Persona creada y añadida al proyecto exitosamente.");
         setIsModalOpen(false);
-        setNuevaPersonaData({ Nombre: "", Sexo: "OTR", RUT: "", FechaDeNacimiento: "" });
+        setNuevaPersonaData({ Nombre: "", Sexo: "Otro", RUT: "", FechaDeNacimiento: "" });
     }
     catch (error) {
         if (error instanceof Error) alert(error.message);
@@ -348,9 +348,9 @@ const EnviarProyecto = () => { // Ya no necesita ser 'async' aquí
                             <div>
                                 <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>Sexo</label>
                                 <select name="Sexo" value={nuevaPersonaData.Sexo} onChange={handleModalChange} required className="mt-1 block w-full pl-3 pr-10 py-2 text-base rounded-md" style={{ borderColor: colorPalette.softGreen, color: colorPalette.oliveGray }}>
-                                    <option value="VAR">Varón</option>
-                                    <option value="MUJ">Mujer</option>
-                                    <option value="OTR">Otro</option>
+                                    <option value="Hombre">Hombre</option>
+                                    <option value="Mujer">Mujer</option>
+                                    <option value="Otro">Otro</option>
                                 </select>
                             </div>
                             <div>

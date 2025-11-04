@@ -50,20 +50,15 @@ const MisProyectos: React.FC = () => {
       try {
         const storedUser = localStorage.getItem("usuario");
         if (!storedUser) {
-          // Si no hay usuario, redirigir al login o mostrar mensaje, aquí lanzamos error para el estado
           throw new Error("No se encontró información del usuario en la sesión.");
         }
-        
         const userData = JSON.parse(storedUser);
-        // Obtenemos el ID de la empresa igual que en el ejemplo
-        const empresaId = userData?.Beneficiario?.ID;
+        const empresaId = userData?.Usuario?.ID;
         
         if (!empresaId) {
           throw new Error("No se pudo obtener el ID de la empresa del usuario.");
         }
-
-        // Llamada a la API
-        const response = await fetch(`http://127.0.0.1:8000/verproyectosdeempresa/${empresaId}`);
+        const response = await fetch(`http://127.0.0.1:8000/usuarios/${empresaId}/proyectos`);
         if (!response.ok) {
           throw new Error(`Error al cargar los proyectos: ${response.statusText}`);
         }
@@ -71,10 +66,12 @@ const MisProyectos: React.FC = () => {
         const data: Proyecto[] = await response.json();
         setProyectos(data);
 
-      } catch (err: any) {
+      }
+      catch (err: any) {
         console.error(err);
         setError(err.message || "Ocurrió un error inesperado al cargar los proyectos.");
-      } finally {
+      }
+      finally {
         setLoading(false);
       }
     };

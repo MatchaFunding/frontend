@@ -71,8 +71,8 @@ export const tipoBeneficioMapping: Record<string, string> = {
   'Capital de riesgo': 'RIE',
   'Creditos': 'CRE',
   'Garantias': 'GAR',
-  'Incentivo mujeres': 'MUJ',
-  'Otros incentivos': 'OTR',
+  'Incentivo mujeres': 'Mujer',
+  'Otros incentivos': 'Otro',
   'Subsidios': 'SUB'
 };
 

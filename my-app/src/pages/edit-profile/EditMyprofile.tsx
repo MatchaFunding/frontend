@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import NavBar from '../../components/NavBar/navbar';
 import { Card } from '../../components/UI/cards';
 import { useNavigate } from 'react-router-dom';
+import { VerMiUsuario } from '../../api/VerMiUsuario';
+import { VerMiBeneficiario } from '../../api/VerMiBeneficiario';
+import { VerMisProyectos } from '../../api/VerMisProyectos';
+import { VerMisPostulaciones } from '../../api/VerMisPostulaciones';
+import { VerMisMiembros } from '../../api/VerMisMiembros';
+import { VerMisIdeas } from '../../api/VerMisIdeas';
 import Persona from "../../models/Persona";
 import Usuario from "../../models/Usuario";
 
@@ -38,12 +44,9 @@ const EditSelectField: React.FC<{ label: string; name: string; value: string; on
 
 const EditProfile: React.FC = () => {
     const navigate = useNavigate();
-
-
     const [originalUser, setOriginalUser] = useState<Usuario | null>(null);
     const [originalPersona, setOriginalPersona] = useState<Persona | null>(null);
   
-
     const [formData, setFormData] = useState({
         Nombre: '',
         Correo: '',
@@ -66,24 +69,9 @@ const EditProfile: React.FC = () => {
                 return;
             }
             try {
-                const sessionData = JSON.parse(storedUser);
-                const userId = sessionData.Usuario?.ID;
-                const personaId = sessionData.Usuario?.Persona;
-
-                if (!userId || !personaId) throw new Error("Datos de sesión incompletos.");
-
-                const [usersRes, personasRes] = await Promise.all([
-                    fetch('http://127.0.0.1:8000/usuarios/'),
-                    fetch('http://127.0.0.1:8000/personas/')
-                ]);
-
-                if (!usersRes.ok || !personasRes.ok) throw new Error("Error al cargar datos del servidor.");
-
-                const allUsers: Usuario[] = await usersRes.json();
-                const allPersonas: Persona[] = await personasRes.json();
-
-                const currentUser = allUsers.find(u => u.ID === userId);
-                const currentPersona = allPersonas.find(p => p.ID === personaId);
+                const data = JSON.parse(storedUser);
+                const currentUser = data.Usuario;
+                const currentPersona = data.Miembros[0];
 
                 if (!currentUser || !currentPersona) throw new Error("No se encontraron los datos del usuario.");
                 
@@ -98,9 +86,11 @@ const EditProfile: React.FC = () => {
                     Sexo: currentPersona.Sexo || 'NA',
                 });
 
-            } catch (err: any) {
+            }
+            catch (err: any) {
                 setError(err.message);
-            } finally {
+            }
+            finally {
                 setLoading(false);
             }
         };
@@ -135,14 +125,13 @@ const EditProfile: React.FC = () => {
         };
 
         try {
-            // .
             const [personaResponse, usuarioResponse] = await Promise.all([
-                fetch(`http://127.0.0.1:8000/persona/${originalPersona.ID}/`, {
+                fetch(`http://127.0.0.1:8000/personas/${originalPersona.ID}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(personaPayload),
                 }),
-                fetch(`http://127.0.0.1:8000/usuario/${originalUser.ID}/`, {
+                fetch(`http://127.0.0.1:8000/usuarios/${originalUser.ID}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(usuarioPayload),
@@ -155,12 +144,32 @@ const EditProfile: React.FC = () => {
                 throw new Error(`Error al guardar: ${personaError || ''} ${usuarioError || ''}`);
             }
 
-            alert("¡Cambios guardados con éxito!");
-            navigate('/Perfil');
-
-        } catch (err: any) {
+            const userData = localStorage.getItem("usuario");
+            if (userData) {
+                const id: number = JSON.parse(userData).Usuario.ID;
+                const usuario = await VerMiUsuario(id);
+                const beneficiario = await VerMiBeneficiario(id);
+                const proyectos = await VerMisProyectos(id);
+                const postulaciones = await VerMisPostulaciones(id);
+                const miembros = await VerMisMiembros(id);
+                const ideas = await VerMisIdeas(id);
+                const datos = {
+                    "Usuario":usuario,
+                    "Beneficiario":beneficiario,
+                    "Proyectos":proyectos,
+                    "Postulaciones":postulaciones,
+                    "Miembros":miembros,
+                    "Ideas":ideas
+                }
+                localStorage.setItem("usuario", JSON.stringify(datos));
+                alert("¡Cambios guardados con éxito!");
+                navigate('/Perfil');
+            }
+        }
+        catch (err: any) {
             setError(err.message || "Ocurrió un error inesperado al guardar.");
-        } finally {
+        }
+        finally {
             setIsSaving(false);
         }
     };
@@ -200,9 +209,9 @@ const EditProfile: React.FC = () => {
                                     value={formData.Sexo}
                                     onChange={handleInputChange}
                                     options={[
-                                        { value: 'NA', label: 'Prefiero no decirlo' },
-                                        { value: 'VAR', label: 'Varón' },
-                                        { value: 'MUJ', label: 'Mujer' },
+                                        { value: 'Otro', label: 'Prefiero no decirlo' },
+                                        { value: 'Hombre', label: 'Hombre' },
+                                        { value: 'Mujer', label: 'Mujer' },
                                     ]}
                                 />
                             </div>

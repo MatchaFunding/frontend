@@ -53,8 +53,6 @@ const colorPalette = {
   danger: '#e53e3e',
 };
 
-
-
 const ChartBarIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5 mr-3"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>);
 const PaperAirplaneIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5 mr-3"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>);
 const ClockIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5 mr-3"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>);
@@ -62,9 +60,7 @@ const LightBulbIcon = ({ className }: { className?: string }) => (<svg xmlns="ht
 const TrashIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>);
 const PencilIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>);
 const EmptyBoxIcon = () => (<svg className="h-24 w-24" style={{ color: colorPalette.mediumGreen }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>);
-
 const CustomTooltip = ({ active, payload }: any) => { if (active && payload && payload.length) { const data = payload[0].payload; return (<div className="bg-white p-3 border border-slate-200 rounded-lg shadow-lg"><p className="font-bold" style={{ color: data.color }}>{data.name}</p><p className="text-sm" style={{ color: colorPalette.oliveGray }}>{`Cantidad: ${data.value}`}</p></div>); } return null; };
-
 
 const MisPostulaciones: React.FC = () => {
   const [ideas, setIdeas] = useState<Idea[]>([]);
@@ -283,10 +279,16 @@ const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparac
   useEffect(() => {
     const fetchProyectos = async () => {
         const storedUser = localStorage.getItem("usuario");
-        if (!storedUser) { setErrorProyectos("No se encontró información del usuario."); return; }
+        if (!storedUser) {
+          setErrorProyectos("No se encontró información del usuario.");
+          return;
+        }
         const userData = JSON.parse(storedUser);
         const empresaId = userData?.Beneficiario?.ID;
-        if (!empresaId) { setErrorProyectos("No se pudo obtener el ID de la empresa."); return; }
+        if (!empresaId) {
+          setErrorProyectos("No se pudo obtener el ID de la empresa.");
+          return;
+        }
 
         setLoadingProyectos(true);
         setErrorProyectos(null);
@@ -345,24 +347,21 @@ const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparac
           const datos = JSON.parse(storedUser);
           const proyectos = datos.Proyectos;
           const postulaciones = datos.Postulaciones;
-          const proyectosEnPreparacionCount = proyectos.filter(p => !proyectos.has(p.ID)).length;
+          const enPreparacion = proyectos.length;
           
-          // Procesamiento para el PieChart (gráfico de torta)
           const pieData = processPieChartData(postulaciones);
-          if (proyectosEnPreparacionCount > 0) {
+          if (enPreparacion > 0) {
             pieData.push({
                 name: 'En preparación',
-                value: proyectosEnPreparacionCount,
+                value: enPreparacion,
                 color: colorPalette.oliveGray,
               });
           }
-          // CAMBIO: Ahora pasamos los conteos de proyectos a la función del RadarChart
           const radarData = processRadarChartData(
-              postulaciones, 
-              proyectosEnPreparacionCount, 
+              postulaciones,
+              enPreparacion,
               proyectos.length
           );
-
           setPieChartData(pieData);
           setRadarChartData(radarData);
         }
@@ -434,14 +433,10 @@ const colorPalette = {
       console.log('Intentando eliminar idea con ID:', idToDelete);
       const result = await BorrarIdea(idToDelete);
       console.log('Resultado de eliminar idea:', result);
-      
-      // Actualizar el estado local
       const updated = ideas.filter(i => i.ID !== idToDelete);
       setIdeas(updated);
       setFilteredIdeas(prev => prev.filter(i => i.ID !== idToDelete));
-      
       alert(`¡Idea eliminada exitosamente!\n\n"${ideaTitulo}" ha sido eliminada de tu lista de ideas.`);
-      
     }
     catch (error: any) {
       console.error('Error al eliminar idea:', error);
@@ -451,8 +446,8 @@ const colorPalette = {
       setDeletingIdeaId(null);
     }
   };
+  // Guardar la idea para convertir en proyecto
   const handleConvertToProject = (idea: Idea) => {
-    // Guardar la idea para convertir en proyecto
     const ideaData = {
       ID: idea.ID,
       Campo: idea.Campo,
@@ -461,14 +456,9 @@ const colorPalette = {
       Innovacion: idea.Innovacion,
       Propuesta: idea.Propuesta
     };
-    
     console.log('GUARDANDO IDEA PARA CONVERSION:', ideaData);
     localStorage.setItem('convertirAProyecto', JSON.stringify(ideaData));
-    
-    // También guardar en localStorage como respaldo
     localStorage.setItem('convertirAProyecto', JSON.stringify(ideaData));
-    
-    // Navegar a la página de construir proyecto
     navigate('/Matcha/Nuevo-proyecto');
   };
 
@@ -485,27 +475,24 @@ const colorPalette = {
     }));
     
     // Navegar a la página de editar idea SIN opción de match
-    navigate('/Matcha/retomar-idea', { state: { disableMatchOption: true } });
+    navigate('/Matcha/retomar-idea', {
+      state: {
+        disableMatchOption: true
+      }
+    });
   };
   
   const handleMatchIdea = async (idea: Idea) => {
     setMatchingIdeaId(idea.ID);
     try {
-      // Mostrar indicador de carga
       console.log('Iniciando match de idea con fondos...', idea);
-      
-      // Llamar a la API para hacer el match
       const matchResults = await getMatchFondosAsync({
         idea_id: idea.ID,
-        top_k: 10 // Obtener los 10 mejores matches
+        top_k: 10
       });
-      
       console.log('Resultados del match:', matchResults);
-      
-      // Guardar los resultados en localStorage para mostrarlos en la siguiente página
       localStorage.setItem('matchResults', JSON.stringify(matchResults));
       
-      // Guardar también la idea para referencia
       const ideaData = {
         ID: idea.ID,
         Campo: idea.Campo,
@@ -514,11 +501,9 @@ const colorPalette = {
         Innovacion: idea.Innovacion,
         Propuesta: idea.Propuesta
       };
+      
       localStorage.setItem('ideaParaMatch', JSON.stringify(ideaData));
-      
-      // Navegar a la página de resultados de match
       navigate('/Matcha/New-idea/Creating-idea/FondoIdea');
-      
     }
     catch (error) {
       console.error('Error al hacer match con IA:', error);

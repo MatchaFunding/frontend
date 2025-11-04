@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import './select-project.css';
 import type { SelectProjectModalProps, Proyecto } from './select-project';
 import { CrearPostulacionAsync } from '../../api/CrearPostulacion';
 import { BorrarPostulacionAsync } from '../../api/BorrarPostulacion';
 import { ObtenerPostulacionAsync } from '../../api/VerificarPostulacion';
+import { useState, useEffect } from 'react';
 import Postulacion from '../../models/Postulacion';
+import React from 'react';
+import './select-project.css';
 
 const SelectProjectModal: React.FC<SelectProjectModalProps> = ({ 
   isOpen, 
@@ -33,7 +34,7 @@ const SelectProjectModal: React.FC<SelectProjectModalProps> = ({
         return; 
       }
       const userData = JSON.parse(storedUser);
-      const empresaId = userData?.Beneficiario?.ID;
+      const empresaId = userData?.Usuario?.ID;
       if (!empresaId) { 
         setError("No se pudo obtener el ID de la empresa."); 
         return; 
@@ -46,13 +47,16 @@ const SelectProjectModal: React.FC<SelectProjectModalProps> = ({
           const postulacion = await ObtenerPostulacionAsync(empresaId, instrumentoId);
           setPostulacionActual(postulacion);
         }
-        const response = await fetch(`http://127.0.0.1:8000/verproyectosdeempresa/${empresaId}`);
-        if (!response.ok) throw new Error(`Error ${response.status}`);
+        const response = await fetch(`http://127.0.0.1:8000/usuarios/${empresaId}/proyectos`);
+        if (!response.ok)
+          throw new Error(`Error ${response.status}`);
         const data = await response.json();
         setProyectos(data || []); 
-      } catch (error: any) {
+      }
+      catch (error: any) {
         setError(error.message || "Ocurrió un error inesperado.");
-      } finally {
+      }
+      finally {
         setLoading(false);
       }
     };
@@ -129,40 +133,27 @@ const SelectProjectModal: React.FC<SelectProjectModalProps> = ({
       }
 
       const userData = JSON.parse(storedUser);
-      const empresaId = userData?.Beneficiario?.ID;
-      if (!empresaId) {
+      const empresaId = userData.Beneficiario?.ID;
+      const usuarioId = userData.Usuario?.ID;
+
+      if (!empresaId && usuarioId) {
         throw new Error('No se pudo obtener el ID de la empresa.');
       }
-
       // Crear el objeto Postulacion usando tu modelo
       const postulacionData = new Postulacion({
         ID: 0, // Se asigna automáticamente por la base de datos
         Beneficiario: empresaId,
         Proyecto: parseInt(selectedProject),
         Instrumento: instrumentoId,
-        Resultado: 'PEN', // Usar valor correcto del modelo Django: "PEN" = Pendiente
+        Resultado: 'Pendiente', // Usar valor correcto del modelo Django: "PEN" = Pendiente
         MontoObtenido: 0, // 0 en lugar de null (el backend no acepta null)
         FechaDePostulacion: new Date().toISOString().split('T')[0],
         FechaDeResultado: new Date().toISOString().split('T')[0], // Fecha actual en lugar de null
-        Detalle: `Postulación realizada a través de MatchaFunding para el fondo: ${fondoTitle || 'Fondo'}`
+        Detalle: `Postulación realizada a través de MatchaFunding para el fondo: ${fondoTitle || 'Fondo'}`,
+        Usuario: usuarioId
       });
 
-      console.log('Datos a enviar:', {
-        'empresaId': empresaId,
-        'selectedProject': selectedProject,
-        'instrumentoId': instrumentoId,
-        'postulacionData': postulacionData,
-        'JSON que se enviará': {
-          'Beneficiario': postulacionData.Beneficiario,
-          'Proyecto': postulacionData.Proyecto,
-          'Instrumento': postulacionData.Instrumento,
-          'Resultado': postulacionData.Resultado,
-          'MontoObtenido': postulacionData.MontoObtenido,
-          'FechaDePostulacion': postulacionData.FechaDePostulacion,
-          'FechaDeResultado': postulacionData.FechaDeResultado,
-          'Detalle': postulacionData.Detalle,
-        }
-      });
+      console.log(`Postulacion a enviar: ${JSON.stringify(postulacionData)}`);
 
       // Usar tu función CrearPostulacionAsync
       const result = await CrearPostulacionAsync(postulacionData);

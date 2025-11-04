@@ -70,9 +70,6 @@ const ProfileI: React.FC = () => {
         const beneficiario: Beneficiario = datos.Beneficiario;
         //const beneficiarioId = beneficiario?.ID;
 
-        console.log(`Usuario: ${user}`);
-        console.log(`Beneficiario: ${beneficiario}`);
-
         /*
 
         if (!user || !beneficiarioId) {

@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Users, SquarePen, User, X, Search, UserPlus, Trash2 } from 'lucide-react';
+import { VerMiUsuario } from '../../../api/VerMiUsuario';
+import { VerMiBeneficiario } from '../../../api/VerMiBeneficiario';
+import { VerMisProyectos } from '../../../api/VerMisProyectos';
+import { VerMisPostulaciones } from '../../../api/VerMisPostulaciones';
+import { VerMisMiembros } from '../../../api/VerMisMiembros';
+import { VerMisIdeas } from '../../../api/VerMisIdeas';
 import type Persona from '../../../models/Persona';
 
 interface MemberRelation {
   ID: number;
   Persona: number;
   Beneficiario: number;
-}
-
-interface MemberDisplayData {
-  memberId: number; 
-  personaId: number; 
-  name: string;
-  rut: string;
-  joinDate: string; 
 }
 
 interface Tag {
@@ -36,7 +34,7 @@ const colorPalette = {
 
 const Members: React.FC = () => {
    
-    const [members, setMembers] = useState<MemberDisplayData[]>([]);
+    const [members, setMembers] = useState<Persona[]>([]);
     const [tags, setTags] = useState<Tag[]>([
         { id: 1, text: 'Tecnología' },
         { id: 2, text: 'Industrias' },
@@ -60,60 +58,30 @@ const Members: React.FC = () => {
         const fetchMembers = async () => {
             setLoading(true);
             setError(null);
-            
             const storedUser = localStorage.getItem("usuario");
             if (!storedUser) {
                 setError("No se encontró información de sesión.");
                 setLoading(false);
                 return;
             }
-
             try {
-                const sessionData = JSON.parse(storedUser);
-                const beneficiarioId = sessionData.Beneficiario?.ID;
-
-                if (!beneficiarioId) {
-                    throw new Error("No se pudo obtener el ID del beneficiario desde la sesión.");
+                const userData = JSON.parse(storedUser);
+                const id = userData.Usuario.ID;
+                if (!id) {
+                    throw new Error("No se pudo obtener el ID del Usuario.");
                 }
-
-                const [membersRes, personasRes] = await Promise.all([
-                    fetch('http://127.0.0.1:8000/miembros/'),
-                    fetch('http://127.0.0.1:8000/personas/')
-                ]);
-
-                if (!membersRes.ok || !personasRes.ok) {
-                    throw new Error("Error al obtener los datos del servidor.");
+                const miembros: Persona[] = userData.Miembros;
+                if (miembros) {
+                    setMembers(miembros);
                 }
-
-                const allMemberRelations: MemberRelation[] = await membersRes.json();
-                const allPersonas: Persona[] = await personasRes.json();
-                
-                
-                const companyMemberRelations = allMemberRelations.filter(
-                    rel => rel.Beneficiario === beneficiarioId
-                );
-                
-               
-                const displayData = companyMemberRelations.map(relation => {
-                    const personaDetails = allPersonas.find(p => p.ID === relation.Persona);
-                    return {
-                        memberId: relation.ID, 
-                        personaId: relation.Persona,
-                        name: personaDetails?.Nombre || 'Nombre no encontrado',
-                        rut: personaDetails?.RUT || 'RUT no disponible',
-                        joinDate: new Date(personaDetails?.FechaDeNacimiento || Date.now()).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' }),
-                    };
-                });
-                
-                setMembers(displayData);
-
-            } catch (err: any) {
+            }
+            catch (err: any) {
                 setError(err.message || "Ocurrió un error inesperado.");
-            } finally {
+            }
+            finally {
                 setLoading(false);
             }
         };
-
         fetchMembers();
     }, []);
 
@@ -133,47 +101,21 @@ const fetchMembers = async () => {
         setLoading(false);
         return;
     }
-
     try {
-        const sessionData = JSON.parse(storedUser);
-        const beneficiarioId = sessionData.Beneficiario?.ID;
-
-        if (!beneficiarioId) {
-            throw new Error("No se pudo obtener el ID del beneficiario desde la sesión.");
+        const userData = JSON.parse(storedUser);
+        const id = userData.Usuario.ID;
+        if (!id) {
+            throw new Error("No se pudo obtener el ID del Usuario.");
         }
-
-        const [membersRes, personasRes] = await Promise.all([
-            fetch('http://127.0.0.1:8000/miembros/'),
-            fetch('http://127.0.0.1:8000/personas/')
-        ]);
-
-        if (!membersRes.ok || !personasRes.ok) {
-            throw new Error("Error al obtener los datos del servidor.");
+        const miembros: Persona[] = userData.Miembros;
+        if (miembros) {
+            setMembers(miembros);
         }
-
-        const allMemberRelations: MemberRelation[] = await membersRes.json();
-        const allPersonas: Persona[] = await personasRes.json();
-        
-        const companyMemberRelations = allMemberRelations.filter(
-            rel => rel.Beneficiario === beneficiarioId
-        );
-        
-        const displayData = companyMemberRelations.map(relation => {
-            const personaDetails = allPersonas.find(p => p.ID === relation.Persona);
-            return {
-                memberId: relation.ID,
-                personaId: relation.Persona,
-                name: personaDetails?.Nombre || 'Nombre no encontrado',
-                rut: personaDetails?.RUT || 'RUT no disponible',
-                joinDate: new Date(personaDetails?.FechaDeNacimiento || Date.now()).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' }),
-            };
-        });
-        
-        setMembers(displayData);
-
-    } catch (err: any) {
+    }
+    catch (err: any) {
         setError(err.message || "Ocurrió un error inesperado.");
-    } finally {
+    }
+    finally {
         setLoading(false);
     }
 };
@@ -217,55 +159,69 @@ const handleSaveMember = async () => {
         return;
     }
     const beneficiarioId = JSON.parse(storedUser).Beneficiario?.ID;
-
-   
     const formattedRut = formatRut(newMemberRut);
+    const id: number = JSON.parse(storedUser).Usuario?.ID;
 
     try {
-        const personaResponse = await fetch(`http://127.0.0.1:8000/crearpersona/`, {
+        const personaResponse = await fetch(`http://127.0.0.1:8000/personas`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 Nombre: newMemberName,
                 RUT: formattedRut, // Usamos el RUT formateado
-                Sexo: "NA",
+                Sexo: "Otro",
                 FechaDeNacimiento: new Date().toISOString().split('T')[0]
             }),
         });
-
-       
         if (!personaResponse.ok) {
             let errorMsg = 'Error al crear la persona en el sistema.';
             try {
-                
                 const errorData = await personaResponse.json();
                 errorMsg += ` Detalle: ${JSON.stringify(errorData)}`;
-            } catch (e) {
-            
+            }
+            catch (e) {
                 errorMsg += ` Código: ${personaResponse.status} ${personaResponse.statusText}`;
             }
             throw new Error(errorMsg);
         }
+        const newPersona: Persona[] = await personaResponse.json();
+        const personaId = newPersona[0].ID;
         
-        const newPersona: Persona = await personaResponse.json();
+        console.log(`Persona creada: ${JSON.stringify(newPersona[0])}`);
 
-        const miembroResponse = await fetch(`http://127.0.0.1:8000/crearmiembro/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                Persona: newPersona.ID,
-                Beneficiario: beneficiarioId
-            }),
-        });
+        if (personaId) {
+            const miembroResponse = await fetch(`http://127.0.0.1:8000/miembros`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    Persona: personaId,
+                    Beneficiario: beneficiarioId,
+                    Usuario: id
+                }),
+            });
+            if (!miembroResponse.ok) {
+                throw new Error('Error al asociar la persona como miembro de la empresa.');
+            }
+            const usuario = await VerMiUsuario(id);
+            const beneficiario = await VerMiBeneficiario(id);
+            const proyectos = await VerMisProyectos(id);
+            const postulaciones = await VerMisPostulaciones(id);
+            const miembros = await VerMisMiembros(id);
+            const ideas = await VerMisIdeas(id);
 
-        if (!miembroResponse.ok) {
-            throw new Error('Error al asociar la persona como miembro de la empresa.');
+            const datos = {
+                "Usuario":usuario,
+                "Beneficiario":beneficiario,
+                "Proyectos":proyectos,
+                "Postulaciones":postulaciones,
+                "Miembros":miembros,
+                "Ideas":ideas
+            }
+            localStorage.setItem("usuario", JSON.stringify(datos));
+            alert("Miembro agregado con éxito.");
+            handleBackToList();
+            fetchMembers();
         }
-        
-        alert("Miembro agregado con éxito.");
-        handleBackToList();
-        fetchMembers();
-
     } catch (err: any) {
         setError(err.message);
         alert(`Error: ${err.message}`);
@@ -274,20 +230,28 @@ const handleSaveMember = async () => {
     }
 };
     const handleRemoveMember = async (memberIdToRemove: number) => {
-        if (!window.confirm("¿Estás seguro de que quieres eliminar a este miembro?")) return;
-
+        if (!window.confirm("¿Estás seguro de que quieres eliminar a este miembro?"))
+            return;
         try {
-            const response = await fetch(`http://127.0.0.1:8000/miembro/${memberIdToRemove}/`, {
+            const response = await fetch(`http://127.0.0.1:8000/miembros/${memberIdToRemove}`, {
                 method: 'DELETE',
             });
-
             if (!response.ok) {
                 throw new Error('No se pudo eliminar el miembro en el servidor.');
             }
-
-            // Si la eliminación fue exitosa en el backend, actualiza el estado local
-            setMembers(prevMembers => prevMembers.filter(m => m.memberId !== memberIdToRemove));
-            alert("Miembro eliminado con éxito.");
+            const storedUser = localStorage.getItem("usuario");
+            if (!storedUser) {
+                setError("No se encontró información de sesión.");
+                setLoading(false);
+                return;
+            }
+            const userData = JSON.parse(storedUser);
+            const id = userData.Usuario.ID;
+            if (id) {
+                const miembros: Persona[] = await VerMisMiembros(id);
+                setMembers(miembros);
+                alert("Miembro eliminado con éxito.");
+            }
 
         } catch (err: any) {
             setError(err.message || "Error al eliminar el miembro.");
@@ -309,7 +273,7 @@ const handleSaveMember = async () => {
 	};
 
     const filteredMembers = members.filter(member => 
-        member.name.toLowerCase().includes(searchTerm.toLowerCase())
+        member.Nombre.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
 	
@@ -331,11 +295,11 @@ const handleSaveMember = async () => {
                 {!loading && !error && (
                     <ul className="space-y-2">
                         {members.map((member) => (
-                            <li key={member.memberId} className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-x-4 p-1 rounded-md hover:bg-slate-50">
+                            <li key={member.ID} className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-x-4 p-1 rounded-md hover:bg-slate-50">
                                 <User className="w-5 h-5 text-slate-500" />
-                                <span className="font-medium text-left text-slate-700">{member.name}</span>
-                                <span className="text-sm text-right text-slate-500">{member.rut}</span>
-                                <span className="text-sm text-right text-slate-500">{member.joinDate}</span>
+                                <span className="font-medium text-left text-slate-700">{member.Nombre}</span>
+                                <span className="text-sm text-right text-slate-500">{member.RUT}</span>
+                                <span className="text-sm text-right text-slate-500">{member.FechaDeNacimiento}</span>
                             </li>
                         ))}
                     </ul>
@@ -364,13 +328,13 @@ const handleSaveMember = async () => {
 								</div>
 								<div className="space-y-2 max-h-72 overflow-y-auto pr-2">
                                     {filteredMembers.map(member => (
-                                        <div key={member.memberId} className="flex justify-between items-center p-2 rounded-md hover:bg-slate-50">
+                                        <div key={member.ID} className="flex justify-between items-center p-2 rounded-md hover:bg-slate-50">
                                             <div>
-                                                <div className="font-medium text-slate-700">{member.name}</div>
-                                                <div className="text-sm text-slate-500">{member.rut}</div>
+                                                <div className="font-medium text-slate-700">{member.Nombre}</div>
+                                                <div className="text-sm text-slate-500">{member.RUT}</div>
                                             </div>
                                            
-                                            <button onClick={() => handleRemoveMember(member.memberId)} className="p-2 rounded-full hover:bg-red-100" title="Eliminar Miembro">
+                                            <button onClick={() => handleRemoveMember(member.ID)} className="p-2 rounded-full hover:bg-red-100" title="Eliminar Miembro">
                                                 <Trash2 className="w-5 h-5 text-red-500" />
                                             </button>
                                         </div>
@@ -401,24 +365,23 @@ const handleSaveMember = async () => {
 										/>
 									</div>
 								</form>
-								
-<div className="flex justify-end gap-3 mt-6">
-    <button 
-        onClick={handleBackToList} 
-        disabled={isSaving} 
-        className="px-4 py-2 bg-slate-200 text-slate-800 rounded-md hover:bg-slate-300 disabled:opacity-50"
-    >
-        Cancelar
-    </button>
-    <button 
-        onClick={handleSaveMember} 
-        disabled={isSaving} 
-        className="px-4 py-2 text-white rounded-md hover:scale-105 transition-transform disabled:opacity-50 disabled:scale-100" 
-        style={{ backgroundColor: colorPalette.darkGreen }}
-    >
-        {isSaving ? 'Guardando...' : 'Guardar'}
-    </button>
-</div>
+                                <div className="flex justify-end gap-3 mt-6">
+                                    <button 
+                                        onClick={handleBackToList} 
+                                        disabled={isSaving} 
+                                        className="px-4 py-2 bg-slate-200 text-slate-800 rounded-md hover:bg-slate-300 disabled:opacity-50"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button 
+                                        onClick={handleSaveMember} 
+                                        disabled={isSaving} 
+                                        className="px-4 py-2 text-white rounded-md hover:scale-105 transition-transform disabled:opacity-50 disabled:scale-100" 
+                                        style={{ backgroundColor: colorPalette.darkGreen }}
+                                    >
+                                        {isSaving ? 'Guardando...' : 'Guardar'}
+                                    </button>
+                                </div>
 							</div>
 						)}
 					</div>

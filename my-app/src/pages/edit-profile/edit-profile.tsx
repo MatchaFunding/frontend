@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import type Beneficiario from '../../models/Beneficiario.tsx';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Members from './members/members.tsx';
 import Company from './company/company.tsx';
 import NavBar from '../../components/NavBar/navbar';
-import { useNavigate } from 'react-router-dom';
-import type Beneficiario from '../../models/Beneficiario.tsx';
+import React from 'react';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -50,19 +51,17 @@ const EditProfile: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/beneficiario/${originalCompanyData.ID}/`,
+        `http://127.0.0.1:8000/usuarios/${originalCompanyData.ID}/beneficiarios`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         }
       );
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(JSON.stringify(errorData) || 'Error al guardar los cambios en la empresa.');
       }
-
       const updatedBeneficiario = await response.json();
       const storedUser = localStorage.getItem('usuario');
       if (storedUser) {
@@ -70,13 +69,14 @@ const EditProfile: React.FC = () => {
         sessionData.Beneficiario = updatedBeneficiario;
         localStorage.setItem('usuario', JSON.stringify(sessionData));
       }
-
       alert('¡Cambios en la empresa guardados con éxito!');
       navigate('/Perfil');
-    } catch (err: any) {
+    }
+    catch (err: any) {
       setError(err.message);
       alert(`Error al guardar: ${err.message}`);
-    } finally {
+    }
+    finally {
       setIsSaving(false);
     }
   };
@@ -87,7 +87,6 @@ const EditProfile: React.FC = () => {
       style={{ backgroundColor: colorPalette.lightGray }}
     >
       <NavBar />
-
       <main className="flex-grow flex items-center justify-center p-4 md:p-8">
         <div className="w-full max-w-6xl space-y-6">
           {error && (
@@ -95,8 +94,6 @@ const EditProfile: React.FC = () => {
               {error}
             </div>
           )}
-
-     
           <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
              
@@ -107,15 +104,11 @@ const EditProfile: React.FC = () => {
                   originalData={originalCompanyData}
                 />
               </div>
-
-             
               <div className="bg-gray-50 border border-gray-200 rounded-2xl shadow-inner p-6 flex flex-col justify-between">
                 <Members />
               </div>
             </div>
           </div>
-
-      
           <footer className="flex justify-center items-center gap-4">
             <button
               onClick={() => navigate('/Perfil')}

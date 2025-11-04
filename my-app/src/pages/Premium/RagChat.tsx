@@ -100,7 +100,7 @@ const RagChat: React.FC = () => {
                 config={config}
                 messageParser={MessageParser}
                 actionProvider={ActionProvider}
-                headerText="Asistente RAG"
+                headerText="Matchito - Asistente de Documentos"
                 placeholderText="Escribe tu pregunta aquí..."
               />
             </div>

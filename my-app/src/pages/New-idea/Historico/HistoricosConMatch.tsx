@@ -44,54 +44,6 @@ interface ProyectoSeleccionado {
   Area:string;
 }
 
-interface ScoreData {
-  semantic_score?: number;
-  topic_score?: number;
-  rules_score?: number;
-}
-
-// --- COMPONENTE PARA EL MENÚ CONTEXTUAL ---
-
-interface ContextMenuProps {
-  x: number;
-  y: number;
-  data: ScoreData | null;
-  onClose: () => void;
-}
-
-const ScoreContextMenu: React.FC<ContextMenuProps> = ({ x, y, data }) => {
-  if (!data) return null;
-
-  const formatScore = (score?: number) => {
-    if (score === undefined || score === null) return 'N/A';
-    return `${(score * 100).toFixed(1)}%`;
-  };
-
-  return (
-    <div
-      style={{ top: y, left: x }}
-      className="absolute bg-white rounded-lg shadow-2xl p-4 z-50 border border-slate-200 w-64 animate-fade-in-fast"
-    >
-      <h4 className="font-bold text-slate-800 text-lg mb-2">Detalle de Afinidad</h4>
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between items-center">
-          <span className="text-slate-600">Puntaje Semántico:</span>
-          <span className="font-semibold text-slate-800 bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">{formatScore(data.semantic_score)}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-slate-600">Puntaje Temático:</span>
-          <span className="font-semibold text-slate-800 bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">{formatScore(data.topic_score)}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-slate-600">Puntaje por Reglas:</span>
-          <span className="font-semibold text-slate-800 bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">{formatScore(data.rules_score)}</span>
-        </div>
-      </div>
-       <p className="text-xs text-slate-400 mt-3 italic">Estos puntajes miden qué tan bien coincide tu proyecto con otros históricos.</p>
-    </div>
-  );
-};
-
 // --- COMPONENTES AUXILIARES ---
 
 const SearchIcon: React.FC = () => (
@@ -115,43 +67,113 @@ interface ProyectoCardProps {
   semantic_score?: number;
   topic_score?: number;
   rules_score?: number;
-  onRightClick: (event: React.MouseEvent, scores: ScoreData) => void;
 }
 
 const ProyectoCard: React.FC<ProyectoCardProps> = ({
   ID, Titulo, Descripcion, Area, Alcance, DuracionEnMesesMinimo, DuracionEnMesesMaximo, Compatibilidad, ImagenUrl,
-  semantic_score, topic_score, rules_score, onRightClick
+  semantic_score, topic_score, rules_score
 }) => {
   const navigate = useNavigate();
   const defaultImage = '/sin-foto.png';
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-  const handleContextMenu = (event: React.MouseEvent) => {
-    event.preventDefault(); // Previene el menú nativo del navegador
-    event.stopPropagation(); // Detiene la propagación del evento para que no active otros listeners
-    onRightClick(event, { semantic_score, topic_score, rules_score });
+  const handleMouseEnter = () => {
+    setShowTooltip(true);
+  };
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    setTooltipPosition({ x: event.clientX, y: event.clientY });
+  };
+
+  const handleMouseLeave = () => {
+    setShowTooltip(false);
   };
 
   return (
-    <div
-      onContextMenu={handleContextMenu}
-      className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80 h-[560px] cursor-pointer"
-    >
-      <div className="relative h-52 flex-shrink-0">
-        <img src={ImagenUrl || defaultImage} alt={Titulo} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = defaultImage; }}/>
+    <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80 h-auto sm:h-[560px] cursor-pointer">
+      {/* Imagen oculta en móvil como en búsqueda libre */}
+      <div className="relative h-52 flex-shrink-0 hidden sm:block">
+        <img 
+          src={ImagenUrl || defaultImage} 
+          alt={Titulo} 
+          className="w-full h-full object-cover" 
+          onError={(e) => { e.currentTarget.src = defaultImage; }}
+          onMouseEnter={handleMouseEnter}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        />
         <span className="absolute top-4 left-4 bg-[rgba(68,98,74,0.8)] backdrop-blur-sm text-white text-sm font-semibold py-1 px-3 rounded-lg">
           {Compatibilidad || 0}% compatibilidad
         </span>
+        
+        {/* Tooltip que sigue el mouse */}
+        {showTooltip && (
+          <div
+            style={{ 
+              position: 'fixed', 
+              top: tooltipPosition.y + 10, 
+              left: tooltipPosition.x + 10,
+              zIndex: 1000
+            }}
+            className="bg-white rounded-lg shadow-2xl p-4 border border-slate-200 w-64 animate-fade-in-fast pointer-events-none"
+          >
+            <h4 className="font-bold text-slate-800 text-lg mb-2">Puntaje de afinidad</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-600">Semántico:</span>
+                <span className="font-semibold text-slate-800 bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                  {semantic_score !== undefined ? `${(semantic_score * 100).toFixed(1)}%` : 'N/A'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-600">Temático:</span>
+                <span className="font-semibold text-slate-800 bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
+                  {topic_score !== undefined ? `${(topic_score * 100).toFixed(1)}%` : 'N/A'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-600">Por reglas:</span>
+                <span className="font-semibold text-slate-800 bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
+                  {rules_score !== undefined ? `${(rules_score * 100).toFixed(1)}%` : 'N/A'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-      <div className="p-6 flex flex-col flex-grow min-h-0">
-        <h2 className="text-xl font-bold text-slate-800 mb-2 line-clamp-2 flex-shrink-0">{Titulo}</h2>
-        <p className="text-slate-500 text-sm mb-4 line-clamp-5 overflow-hidden flex-shrink-0">{Descripcion}</p>
-        <div className="mt-auto flex-shrink-0">
-          <p className="text-xs text-slate-400 italic mb-2">Área: {Area}</p>
-          <p className="text-xs text-slate-400 italic mb-2">Duración: {DuracionEnMesesMinimo}-{DuracionEnMesesMaximo} meses</p>
-          <p className="text-xs text-slate-400 italic mb-4">Alcance: {Alcance}</p>
+      <div className="p-4 sm:p-6 flex flex-col flex-grow min-h-0">
+        {/* Badge de compatibilidad móvil - solo visible en móvil */}
+        <div className="flex justify-start mb-2 sm:hidden">
+          <span className="bg-[rgba(68,98,74,0.8)] text-white text-sm font-semibold py-1 px-3 rounded-lg">
+            {Compatibilidad || 0}% compatibilidad
+          </span>
+        </div>
+        
+        <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-2 line-clamp-2 flex-shrink-0">{Titulo}</h2>
+        <p className="text-slate-500 text-sm mb-3 sm:mb-4 line-clamp-5 sm:line-clamp-4 overflow-hidden flex-shrink-0">{Descripcion}</p>
+        <div className="mt-3 sm:mt-auto flex-shrink-0">
+          <p className="text-xs text-slate-400 italic mb-1 sm:mb-2">Área: {Area}</p>
+          <p className="text-xs text-slate-400 italic mb-1 sm:mb-2">Duración: {DuracionEnMesesMinimo}-{DuracionEnMesesMaximo} meses</p>
+          <p className="text-xs text-slate-400 italic mb-3 sm:mb-4">Alcance: {Alcance}</p>
           <button
             onClick={() => navigate(`/Matcha/My-projects/proyectos-historicos/Detalle/${ID}`)}
-            className="w-full bg-[#8ba888] hover:bg-[rgba(68,98,74,0.8)] text-white font-bold py-3 px-4 rounded-xl transition-colors duration-300"
+            className="w-full text-white font-bold py-2 sm:py-3 px-4 rounded-xl"
+            style={{
+              background: 'linear-gradient(to right, #44624a 0%, #8ba888 50%, #44624a 100%)',
+              backgroundSize: '200% 100%',
+              backgroundPosition: '0% 0%',
+              transition: 'all 0.6s ease',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundPosition = '100% 0%';
+              e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundPosition = '0% 0%';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+            }}
           >
             Ver más detalles
           </button>
@@ -176,9 +198,6 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
   const [historicos, setHistoricos] = useState<ProyectoHistorico[]>([]);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   
-  // Estado para el menú contextual
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; data: ScoreData } | null>(null);
-
   const AI_API_URL = "https://ai.matchafunding.com/api/v1/projects/upsertusers";
 
   const enviarProyectoAI = async (proyecto: Proyecto) => {
@@ -258,25 +277,6 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
       } catch (error) { console.error(error); }
     }
   }, []);
-
-  // --- useEffect CORREGIDO para cerrar el menú ---
-  useEffect(() => {
-    // Función que se ejecutará al hacer click fuera
-    const handleClickOutside = () => setContextMenu(null);
-
-    // Solo añadimos el listener si el menú está visible
-    if (contextMenu) {
-      window.addEventListener('click', handleClickOutside);
-      window.addEventListener('contextmenu', handleClickOutside); // También cierra con otro click derecho
-    }
-
-    // Función de limpieza: se ejecuta cuando el componente se desmonta o cuando `contextMenu` cambia
-    return () => {
-      window.removeEventListener('click', handleClickOutside);
-      window.removeEventListener('contextmenu', handleClickOutside);
-    };
-  }, [contextMenu]); // La dependencia clave: se ejecuta cada vez que `contextMenu` cambia
-
   const areas = useMemo(() => ['Todas', ...new Set(historicos.map(p => p.Area))], [historicos]);
 
   const filteredProyectos = useMemo(() => {
@@ -294,21 +294,13 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
     return proyectos;
   }, [searchTerm, areaFilter, sortBy, historicos]);
 
-  const handleCardRightClick = (event: React.MouseEvent, scores: ScoreData) => {
-    setContextMenu({
-      x: event.clientX,
-      y: event.clientY,
-      data: scores
-    });
-  };
-
   if (showAnimation || isLoading) {
     return (
       <div className="min-h-screen bg-[#f1f5f9] flex flex-col">
         <NavBar />
-        <div className="flex flex-col items-center justify-center flex-1 space-y-6">
+        <div className="flex flex-col items-center justify-center flex-1 space-y-6 px-4">
           <LoopAnimation />
-          <p className="text-xl sm:text-2xl font-semibold text-gray-700 animate-pulse">
+          <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700 animate-pulse text-center max-w-md sm:max-w-lg">
             {isLoading ? "Cargando proyectos históricos..." : "Cargando..."}
           </p>
         </div>
@@ -320,7 +312,7 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
     <div className="min-h-screen bg-[#f1f5f9]">
       <NavBar />
       {showDisclaimer && <DisclaimerModal onClose={() => setShowDisclaimer(false)} />}
-      <main className="flex-grow p-6 md:p-10 max-w-screen-2xl mx-auto mt-[5%]">
+      <main className="flex-grow p-6 md:p-10 max-w-screen-2xl mx-auto mt-24 sm:mt-32">
         <div className="text-center mb-10">
           {selectedProject ? (
             <>
@@ -360,7 +352,6 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
               <ProyectoCard
                 key={proyecto.ID}
                 {...proyecto}
-                onRightClick={handleCardRightClick}
               />)
           ) : (
             <div className="col-span-full text-center py-12">
@@ -369,15 +360,6 @@ const ProyectosHistoricosConPorcentaje: React.FC = () => {
           )}
         </div>
       </main>
-
-      {contextMenu && (
-        <ScoreContextMenu
-          x={contextMenu.x}
-          y={contextMenu.y}
-          data={contextMenu.data}
-          onClose={() => setContextMenu(null)}
-        />
-      )}
     </div>
   );
 };

@@ -10,7 +10,7 @@ Puedo ayudarte a entender mejor los requisitos, plazos, documentación y todo lo
 ¿En qué puedo ayudarte hoy?`
     )
   ],
-  botName: 'Asistente RAG',
+  botName: 'Matchito',
   customStyles: {
     botMessageBox: {
       backgroundColor: '#44624a',
@@ -18,7 +18,13 @@ Puedo ayudarte a entender mejor los requisitos, plazos, documentación y todo lo
     chatButton: {
       backgroundColor: '#44624a',
     },
+    botAvatar: {
+      backgroundColor: '#44624a',
+      borderRadius: '50%',
+    },
   },
+  // Personalizar letra del avatar
+  botAvatarLetter: 'M',
   customComponents: {
     // Aquí puedes agregar componentes personalizados si lo necesitas
   },

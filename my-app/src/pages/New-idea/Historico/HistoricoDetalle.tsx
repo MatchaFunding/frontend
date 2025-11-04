@@ -86,7 +86,7 @@ const DetalleProyecto: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: colorPalette.lightGray }}>
       <NavBar />
-      <main className="flex-grow p-6 md:p-10 mt-[5%]">
+      <main className="flex-grow p-6 md:p-10 mt-24 sm:mt-32">
         <div className="max-w-5xl mx-auto space-y-8">
           <div className="mb-4">
             <button
@@ -131,15 +131,6 @@ const DetalleProyecto: React.FC = () => {
             </div>
           </Card>
 
-          <div className="flex justify-end pt-4">
-            <button
-              onClick={() => navigate('/Matcha/New-Match')}
-              className="px-8 py-3 font-bold text-white rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2"
-              style={{ backgroundColor: colorPalette.darkGreen, borderColor: colorPalette.softGreen }}
-            >
-              Comparar con mi proyecto
-            </button>
-          </div>
         </div>
       </main>
     </div>

@@ -25,7 +25,22 @@ const ProjectCard: React.FC<{ proyecto: Proyecto; onSelect: () => void }> = ({ p
         </div>
         <button
           onClick={onSelect}
-          className="w-full bg-[#8ba888] hover:bg-[#3a523f] text-white font-semibold py-2.5 sm:py-3 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-1 text-sm sm:text-base"
+          className="w-full text-white font-semibold py-2.5 sm:py-3 rounded-xl shadow-md text-sm sm:text-base"
+          style={{
+            background: 'linear-gradient(to right, #44624a 0%, #8ba888 50%, #44624a 100%)',
+            backgroundSize: '200% 100%',
+            backgroundPosition: '0% 0%',
+            transition: 'all 0.6s ease',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundPosition = '100% 0%';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundPosition = '0% 0%';
+            e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+          }}
         >
           Seleccionar y Buscar Fondos
         </button>

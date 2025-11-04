@@ -60,7 +60,6 @@ const defaultFondo: Fondo = {
 
 const CrearProyectoMatch: React.FC = () => {
   const [step, setStep] = useState(1);
-  const [activeTab, setActiveTab] = useState<"presentacion" | "publico">("presentacion");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -390,12 +389,37 @@ const CrearProyectoMatch: React.FC = () => {
             {step === 4 && (
               <CardContent>
                 <h2 className="text-2xl font-semibold text-center mb-6" style={{ color: colorPalette.darkGreen }}>Vista Previa del Proyecto</h2>
-                <div className="flex justify-center space-x-2 mb-6">
-                  <button type="button" onClick={() => setActiveTab("presentacion")} className="px-6 py-2 border rounded-md font-semibold transition-colors duration-200" style={{ color: activeTab === "presentacion" ? colorPalette.darkGreen : colorPalette.softGreen, borderColor: activeTab === "presentacion" ? colorPalette.softGreen : "#e2e8f0", borderWidth: "2px" }}>PRESENTACIÓN</button>
-                  <button type="button" onClick={() => setActiveTab("publico")} className="px-6 py-2 border rounded-md font-semibold transition-colors duration-200" style={{ color: activeTab === "publico" ? colorPalette.darkGreen : colorPalette.softGreen, borderColor: activeTab === "publico" ? colorPalette.softGreen : "#e2e8f0", borderWidth: "2px" }}>DETALLE</button>
-                </div>
-                {activeTab === "presentacion" && (<Card><div className="p-6 md:p-8"><h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Presentación</h3><div className="space-y-4 leading-relaxed" style={{ color: colorPalette.oliveGray }}>{formData.Titulo && <p><strong>Título:</strong> {formData.Titulo}</p>}{formData.Descripcion && <p><strong>Descripción:</strong> {formData.Descripcion}</p>}{(formData.DuracionEnMesesMinimo > 0 || formData.DuracionEnMesesMaximo > 0) && <p><strong>Duración:</strong> {formData.DuracionEnMesesMinimo || "?"} - {formData.DuracionEnMesesMaximo || "?"} meses</p>}</div></div></Card>)}
-                {activeTab === "publico" && (<Card><div className="p-6 md:p-8"><h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Detalle</h3><div className="space-y-4 leading-relaxed" style={{ color: colorPalette.oliveGray }}>{formData.Alcance && <p><strong>Alcance:</strong> {opcionesAlcance.find(o => o.value === formData.Alcance)?.label}</p>}{formData.Area && <p><strong>Área:</strong> {formData.Area}</p>}{formData.Miembros.length > 0 ? (<p><strong>Miembros:</strong> {formData.Miembros.join(", ")}</p>) : (<p className="italic text-slate-500">No hay miembros agregados</p>)}</div></div></Card>)}
+                
+                {/* Contenido unificado sin pestañas */}
+                <Card>
+                  <div className="p-6 md:p-8">
+                    <h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>
+                      Presentación
+                    </h3>
+                    <div className="space-y-4 leading-relaxed mb-6" style={{ color: colorPalette.oliveGray }}>
+                      {formData.Titulo && <p><strong>Título:</strong> {formData.Titulo}</p>}
+                      {formData.Descripcion && <p><strong>Descripción:</strong> {formData.Descripcion}</p>}
+                      {(formData.DuracionEnMesesMinimo > 0 || formData.DuracionEnMesesMaximo > 0) && (
+                        <p><strong>Duración:</strong> {formData.DuracionEnMesesMinimo || "?"} - {formData.DuracionEnMesesMaximo || "?"} meses</p>
+                      )}
+                    </div>
+                    
+                    <h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>
+                      Detalle
+                    </h3>
+                    <div className="space-y-4 leading-relaxed" style={{ color: colorPalette.oliveGray }}>
+                      {formData.Alcance && (
+                        <p><strong>Alcance:</strong> {opcionesAlcance.find(o => o.value === formData.Alcance)?.label}</p>
+                      )}
+                      {formData.Area && <p><strong>Área:</strong> {formData.Area}</p>}
+                      {formData.Miembros.length > 0 ? (
+                        <p><strong>Miembros:</strong> {formData.Miembros.join(", ")}</p>
+                      ) : (
+                        <p className="italic text-slate-500">No hay miembros agregados</p>
+                      )}
+                    </div>
+                  </div>
+                </Card>
               </CardContent>
             )}
             <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-200">

@@ -75,7 +75,7 @@ const SuggestedQuestions: React.FC<SuggestedQuestionsProps> = ({ onQuestionClick
       <div className="suggestions-card info-card">
         <h3>
           <FontAwesomeIcon icon={faRobot} style={{ marginRight: '0.5rem' }} />
-          Asistente RAG
+          Asistente de Documentos
         </h3>
         <p>
           Este chatbot utiliza tecnología RAG (Retrieval-Augmented Generation) para

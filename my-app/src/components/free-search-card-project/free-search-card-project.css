@@ -26,6 +26,10 @@
     height: auto;
     min-height: 16rem;
   }
+
+  .free-search-card--project {
+    min-height: 12rem;
+  }
 }
 
 .free-search-card__content {

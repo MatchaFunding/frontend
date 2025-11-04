@@ -101,21 +101,14 @@ const RagSearchCard: React.FC<RagSearchCardProps> = ({
           <div className="free-search-card__metadata">
             <div className="free-search-card__topic-bookmark">
               <span className="free-search-card__topic">{topic || 'General'}</span>
-              <div className="flex gap-2">
-                <span className="text-sm text-gray-500">💬 Chat RAG</span>
-              </div>
             </div>
             {renderBenefit(benefit || 'Beneficio no disponible')}
           </div>
           <button 
             className="free-search-card__button"
             onClick={handleChatClick}
-            style={{
-              background: 'linear-gradient(135deg, #44624a 0%, #8ba888 100%)',
-              color: 'white'
-            }}
           >
-            💬 Chatear con este Fondo
+            Chatear con este Fondo
           </button>
         </div>
       </div>

@@ -108,7 +108,7 @@ const DetalleFondo: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: colorPalette.lightGray }}>
       <NavBar />
-      <main className="flex-grow p-6 md:p-10 mt-[5%]">
+      <main className="flex-grow p-6 md:p-10 mt-24 sm:mt-32">
         <div className="max-w-5xl mx-auto space-y-8">
           <div>
             <button onClick={handleBack} className="px-4 py-2 font-semibold text-white rounded-lg shadow-md transition-all duration-300 hover:bg-[rgba(68,98,74,0.8)]" style={{ backgroundColor: colorPalette.darkGreen }}>

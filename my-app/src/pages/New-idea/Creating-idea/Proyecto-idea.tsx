@@ -5,10 +5,168 @@ import { Button } from "../../../components/UI/buttons";
 import { Card, CardContent } from "../../../components/UI/cards";
 import { Input } from "../../../components/UI/input";
 import { Textarea } from "../../../components/UI/textarea";
-import { StepIndicator } from "../../../components/Shared/StepIndicator";
+
 import PersonaClass from "../../../models/Persona";
 
+interface ProyectoForm {
+  Beneficiario: number; Titulo: string; Descripcion: string;
+  DuracionEnMesesMinimo: number; DuracionEnMesesMaximo: number;
+  Alcance: string; Area: string; Miembros: string[];
+  Problema: string; PublicoObjetivo: string; ObjetivoGeneral: string;
+  ObjetivoEspecifico: string; Proposito: string; Innovacion: string;
+  ResultadoEsperado: string; isFromConvertedIdea?: boolean;
+}
 
+
+interface PaginatorProps {
+  data: ProyectoForm;
+  colorPalette: { [key: string]: string };
+}
+
+const ProjectPreviewPaginator: React.FC<PaginatorProps> = ({ data, colorPalette }) => {
+
+  const [currentPage, setCurrentPage] = React.useState(0);
+  const pages = [
+    {
+      title: "Información General",
+      content: (
+        <>
+          <p><strong>Título:</strong> {data.Titulo}</p>
+          <p className="text-slate-600 text-sm mt-1">{data.Descripcion}</p>
+        </>
+      ),
+    },
+    {
+      title: "Problema y Objetivos",
+      content: (
+        <>
+          <p><strong>Problema:</strong> {data.Problema}</p>
+          <p className="mt-1"><strong>Público Objetivo:</strong> {data.PublicoObjetivo}</p>
+          <p className="mt-1"><strong>Objetivo General:</strong> {data.ObjetivoGeneral}</p>
+        </>
+      ),
+    },
+    {
+      title: "Propuesta de Valor",
+      content: (
+        <>
+          <p><strong>Propósito:</strong> {data.Proposito}</p>
+          <p className="mt-1"><strong>Innovación:</strong> {data.Innovacion}</p>
+          <p className="mt-1"><strong>Resultados Esperados:</strong> {data.ResultadoEsperado}</p>
+        </>
+      ),
+    },
+  ];
+
+
+  const handleNext = () => setCurrentPage((p) => Math.min(p + 1, pages.length - 1));
+  const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 0));
+
+  return (
+    <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+      <h3 className="text-lg font-semibold border-b pb-2 mb-3" style={{ color: colorPalette.darkGreen }}>
+        {pages[currentPage].title}
+      </h3>
+      
+      <div className="text-slate-700 space-y-2 min-h-[120px]">
+        {pages[currentPage].content}
+      </div>
+
+      <div className="flex justify-between items-center mt-6">
+        <button
+          type="button"
+          onClick={handlePrev}
+          disabled={currentPage === 0}
+          className="px-4 py-2 rounded-full text-sm font-medium transition disabled:opacity-50"
+          style={{ backgroundColor: colorPalette.lightGray, color: colorPalette.oliveGray }}
+        >
+          ← Anterior
+        </button>
+
+        <span className="text-sm font-medium" style={{ color: colorPalette.softGreen }}>
+          {currentPage + 1} / {pages.length}
+        </span>
+
+        <button
+          type="button"
+          onClick={handleNext}
+          disabled={currentPage === pages.length - 1}
+          className="px-4 py-2 rounded-full text-sm font-medium transition disabled:opacity-50"
+          style={{ backgroundColor: colorPalette.darkGreen, color: "white" }}
+        >
+          Siguiente →
+        </button>
+      </div>
+    </div>
+  );
+};
+export const StepIndicator: React.FC<{ currentStep: number; totalSteps: number }> = ({
+  currentStep,
+  totalSteps,
+}) => {
+  const colorPalette = {
+    darkGreen: "#44624a",
+    softGreen: "#8ba888",
+    oliveGray: "#505143",
+    lightGray: "#f1f5f9",
+  };
+
+  const stepLabels = [
+    "Básicos", "Detalles", "Problema", "Objetivos",
+    "Propuesta", "Miembros", "Vista previa",
+  ];
+
+  return (
+  
+    <div className="mb-4 md:mb-8 w-full max-w-3xl mx-auto">
+      <div className="flex items-start">
+        {Array.from({ length: totalSteps }).map((_, index) => {
+          const stepNumber = index + 1;
+          const isDone = stepNumber < currentStep;
+          const isActive = stepNumber === currentStep;
+          return (
+            <React.Fragment key={stepNumber}>
+              <div className="flex flex-col items-center relative">
+                <div
+                  className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 text-sm md:text-base ${
+                    isActive ? "scale-110" : ""
+                  }`}
+                  style={{
+                    backgroundColor: isDone ? colorPalette.softGreen : isActive ? colorPalette.darkGreen : "#d1d5db",
+                    color: isDone || isActive ? "white" : colorPalette.oliveGray,
+                  }}
+                >
+                  {isDone ? "✓" : stepNumber}
+                </div>
+                <p
+                  className={`mt-1 md:mt-2 text-xs md:text-sm text-center ${
+                    isActive ? "font-bold" : ""
+                  }`}
+                  style={{
+                    color: isActive ? colorPalette.darkGreen : colorPalette.oliveGray,
+                  }}
+                >
+                  {stepLabels[index] || `Paso ${stepNumber}`}
+                </p>
+              </div>
+              {stepNumber < totalSteps && (
+                
+                <div className="flex-grow flex items-center pt-4 md:pt-5 px-1">
+                  <div
+                    className="h-0.5 w-full"
+                    style={{
+                      backgroundColor: isDone ? colorPalette.softGreen : "#d1d5db",
+                    }}
+                  />
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 interface PersonaPayload { Nombre: string; Sexo: string; RUT: string; FechaDeNacimiento: string; }
 interface ProyectoForm {
   Beneficiario: number;
@@ -19,7 +177,16 @@ interface ProyectoForm {
   Alcance: string;
   Area: string;
   Miembros: string[];
-  isFromConvertedIdea?: boolean; // Agregar bandera en el formData
+
+  Problema: string;
+  PublicoObjetivo: string;
+  ObjetivoGeneral: string;
+  ObjetivoEspecifico: string;
+  Proposito: string;
+  Innovacion: string;
+  ResultadoEsperado: string;
+ 
+  isFromConvertedIdea?: boolean;
 }
 interface Idea { id: number; field: string; problem: string; audience: string; uniqueness: string; }
 interface Fondo { id: number; nombre: string; categoria: string; }
@@ -65,14 +232,15 @@ const CrearProyectoMatch: React.FC = () => {
 
   const { idea = defaultIdea, fondo = defaultFondo } = (location.state as { idea: Idea; fondo: Fondo }) || {};
 
-  const [formData, setFormData] = useState<ProyectoForm>(() => {
-    // Inicialización lazy para evitar reinicios
-    return {
-      Beneficiario: 0, Titulo: "", Descripcion: "", DuracionEnMesesMinimo: 6,
-      DuracionEnMesesMaximo: 12, Alcance: "", Area: "", Miembros: [],
-      isFromConvertedIdea: false
-    };
-  });
+  const [formData, setFormData] = useState<ProyectoForm>(() => ({
+    Beneficiario: 0, Titulo: "", Descripcion: "", DuracionEnMesesMinimo: 6,
+    DuracionEnMesesMaximo: 12, Alcance: "", Area: "", Miembros: [],
+    // --- NUEVOS CAMPOS INICIALIZADOS ---
+    Problema: "", PublicoObjetivo: "", ObjetivoGeneral: "", ObjetivoEspecifico: "",
+    Proposito: "", Innovacion: "", ResultadoEsperado: "",
+    // --- FIN NUEVOS CAMPOS ---
+    isFromConvertedIdea: false
+}));
   
 
   const [personas, setPersonas] = useState<PersonaClass[]>([]);
@@ -86,12 +254,10 @@ const CrearProyectoMatch: React.FC = () => {
   const storedUser = sessionStorage.getItem("usuario");
 
 
-
-  // useEffect para manejar conversión de ideas - solo se ejecuta una vez
   useEffect(() => {
     console.log('INICIO CARGA DE DATOS - CONVERSION');
     
-    // Verificar si viene una idea para convertir en proyecto
+   
     const ideaAConvertir = localStorage.getItem('convertirAProyecto') || 
                           sessionStorage.getItem('convertirAProyecto');
     console.log('localStorage convertirAProyecto:', localStorage.getItem('convertirAProyecto'));
@@ -102,8 +268,7 @@ const CrearProyectoMatch: React.FC = () => {
       try {
         const ideaParsed = JSON.parse(ideaAConvertir);
         console.log('IDEA PARSEADA:', ideaParsed);
-        
-        // Para ideas convertidas, usar la propuesta LLM como descripción
+     
         const resumenLLM = ideaParsed.Propuesta || 
                           ideaParsed.ResumenLLM || 
                           ideaParsed.propuesta || 
@@ -115,27 +280,35 @@ const CrearProyectoMatch: React.FC = () => {
         
         console.log('DESCRIPCION A ESTABLECER:', descripcionDeIdea);
         
-        const formDataToSet = {
-          Beneficiario: 0,
-          Titulo: "", 
-          Descripcion: descripcionDeIdea, 
-          DuracionEnMesesMinimo: 6,
-          DuracionEnMesesMaximo: 12,
-          Alcance: "", 
-          Area: ideaParsed.Campo || "", 
-          Miembros: [],
-          isFromConvertedIdea: true
-        };
+     
+const formDataToSet = {
+  Beneficiario: 0,
+  Titulo: "", 
+  Descripcion: descripcionDeIdea, 
+  DuracionEnMesesMinimo: 6,
+  DuracionEnMesesMaximo: 12,
+  Alcance: "", 
+  Area: ideaParsed.Campo || "", 
+  Miembros: [],
+  isFromConvertedIdea: true,
+
+  Problema: "",
+  PublicoObjetivo: "",
+  ObjetivoGeneral: "",
+  ObjetivoEspecifico: "",
+  Proposito: "",
+  Innovacion: "",
+  ResultadoEsperado: ""
+};
         
         console.log('FORMDATA A ESTABLECER:', formDataToSet);
         setFormData(formDataToSet);
         setIsFromConvertedIdea(true);
         
-        // Limpiar ambos storage después de usar la idea
         localStorage.removeItem('convertirAProyecto');
         sessionStorage.removeItem('convertirAProyecto');
         
-        // Marcar que los datos se han cargado
+      
         setIsDataLoaded(true);
         
         console.log('CONVERSION COMPLETADA');
@@ -146,21 +319,21 @@ const CrearProyectoMatch: React.FC = () => {
       }
     }
     
-    // Si no hay conversión, marcar como cargado para permitir flujo normal
+  
     setIsDataLoaded(true);
-  }, []); // SIN DEPENDENCIAS - solo se ejecuta una vez al montar
+  }, []); 
 
-  // useEffect separado para flujo normal (cuando NO hay conversión)
+ 
   useEffect(() => {
-    // Solo ejecutar si ya se verificó conversión y no hay conversión pendiente
+    
     if (!isDataLoaded || formData.isFromConvertedIdea) return;
     
     console.log('INICIO FLUJO NORMAL');
     
-    // Procesamiento normal para ideas que vienen del flujo estándar
+   
     const ideaActiva = idea || JSON.parse(localStorage.getItem("selectedIdea") || JSON.stringify(defaultIdea));
 
-    // Solo usar descripción sugerida si hay respuesta de IA guardada
+
     let descripcionSugerida = "";
     const storedApiResponse = localStorage.getItem('ideaRespuestaIA');
 
@@ -175,7 +348,7 @@ const CrearProyectoMatch: React.FC = () => {
       }
     }
 
-    // Solo precargar datos si tenemos información válida de la idea y fondo
+    
     const tituloSugerido = (ideaActiva.field && fondo.nombre) ? 
       `Proyecto de ${ideaActiva.field}: Aplicación a ${fondo.nombre}` : "";
 
@@ -187,35 +360,35 @@ const CrearProyectoMatch: React.FC = () => {
       isFromConvertedIdea: false
     }));
     
-    // Limpiar localStorage de respuesta IA
+
     localStorage.removeItem('ideaRespuestaIA');
 
-  }, [idea, fondo, isDataLoaded]); // Solo depende de idea/fondo para flujo normal
+  }, [idea, fondo, isDataLoaded]); 
 
 
 
   useEffect(() => {
-    // Solo actualizar datos de usuario si NO viene de conversión de idea
+
     if (storedUser && !isFromConvertedIdea) {
       const usuario = JSON.parse(storedUser);
       setFormData((prev) => ({ ...prev, Beneficiario: usuario.Beneficiario.ID }));
       setPersonas(usuario.Miembros.map((m: any) => new PersonaClass(m)));
     } else if (storedUser && isFromConvertedIdea) {
-      // Si viene de conversión, solo actualizar el Beneficiario sin tocar otros campos
+    
       const usuario = JSON.parse(storedUser);
       setFormData((prev) => ({ ...prev, Beneficiario: usuario.Beneficiario.ID }));
       setPersonas(usuario.Miembros.map((m: any) => new PersonaClass(m)));
     }
   }, [storedUser, isFromConvertedIdea]);
 
-  // useEffect adicional para debuggear el estado del formData (temporal)
+
   useEffect(() => {
     if (formData.isFromConvertedIdea) {
       console.log('CONVERSION DEBUG - Descripción:', formData.Descripcion.length > 0 ? 'Cargada correctamente' : 'VACÍA');
     }
   }, [formData]);
 
-  // Log del render para verificar el estado
+ 
   if (formData.isFromConvertedIdea) {
     console.log('RENDER - Conversión detectada, descripción:', formData.Descripcion ? 'presente' : 'FALTA');
   }
@@ -229,6 +402,7 @@ const CrearProyectoMatch: React.FC = () => {
   const handleModalChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setNuevaPersonaData({ ...nuevaPersonaData, [e.target.name]: e.target.value });
   };
+  
 
   const handleCrearNuevaPersona = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -285,6 +459,7 @@ const CrearProyectoMatch: React.FC = () => {
       else alert("Ha ocurrido un error inesperado.");
     }
   };
+  
 
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
@@ -308,71 +483,126 @@ const CrearProyectoMatch: React.FC = () => {
             </div>
           </div>
         )}
+        <StepIndicator currentStep={step} totalSteps={7} />
         
-        <StepIndicator currentStep={step} totalSteps={4} />
-        <Card className="w-full max-w-3xl px-9 py-8">
-          <form onSubmit={(e) => { e.preventDefault(); if (step < 4) nextStep(); else crearProyecto(); }}>
-            {step === 1 && (
-              <CardContent className="space-y-6">
-                <h2 className="text-2xl font-semibold text-center text-slate-800">
-                  {formData.isFromConvertedIdea ? "Información Básica (Pre-cargada desde tu Idea)" : "Información Básica (Sugerida)"}
-                </h2>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Título del Proyecto
-                    {formData.isFromConvertedIdea && <span className="text-green-600 text-xs ml-2">(Personalízalo como desees)</span>}
-                  </label>
-                  <Input name="Titulo" value={formData.Titulo} onChange={handleChange} minLength={10} required 
-                    placeholder={formData.isFromConvertedIdea ? "Ingresa un título descriptivo para tu proyecto..." : "Título del proyecto"}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Descripción del Proyecto
-                    {formData.isFromConvertedIdea && <span className="text-green-600 text-xs ml-2">(Pre-cargada con IA - puedes editarla)</span>}
-                  </label>
-                  <Textarea 
-                    name="Descripcion" 
-                    rows={6} 
-                    value={formData.Descripcion} 
-                    onChange={handleChange} 
-                    minLength={10} 
-                    required 
-                    placeholder={formData.isFromConvertedIdea ? "Descripción generada por IA - edítala si es necesario..." : "Descripción del proyecto"}
-                    onFocus={() => console.log('TEXTAREA FOCUS - Valor actual:', formData.Descripcion)}
-                  />
-                </div>
-              </CardContent>
-            )}
-            {step === 2 && (
-              <CardContent className="space-y-6">
-                <h2 className="text-2xl font-semibold text-center text-slate-800">Completa los Detalles</h2>
-                <div className="grid grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Duración mínima (meses)</label>
-                        <Input name="DuracionEnMesesMinimo" type="number" value={formData.DuracionEnMesesMinimo} onChange={handleChange} min={1} required />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Duración máxima (meses)</label>
-                        <Input name="DuracionEnMesesMaximo" type="number" value={formData.DuracionEnMesesMaximo} onChange={handleChange} min={1} required />
-                    </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Alcance (Región)</label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {opcionesAlcance.map(opcion => (<button type="button" key={opcion.value} onClick={() => setFormData({...formData, Alcance: opcion.value})} className={`px-3 py-1 text-sm rounded-full border transition-colors ${formData.Alcance === opcion.value ? 'bg-green-600 text-white border-green-700' : 'bg-gray-100 text-gray-700 border-gray-300'}`}>{opcion.label}</button>))}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Área (Sugerida)</label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {opcionesArea.map(opcion => (<button type="button" key={opcion} onClick={() => setFormData({...formData, Area: opcion})} className={`px-3 py-1 text-sm rounded-full border transition-colors ${formData.Area === opcion ? 'bg-green-600 text-white border-green-700' : 'bg-gray-100 text-gray-700 border-gray-300'}`}>{opcion}</button>))}
-                  </div>
-                </div>
-              </CardContent>
-            )}
-            {/* ... resto del JSX ... */}
-            {step === 3 && (
+        {/* El contenedor Card ahora es más ancho para el nuevo diseño */}
+        <Card className="w-full max-w-4xl px-9 py-8">
+            {/* Se mantiene una altura mínima consistente para el formulario */}
+            <form className="flex flex-col min-h-[580px]" onSubmit={(e) => { e.preventDefault(); if (step < 7) nextStep(); else crearProyecto(); }}>
+                
+                {/* Contenedor de pasos con altura mínima para evitar "saltos" */}
+                <div className="flex-grow min-h-[480px] transition-opacity duration-300 ease-in-out">
+                    
+                    {step === 1 && (
+                        <CardContent className="space-y-6">
+                            <h2 className="text-2xl font-semibold text-center text-slate-800">Información Básica</h2>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Título del Proyecto</label>
+                                <Input name="Titulo" value={formData.Titulo} onChange={handleChange} minLength={10} required 
+                                    className="p-2.5 text-base"
+                                    onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('El título debe tener al menos 10 caracteres.')}
+                                    onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
+                                    placeholder="Ej: Plataforma de apoyo para agricultores locales"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Descripción del Proyecto</label>
+                                <Textarea name="Descripcion" rows={6} value={formData.Descripcion} onChange={handleChange} minLength={10} required 
+                                    className="p-2.5 text-base leading-relaxed"
+                                    onInvalid={e => (e.target as HTMLTextAreaElement).setCustomValidity('La descripción debe tener al menos 10 caracteres.')}
+                                    onInput={e => (e.target as HTMLTextAreaElement).setCustomValidity('')}
+                                    placeholder="Describe la esencia de tu proyecto, qué es y qué busca lograr."
+                                />
+                            </div>
+                        </CardContent>
+                    )}
+
+                    {step === 2 && (
+                        <CardContent className="space-y-6">
+                            <h2 className="text-2xl font-semibold text-center text-slate-800">Completa los Detalles</h2>
+                            {/* MEJORA: Grid responsivo, se apila en móviles */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Duración mínima (meses)</label>
+                                    <Input name="DuracionEnMesesMinimo" type="number" value={formData.DuracionEnMesesMinimo} onChange={handleChange} min={1} required 
+                                         className="p-2.5 text-base"
+                                         onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('La duración debe ser un número positivo.')}
+                                         onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Duración máxima (meses)</label>
+                                    <Input name="DuracionEnMesesMaximo" type="number" value={formData.DuracionEnMesesMaximo} onChange={handleChange} min={formData.DuracionEnMesesMinimo} required 
+                                         className="p-2.5 text-base"
+                                         onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Debe ser mayor o igual a la duración mínima.')}
+                                         onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Alcance (Región)</label>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {opcionesAlcance.map(opcion => (<button type="button" key={opcion.value} onClick={() => setFormData({...formData, Alcance: opcion.value})} className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${formData.Alcance === opcion.value ? 'bg-green-600 text-white border-green-700' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'}`}>{opcion.label}</button>))}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Área Temática</label>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {opcionesArea.map(opcion => (<button type="button" key={opcion} onClick={() => setFormData({...formData, Area: opcion})} className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${formData.Area === opcion ? 'bg-green-600 text-white border-green-700' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'}`}>{opcion}</button>))}
+                                </div>
+                            </div>
+                        </CardContent>
+                    )}
+
+                    {/* --- Pasos 3, 4, 5 y 6 con validaciones mejoradas --- */}
+                    {step === 3 && (
+                        <CardContent className="space-y-6">
+                            <h2 className="text-2xl font-semibold text-center text-slate-800">Problema y Público Objetivo</h2>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Problema</label>
+                                <Textarea name="Problema" rows={5} value={formData.Problema} onChange={handleChange} required placeholder="Describe en detalle el problema o la necesidad que tu proyecto busca resolver." className="p-2.5 text-base" onInvalid={e => (e.target as HTMLTextAreaElement).setCustomValidity('Por favor, describe el problema.')} onInput={e => (e.target as HTMLTextAreaElement).setCustomValidity('')} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Público Objetivo</label>
+                                <Textarea name="PublicoObjetivo" rows={5} value={formData.PublicoObjetivo} onChange={handleChange} required placeholder="¿A quién está dirigido tu proyecto? Describe tu público, usuarios o mercado meta." className="p-2.5 text-base" onInvalid={e => (e.target as HTMLTextAreaElement).setCustomValidity('Por favor, define tu público objetivo.')} onInput={e => (e.target as HTMLTextAreaElement).setCustomValidity('')} />
+                            </div>
+                        </CardContent>
+                    )}
+
+
+{step === 4 && (
+  <CardContent className="space-y-6">
+    <h2 className="text-2xl font-semibold text-center text-slate-800">Objetivos del Proyecto</h2>
+    <div>
+      <label className="block text-sm font-medium text-slate-700 mb-1">Objetivo General</label>
+      <Textarea name="ObjetivoGeneral" rows={5} value={formData.ObjetivoGeneral} onChange={handleChange} required placeholder="Define el objetivo principal y de alto nivel de tu proyecto. ¿Qué es lo más importante que quieres lograr?" />
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-slate-700 mb-1">Objetivos Específicos</label>
+      <Textarea name="ObjetivoEspecifico" rows={5} value={formData.ObjetivoEspecifico} onChange={handleChange} required placeholder="Detalla los objetivos específicos, medibles y alcanzables que contribuyen al objetivo general. Puedes listarlos." />
+    </div>
+  </CardContent>
+)}
+
+
+{step === 5 && (
+  <CardContent className="space-y-6">
+    <h2 className="text-2xl font-semibold text-center text-slate-800">Propuesta de Valor</h2>
+    <div>
+      <label className="block text-sm font-medium text-slate-700 mb-1">Propósito</label>
+      <Textarea name="Proposito" rows={4} value={formData.Proposito} onChange={handleChange} required placeholder="¿Cuál es el propósito o la misión de tu proyecto? ¿Por qué es importante?" />
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-slate-700 mb-1">Innovación</label>
+      <Textarea name="Innovacion" rows={4} value={formData.Innovacion} onChange={handleChange} required placeholder="¿Qué hace que tu proyecto sea innovador, diferente o único en comparación con otras soluciones?" />
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-slate-700 mb-1">Resultado Esperado</label>
+      <Textarea name="ResultadoEsperado" rows={4} value={formData.ResultadoEsperado} onChange={handleChange} required placeholder="Describe los resultados concretos y tangibles que esperas lograr al finalizar el proyecto." />
+    </div>
+  </CardContent>
+)}
+            {step === 6 && (
                 <CardContent className="space-y-6">
                     <h2 className="text-2xl font-semibold text-center" style={{ color: colorPalette.oliveGray }}>Añadir Miembros</h2>
                     <div className="flex flex-wrap gap-3 mb-6">
@@ -386,49 +616,59 @@ const CrearProyectoMatch: React.FC = () => {
                     </div>
                 </CardContent>
             )}
-            {step === 4 && (
-              <CardContent>
-                <h2 className="text-2xl font-semibold text-center mb-6" style={{ color: colorPalette.darkGreen }}>Vista Previa del Proyecto</h2>
-                
-                {/* Contenido unificado sin pestañas */}
-                <Card>
-                  <div className="p-6 md:p-8">
-                    <h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>
-                      Presentación
-                    </h3>
-                    <div className="space-y-4 leading-relaxed mb-6" style={{ color: colorPalette.oliveGray }}>
-                      {formData.Titulo && <p><strong>Título:</strong> {formData.Titulo}</p>}
-                      {formData.Descripcion && <p><strong>Descripción:</strong> {formData.Descripcion}</p>}
-                      {(formData.DuracionEnMesesMinimo > 0 || formData.DuracionEnMesesMaximo > 0) && (
-                        <p><strong>Duración:</strong> {formData.DuracionEnMesesMinimo || "?"} - {formData.DuracionEnMesesMaximo || "?"} meses</p>
-                      )}
-                    </div>
-                    
-                    <h3 className="text-xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>
-                      Detalle
-                    </h3>
-                    <div className="space-y-4 leading-relaxed" style={{ color: colorPalette.oliveGray }}>
-                      {formData.Alcance && (
-                        <p><strong>Alcance:</strong> {opcionesAlcance.find(o => o.value === formData.Alcance)?.label}</p>
-                      )}
-                      {formData.Area && <p><strong>Área:</strong> {formData.Area}</p>}
-                      {formData.Miembros.length > 0 ? (
-                        <p><strong>Miembros:</strong> {formData.Miembros.join(", ")}</p>
-                      ) : (
-                        <p className="italic text-slate-500">No hay miembros agregados</p>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              </CardContent>
-            )}
-            <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-200">
-              <Button type="button" onClick={prevStep} disabled={step === 1} variant="outline">Anterior</Button>
-              <Button type="submit">{step < 4 ? "Siguiente" : "Crear Proyecto"}</Button>
+         
+{step === 7 && (
+  <CardContent className="space-y-10">
+    <h2 className="text-2xl font-semibold text-center" style={{ color: colorPalette.darkGreen }}>
+      Revisa y Confirma tu Proyecto
+    </h2>
+
+   
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Duración */}
+        <div className="p-5 bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <h4 className="font-semibold text-slate-600 text-sm mb-2">Duración del Proyecto</h4>
+            <div className="flex items-center gap-3 text-xl font-bold" style={{ color: colorPalette.oliveGray }}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                {formData.DuracionEnMesesMinimo}-{formData.DuracionEnMesesMaximo} Meses
             </div>
-          </form>
+        </div>
+        {/* Área */}
+        <div className="p-5 bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <h4 className="font-semibold text-slate-600 text-sm mb-2">Área y Alcance</h4>
+            <div className="flex items-center gap-3 text-xl font-bold" style={{ color: colorPalette.oliveGray }}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                {formData.Area}
+            </div>
+            <p className="text-xs text-slate-500 mt-1">{opcionesAlcance.find(o => o.value === formData.Alcance)?.label}</p>
+        </div>
+        {/* Equipo */}
+        <div className="p-5 bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <h4 className="font-semibold text-slate-600 text-sm mb-2">Equipo</h4>
+            <div className="flex items-center gap-3 text-xl font-bold" style={{ color: colorPalette.oliveGray }}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.125-1.274-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.125-1.274.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                {formData.Miembros.length} Miembro(s)
+            </div>
+        </div>
+    </div>
+    
+   
+    <ProjectPreviewPaginator data={formData} colorPalette={colorPalette} />
+
+  </CardContent>
+)}
+
+
+                </div>
+
+                <div className="flex justify-between items-center mt-auto pt-6 border-t border-slate-200">
+                    <Button type="button" onClick={prevStep} disabled={step === 1} variant="outline">Anterior</Button>
+                    <Button type="submit">{step < 7 ? "Siguiente" : "Crear Proyecto"}</Button>
+                </div>
+            </form>
         </Card>
       </main>
+      
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
             <Card className="w-full max-w-md">
@@ -462,6 +702,7 @@ const CrearProyectoMatch: React.FC = () => {
                             <Button type="submit">Guardar y Añadir</Button>
                         </div>
                     </CardContent>
+                    
                 </form>
             </Card>
         </div>

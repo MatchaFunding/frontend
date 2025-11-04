@@ -113,7 +113,7 @@ function DropdownMenu({ navigate }: { navigate: (path: string) => void }) {
   //Logout 
   const handleLogout = () => {
     localStorage.clear();
-    sessionStorage.clear();
+    localStorage.clear();
     navigate("/");
     setOpen(false);
   };
@@ -186,7 +186,7 @@ const NavBar: React.FC = () => {
 
   const handleMobileLogout = () => {
     localStorage.clear();
-    sessionStorage.clear();
+    localStorage.clear();
     navigate("/");
     setIsMobileMenuOpen(false);
   };

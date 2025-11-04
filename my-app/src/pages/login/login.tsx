@@ -5,12 +5,13 @@ import { IniciarSesion } from '../../api/IniciarSesion';
 import { VerMiUsuario } from '../../api/VerMiUsuario';
 import { Autorizar } from '../../api/Autorizar';
 import { useState } from 'react';
-import React from 'react';
-import './login.css';
 import { VerMiBeneficiario } from '../../api/VerMiBeneficiario';
 import { VerMisProyectos } from '../../api/VerMisProyectos';
 import { VerMisPostulaciones } from '../../api/VerMisPostulaciones';
 import { VerMisMiembros } from '../../api/VerMisMiembros';
+import { VerMisIdeas } from '../../api/VerMisIdeas';
+import React from 'react';
+import './login.css';
 
 
 const Login: React.FC = () => {
@@ -64,6 +65,7 @@ const Login: React.FC = () => {
       const proyectos = await VerMisProyectos(id);
       const postulaciones = await VerMisPostulaciones(id);
       const miembros = await VerMisMiembros(id);
+      const ideas = await VerMisIdeas(id);
 
       console.log(`JSON Web Token: ${token}`);
       
@@ -73,7 +75,7 @@ const Login: React.FC = () => {
         "Proyectos":proyectos,
         "Postulaciones":postulaciones,
         "Miembros":miembros,
-        "Ideas": []
+        "Ideas":ideas
       }
 
       localStorage.setItem("usuario", JSON.stringify(datos));
@@ -164,17 +166,9 @@ const Login: React.FC = () => {
                     )}
                   </button>
                 </div>
-<<<<<<< HEAD
                 {fieldErrors.password && (
                   <p className="email-error">{fieldErrors.password}</p>
                 )}
-=======
-                
-                {/* Mensaje de error para la contraseña */}
-                <p className="email-error">{fieldErrors.password || '\u00A0'}</p>
-                
-                {/* Enlace de olvidé mi contraseña */}
->>>>>>> main
                 <a href="#" className="forgot-password-link">
                   ¿Olvidaste tu contraseña?
                 </a>
@@ -191,19 +185,11 @@ const Login: React.FC = () => {
                   <span>{isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}</span>
                   <img src="/svgs/guy-in.svg" alt="" width="15" height="15" className="submit-btn-icon" />
                 </button>
-<<<<<<< HEAD
                 {loginError && (
                   <p className="email-error" style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                     {loginError}
                   </p>
                 )}
-=======
-                
-                {/* Mensaje de error de login */}
-                <p className="email-error" style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-                  {loginError || '\u00A0'}
-                </p>
->>>>>>> main
               </div>
             </form>
             <p className="bottom-text">

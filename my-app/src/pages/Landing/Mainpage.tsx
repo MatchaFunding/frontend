@@ -15,17 +15,17 @@ const MatchaHomePage: React.FC = () => {
 
   /*
   useEffect(() => {
-    const storedUser = sessionStorage.getItem('usuario');
+    const storedUser = localStorage.getItem('usuario');
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        console.log('Datos del usuario cargados desde sessionStorage:', parsedUser);
+        console.log('Datos del usuario cargados desde localStorage:', parsedUser);
       } 
       catch (error) {
-        console.error('Error al parsear datos del usuario desde sessionStorage:', error);
+        console.error('Error al parsear datos del usuario desde localStorage:', error);
       }
     } else {
-      console.log('No se encontraron datos de usuario en sessionStorage');
+      console.log('No se encontraron datos de usuario en localStorage');
     }
   }, []);
   */

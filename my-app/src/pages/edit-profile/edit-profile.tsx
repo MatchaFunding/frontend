@@ -23,7 +23,7 @@ const EditProfile: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedUser = sessionStorage.getItem('usuario');
+    const storedUser = localStorage.getItem('usuario');
     if (storedUser) {
       const sessionData = JSON.parse(storedUser);
       if (sessionData.Beneficiario) {
@@ -50,7 +50,7 @@ const EditProfile: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/cambiarbeneficiario/${originalCompanyData.ID}/`,
+        `http://127.0.0.1:8000/beneficiario/${originalCompanyData.ID}/`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -64,11 +64,11 @@ const EditProfile: React.FC = () => {
       }
 
       const updatedBeneficiario = await response.json();
-      const storedUser = sessionStorage.getItem('usuario');
+      const storedUser = localStorage.getItem('usuario');
       if (storedUser) {
         const sessionData = JSON.parse(storedUser);
         sessionData.Beneficiario = updatedBeneficiario;
-        sessionStorage.setItem('usuario', JSON.stringify(sessionData));
+        localStorage.setItem('usuario', JSON.stringify(sessionData));
       }
 
       alert('¡Cambios en la empresa guardados con éxito!');

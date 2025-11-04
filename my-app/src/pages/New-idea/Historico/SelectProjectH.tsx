@@ -44,7 +44,7 @@ const MisProyectosH: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const storedUser = sessionStorage.getItem("usuario");
+        const storedUser = localStorage.getItem("usuario");
         if (!storedUser) {
           throw new Error("No se encontró información del usuario en la sesión.");
         }

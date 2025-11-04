@@ -61,7 +61,7 @@ const Members: React.FC = () => {
             setLoading(true);
             setError(null);
             
-            const storedUser = sessionStorage.getItem("usuario");
+            const storedUser = localStorage.getItem("usuario");
             if (!storedUser) {
                 setError("No se encontró información de sesión.");
                 setLoading(false);
@@ -77,8 +77,8 @@ const Members: React.FC = () => {
                 }
 
                 const [membersRes, personasRes] = await Promise.all([
-                    fetch('http://127.0.0.1:8000/vertodoslosmiembros/'),
-                    fetch('http://127.0.0.1:8000/vertodaslaspersonas/')
+                    fetch('http://127.0.0.1:8000/miembros/'),
+                    fetch('http://127.0.0.1:8000/personas/')
                 ]);
 
                 if (!membersRes.ok || !personasRes.ok) {
@@ -127,7 +127,7 @@ const fetchMembers = async () => {
     setLoading(true);
     setError(null);
     
-    const storedUser = sessionStorage.getItem("usuario");
+    const storedUser = localStorage.getItem("usuario");
     if (!storedUser) {
         setError("No se encontró información de sesión.");
         setLoading(false);
@@ -143,8 +143,8 @@ const fetchMembers = async () => {
         }
 
         const [membersRes, personasRes] = await Promise.all([
-            fetch('http://127.0.0.1:8000/vertodoslosmiembros/'),
-            fetch('http://127.0.0.1:8000/vertodaslaspersonas/')
+            fetch('http://127.0.0.1:8000/miembros/'),
+            fetch('http://127.0.0.1:8000/personas/')
         ]);
 
         if (!membersRes.ok || !personasRes.ok) {
@@ -210,7 +210,7 @@ const handleSaveMember = async () => {
     setIsSaving(true);
     setError(null);
 
-    const storedUser = sessionStorage.getItem("usuario");
+    const storedUser = localStorage.getItem("usuario");
     if (!storedUser) {
         setError("Sesión expirada. Por favor, inicie sesión de nuevo.");
         setIsSaving(false);
@@ -277,7 +277,7 @@ const handleSaveMember = async () => {
         if (!window.confirm("¿Estás seguro de que quieres eliminar a este miembro?")) return;
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/borrarmiembro/${memberIdToRemove}/`, {
+            const response = await fetch(`http://127.0.0.1:8000/miembro/${memberIdToRemove}/`, {
                 method: 'DELETE',
             });
 

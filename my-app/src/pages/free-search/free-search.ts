@@ -1,13 +1,8 @@
 import type { FreeSearchCard as FreeSearchCardType } from '../../components/free-search-card/free-search-card.ts';
 import type { FreeSearchCardProject as FreeSearchCardProjectType } from '../../components/free-search-card-project/free-search-card-project.ts';
 import type { FiltersValues, OrderOption } from '../../components/filters-component/filters-component.ts';
-<<<<<<< HEAD
-import { regionMapping, tipoBeneficioMapping } from '../../components/filters-component/filters-component.ts';
-import { estadoMapping, estadoMappingInverse } from '../../components/filters-component/filters-component.ts';
-=======
 import { regionMapping, tipoBeneficioMapping, estadoMapping, estadoMappingInverse } from '../../components/filters-component/filters-component.ts';
 import { REGIONES } from '../../components/free-search-card-project/free-search-card-project.ts';
->>>>>>> main
 
 // Crear mappings inversos para mostrar nombres legibles en la UI
 const regionMappingInverse = Object.fromEntries(
@@ -230,14 +225,6 @@ export function mapInstrumentToCard(instrumento: any): FreeSearchCardType {
   const benefit = formatAmount(instrumento.MontoMaximo);
   const imageUrl = validateImageUrl(instrumento.EnlaceDeLaFoto);
 
-<<<<<<< HEAD
-  // Debug: verificar el estado que viene del backend
-  //if (instrumento.Estado) {
-  //  console.log(`Instrumento "${instrumento.Titulo}" - Estado backend: "${instrumento.Estado}"`);
-  //}
-
-=======
->>>>>>> main
   const mappedCard = {
     id: instrumento.ID, // Agregar el ID del instrumento
     title: instrumento.Titulo || 'Título no disponible',
@@ -328,10 +315,7 @@ export function createHandlePageChange(
   };
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Funciones para manejar Proyectos
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 export function mapProyectoToCard(proyecto: any): FreeSearchCardProjectType {
   return {
     id: proyecto.ID,

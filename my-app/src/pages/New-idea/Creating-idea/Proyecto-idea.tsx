@@ -1,15 +1,28 @@
-import React, { useState, useEffect } from "react";
 import NavBar from "../../../components/NavBar/navbar";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../../../components/UI/buttons";
 import { Card, CardContent } from "../../../components/UI/cards";
 import { Input } from "../../../components/UI/input";
 import { Textarea } from "../../../components/UI/textarea";
 import { StepIndicator } from "../../../components/Shared/StepIndicator";
+import { VerMiUsuario } from '../../../api/VerMiUsuario';
+import { VerMiBeneficiario } from '../../../api/VerMiBeneficiario';
+import { VerMisProyectos } from '../../../api/VerMisProyectos';
+import { VerMisPostulaciones } from '../../../api/VerMisPostulaciones';
+import { VerMisMiembros } from '../../../api/VerMisMiembros';
+import { VerMisIdeas } from '../../../api/VerMisIdeas';
+import React from 'react';
 import PersonaClass from "../../../models/Persona";
 
 
-interface PersonaPayload { Nombre: string; Sexo: string; RUT: string; FechaDeNacimiento: string; }
+interface PersonaPayload {
+  Nombre: string;
+  Sexo: string;
+  RUT: string;
+  FechaDeNacimiento: string;
+}
+
 interface ProyectoForm {
   Beneficiario: number;
   Titulo: string;
@@ -21,8 +34,20 @@ interface ProyectoForm {
   Miembros: string[];
   isFromConvertedIdea?: boolean; // Agregar bandera en el formData
 }
-interface Idea { id: number; field: string; problem: string; audience: string; uniqueness: string; }
-interface Fondo { id: number; nombre: string; categoria: string; }
+
+interface Idea {
+  id: number;
+  field: string;
+  problem: string;
+  audience: string;
+  uniqueness: string;
+}
+
+interface Fondo {
+  id: number;
+  nombre: string;
+  categoria: string;
+}
 
 const colorPalette = {
   darkGreen: "#44624a",
@@ -32,14 +57,23 @@ const colorPalette = {
 };
 
 const opcionesAlcance = [
-    { value: 'AP', label: 'Arica y Parinacota' }, { value: 'TA', label: 'Tarapacá' },
-    { value: 'AN', label: 'Antofagasta' }, { value: 'AT', label: 'Atacama' },
-    { value: 'CO', label: 'Coquimbo' }, { value: 'VA', label: 'Valparaíso' },
-    { value: 'RM', label: 'Metropolitana' }, { value: 'LI', label: 'O\'Higgins' },
-    { value: 'ML', label: 'Maule' }, { value: 'NB', label: 'Ñuble' },
-    { value: 'BI', label: 'Biobío' }, { value: 'AR', label: 'La Araucanía' },
-    { value: 'LR', label: 'Los Ríos' }, { value: 'LL', label: 'Los Lagos' },
-    { value: 'AI', label: 'Aysén' }, { value: 'MA', label: 'Magallanes' }
+  { value: '', label: 'Seleccionar región' },
+  { value: 'Arica y Parinacota', label: 'Arica y Parinacota' },
+  { value: 'Tarapaca', label: 'Tarapacá' },
+  { value: 'Antofagasta', label: 'Antofagasta' },
+  { value: 'Atacama', label: 'Atacama' },
+  { value: 'Coquimbo', label: 'Coquimbo' },
+  { value: 'Valparaiso', label: 'Valparaíso' },
+  { value: 'Santiago', label: 'Metropolitana' },
+  { value: 'O\'Higgins', label: 'O\'Higgins' },
+  { value: 'Maule', label: 'Maule' },
+  { value: 'Nuble', label: 'Ñuble' },
+  { value: 'Biobio', label: 'Biobío' },
+  { value: 'La Araucania', label: 'La Araucanía' },
+  { value: 'Los Rios', label: 'Los Ríos' },
+  { value: 'Los Lagos', label: 'Los Lagos' },
+  { value: 'Aysen', label: 'Aysén' },
+  { value: 'Magallanes', label: 'Magallanes' }
 ];
 const opcionesArea = [ "Salud", "Innovación", "Tecnología", "Construcción", "Servicios", "Educación", "Medio Ambiente" ];
 
@@ -79,12 +113,12 @@ const CrearProyectoMatch: React.FC = () => {
   const [personas, setPersonas] = useState<PersonaClass[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [nuevaPersonaData, setNuevaPersonaData] = useState<PersonaPayload>({
-    Nombre: "", Sexo: "OTR", RUT: "", FechaDeNacimiento: ""
+    Nombre: "", Sexo: "Otro", RUT: "", FechaDeNacimiento: ""
   });
   const [isFromConvertedIdea, setIsFromConvertedIdea] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   
-  const storedUser = sessionStorage.getItem("usuario");
+  const storedUser = localStorage.getItem("usuario");
 
 
 
@@ -94,9 +128,9 @@ const CrearProyectoMatch: React.FC = () => {
     
     // Verificar si viene una idea para convertir en proyecto
     const ideaAConvertir = localStorage.getItem('convertirAProyecto') || 
-                          sessionStorage.getItem('convertirAProyecto');
+                          localStorage.getItem('convertirAProyecto');
     console.log('localStorage convertirAProyecto:', localStorage.getItem('convertirAProyecto'));
-    console.log('sessionStorage convertirAProyecto:', sessionStorage.getItem('convertirAProyecto'));
+    console.log('localStorage convertirAProyecto:', localStorage.getItem('convertirAProyecto'));
     console.log('ideaAConvertir final:', ideaAConvertir);
     
     if (ideaAConvertir) {
@@ -134,7 +168,7 @@ const CrearProyectoMatch: React.FC = () => {
         
         // Limpiar ambos storage después de usar la idea
         localStorage.removeItem('convertirAProyecto');
-        sessionStorage.removeItem('convertirAProyecto');
+        localStorage.removeItem('convertirAProyecto');
         
         // Marcar que los datos se han cargado
         setIsDataLoaded(true);
@@ -239,8 +273,16 @@ const CrearProyectoMatch: React.FC = () => {
         return;
     }
     try {
-        const resPersona = await fetch("http://127.0.0.1:8000/crearpersona/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevaPersonaData) });
-        if (!resPersona.ok) throw new Error("No se pudo crear la persona. Verifique los datos.");
+        const resPersona = await fetch("http://127.0.0.1:8000/personas", {
+          method: "POST", 
+          headers: {
+            "Content-Type": "application/json" 
+          },
+          body: JSON.stringify(nuevaPersonaData) 
+        });
+
+        if (!resPersona.ok)
+          throw new Error("No se pudo crear la persona. Verifique los datos.");
         
         const personaCreada = await resPersona.json();
         setFormData(prev => ({ ...prev, Miembros: [...prev.Miembros, personaCreada.Nombre] }));
@@ -248,42 +290,115 @@ const CrearProyectoMatch: React.FC = () => {
         
         alert("Persona creada y añadida al proyecto exitosamente.");
         setIsModalOpen(false);
-        setNuevaPersonaData({ Nombre: "", Sexo: "OTR", RUT: "", FechaDeNacimiento: "" });
-    } catch (error) {
+        setNuevaPersonaData({ Nombre: "", Sexo: "Otro", RUT: "", FechaDeNacimiento: "" });
+    }
+    catch (error) {
         if (error instanceof Error) alert(error.message);
         else alert("Ocurrió un error inesperado al crear la persona.");
     }
   };
 
-  const crearProyecto = async () => {
-    if (formData.Titulo.length < 10) { alert("El título debe tener al menos 10 caracteres."); return; }
-    if (formData.Descripcion.length < 10) { alert("La descripción debe tener al menos 10 caracteres."); return; }
-    if (formData.DuracionEnMesesMinimo <= 0 || formData.DuracionEnMesesMaximo <= 0) { alert("La duración debe ser mayor a cero."); return; }
-    if (formData.DuracionEnMesesMinimo > formData.DuracionEnMesesMaximo) { alert("La duración mínima no puede ser mayor que la máxima."); return; }
-    if (!formData.Alcance || !formData.Area) { alert("Debes seleccionar un Alcance y un Área."); return; }
+  const CrearProyecto = async () => {
+    if (formData.Titulo.length < 10) {
+      alert("El título debe tener al menos 10 caracteres."); 
+      return;
+    }
+    if (formData.Descripcion.length < 10) {
+      alert("La descripción debe tener al menos 10 caracteres."); 
+      return;
+    }
+    if (formData.DuracionEnMesesMinimo <= 0 || formData.DuracionEnMesesMaximo <= 0) {
+      alert("La duración debe ser mayor a cero.");
+      return;
+    }
+    if (formData.DuracionEnMesesMinimo > formData.DuracionEnMesesMaximo) {
+      alert("La duración mínima no puede ser mayor que la máxima.");
+      return;
+    }
+    if (!formData.Alcance || !formData.Area) {
+      alert("Debes seleccionar un Alcance y un Área.");
+      return;
+    }
     try {
-      const proyectoData = { ...formData };
-      const resProyecto = await fetch("http://127.0.0.1:8000/crearproyecto/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(proyectoData) });
-      if (!resProyecto.ok) {
-        if (resProyecto.status === 400) throw new Error("Los datos enviados no son válidos. Por favor, revise todos los campos.");
-        throw new Error(`Error del servidor: ${resProyecto.status}`);
-      }
-      const proyectoCreado = await resProyecto.json();
-      if (formData.Miembros.length > 0) {
-        for (const nombreMiembro of formData.Miembros) {
-          let persona = personas.find((p) => p.Nombre === nombreMiembro);
-          if (!persona) throw new Error(`No se encontró la persona ${nombreMiembro}.`);
-          const colaboradorPayload = { Persona: persona.ID, Proyecto: proyectoCreado.ID };
-          const resColaborador = await fetch("http://127.0.0.1:8000/crearcolaborador/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(colaboradorPayload) });
-          if (!resColaborador.ok) throw new Error(`Error al crear el colaborador para ${nombreMiembro}`);
+      const userData = localStorage.getItem("usuario");
+      if (userData) {
+        const parsedData = JSON.parse(userData);
+        const miUsuario = parsedData?.Usuario;
+        if (miUsuario) {
+          const id = miUsuario.ID;
+          var proyectoData = { ...formData };
+          const resProyecto = await fetch("http://127.0.0.1:8000/proyectos", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            }, 
+            body: JSON.stringify({
+              "Beneficiario":proyectoData.Beneficiario,
+              "Titulo":proyectoData.Titulo,
+              "Descripcion":proyectoData.Descripcion,
+              "DuracionEnMesesMinimo":proyectoData.DuracionEnMesesMinimo,
+              "DuracionEnMesesMaximo":proyectoData.DuracionEnMesesMaximo,
+              "Alcance":proyectoData.Alcance,
+              "Area":proyectoData.Area,
+              "Usuario":id
+            }
+            )
+          });
+          if (!resProyecto.ok) {
+            if (resProyecto.status === 400)
+              throw new Error("Los datos enviados no son válidos. Por favor, revise todos los campos.");
+            throw new Error(`Error del servidor: ${resProyecto.status}`);
+          }
+          const proyectoCreado = await resProyecto.json();
+          if (formData.Miembros.length > 0) {
+            for (const nombreMiembro of formData.Miembros) {
+              let persona = personas.find((p) => p.Nombre === nombreMiembro);
+              if (!persona)
+                throw new Error(`No se encontró la persona ${nombreMiembro}.`);
+              const colaboradorPayload = {
+                Persona: persona.ID,
+                Proyecto: proyectoCreado[0].ID,
+                Usuario:id
+              };
+              const resColaborador = await fetch("http://127.0.0.1:8000/colaboradores", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                }, 
+                body: JSON.stringify(colaboradorPayload)
+              });
+              if (!resColaborador.ok)
+                throw new Error(`Error al crear el colaborador para ${nombreMiembro}`);
+            }
+          }
+
+          const usuario = await VerMiUsuario(id);
+          const beneficiario = await VerMiBeneficiario(id);
+          const proyectos = await VerMisProyectos(id);
+          const postulaciones = await VerMisPostulaciones(id);
+          const miembros = await VerMisMiembros(id);
+          const ideas = await VerMisIdeas(id);
+          const datos = {
+            "Usuario":usuario,
+            "Beneficiario":beneficiario,
+            "Proyectos":proyectos,
+            "Postulaciones":postulaciones,
+            "Miembros":miembros,
+            "Ideas":ideas
+          }
+          localStorage.setItem("usuario", JSON.stringify(datos));
+
+          alert("¡Tu proyecto ha sido creado con éxito!");
+          navigate("/Proyectos");
         }
       }
-      alert("¡Tu proyecto ha sido creado con éxito!");
-      navigate("/Proyectos");
-    } catch (error) {
+    }
+    catch (error) {
       console.error("Falló el proceso de creación:", error);
-      if (error instanceof Error) alert(error.message);
-      else alert("Ha ocurrido un error inesperado.");
+      if (error instanceof Error)
+        alert(error.message);
+      else 
+        alert("Ha ocurrido un error inesperado.");
     }
   };
 
@@ -292,7 +407,6 @@ const CrearProyectoMatch: React.FC = () => {
 
 
   return (
-
     <div className="min-h-screen bg-slate-50">
       <NavBar />
       <main className="flex flex-col items-center justify-center px-4 py-10 mt-16 md:mt-20 lg:mt-[5%]">
@@ -312,7 +426,7 @@ const CrearProyectoMatch: React.FC = () => {
         
         <StepIndicator currentStep={step} totalSteps={4} />
         <Card className="w-full max-w-3xl px-9 py-8">
-          <form onSubmit={(e) => { e.preventDefault(); if (step < 4) nextStep(); else crearProyecto(); }}>
+          <form onSubmit={(e) => { e.preventDefault(); if (step < 4) nextStep(); else CrearProyecto(); }}>
             {step === 1 && (
               <CardContent className="space-y-6">
                 <h2 className="text-2xl font-semibold text-center text-slate-800">
@@ -423,9 +537,9 @@ const CrearProyectoMatch: React.FC = () => {
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Sexo</label>
                                 <select name="Sexo" value={nuevaPersonaData.Sexo} onChange={handleModalChange} required className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                    <option value="VAR">Varón</option>
-                                    <option value="MUJ">Mujer</option>
-                                    <option value="OTR">Otro</option>
+                                    <option value="Hombre">Hombre</option>
+                                    <option value="Mujer">Mujer</option>
+                                    <option value="Otro">Otro</option>
                                 </select>
                             </div>
                             <div>

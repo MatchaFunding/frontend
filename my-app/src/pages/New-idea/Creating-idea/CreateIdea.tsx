@@ -143,7 +143,7 @@ const CreateIdea: React.FC = () => {
         if (ideaRespuesta && ideaRespuesta.ResumenLLM) {
           try {
             // Obtener el usuario actual para crear el objeto Idea completo
-            const storedUser = sessionStorage.getItem("usuario");
+            const storedUser = localStorage.getItem("usuario");
             if (storedUser) {
               const datos = JSON.parse(storedUser);
               const usuarioId = datos.Usuario?.ID;
@@ -179,11 +179,11 @@ const CreateIdea: React.FC = () => {
               if (resultadoActualizacion) {
                 console.log('Propuesta IA guardada correctamente en la idea:', ideaBackend.ID);
                 
-                // Actualizar el sessionStorage
+                // Actualizar el localStorage
                 const resultado = await VerEmpresaCompletaAsync(usuarioId);
                 if (resultado) {
-                  sessionStorage.setItem('usuario', JSON.stringify(resultado));
-                  console.log('SessionStorage actualizado con nueva idea');
+                  localStorage.setItem('usuario', JSON.stringify(resultado));
+                  console.log('localStorage actualizado con nueva idea');
                 }
 
                 // Actualizar localStorage con la idea completa
@@ -221,8 +221,8 @@ const CreateIdea: React.FC = () => {
   }
   const handleConfirmAndSaveIdea = async () => {
     try {
-      // Obtener el ID del usuario actual desde sessionStorage
-      const storedUser = sessionStorage.getItem("usuario");
+      // Obtener el ID del usuario actual desde localStorage
+      const storedUser = localStorage.getItem("usuario");
       let usuarioId = null;
       
       if (storedUser) {

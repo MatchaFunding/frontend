@@ -107,7 +107,7 @@ const RetomarIdea: React.FC = () => {
       // Obtener el ID del usuario
       let usuarioId = 1; // fallback
       try {
-        const storedUser = sessionStorage.getItem("usuario");
+        const storedUser = localStorage.getItem("usuario");
         if (storedUser) {
           const userData = JSON.parse(storedUser);
           usuarioId = userData.Usuario?.ID || 1;
@@ -193,7 +193,7 @@ const RetomarIdea: React.FC = () => {
       // Obtener el ID del usuario
       let usuarioId = 1; // fallback
       try {
-        const storedUser = sessionStorage.getItem("usuario");
+        const storedUser = localStorage.getItem("usuario");
         if (storedUser) {
           const userData = JSON.parse(storedUser);
           usuarioId = userData.Usuario?.ID || 1;

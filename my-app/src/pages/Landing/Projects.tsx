@@ -1,20 +1,22 @@
+import type { FiltersIdeaValues } from '../../components/filters-ideas/filters-idea';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
-import NavBar from '../../components/NavBar/navbar';
-import FiltersIdea from '../../components/filters-ideas/filters-idea.tsx';
+import { PieChart, Pie } from 'recharts';
+import { Cell, Tooltip } from 'recharts';
+import { ResponsiveContainer } from 'recharts';
+import { Legend, RadarChart } from 'recharts';
+import { PolarGrid, PolarAngleAxis } from 'recharts';
+import { PolarRadiusAxis, Radar } from 'recharts';
 import { applyFiltersAndSorting } from '../../components/filters-ideas/filters-idea';
-import type { FiltersIdeaValues } from '../../components/filters-ideas/filters-idea';
-import Idea from "../../models/Idea";
-
-import Postulacion from "../../models/Postulacion"; 
-import IdeaRefinadaModal from '../../components/IdeaRefinadaModal/IdeaRefinadaModal';
-import { VerIdeasDeUsuarioAsync } from '../../api/VerIdeasDeUsuario';
-import { BorrarIdeaAsync } from '../../api/BorrarIdea';
+import { BorrarIdea } from '../../api/BorrarIdea';
 import { getMatchFondosAsync } from '../../api/MatchFondos';
-
 import { VerTodasLasPostulacionesAsync } from "../../api/VerTodasLasPostulaciones";
 import { VerTodosLosInstrumentosAsync } from "../../api/VerTodosLosInstrumentos"; 
+import NavBar from '../../components/NavBar/navbar';
+import FiltersIdea from '../../components/filters-ideas/filters-idea.tsx';
+import Idea from "../../models/Idea";
+import Postulacion from "../../models/Postulacion"; 
+import IdeaRefinadaModal from '../../components/IdeaRefinadaModal/IdeaRefinadaModal';
 
 interface PostulacionData {
   name: string;
@@ -29,6 +31,7 @@ interface Proyecto {
   estado?: string; 
   fondo_seleccionado?: string; 
 }
+
 interface FondoAsignado {
   nombreFondo: string;
   estado: string;
@@ -93,32 +96,33 @@ const MisPostulaciones: React.FC = () => {
   
   // Función para recargar ideas desde el backend
   const reloadIdeas = async () => {
-    const storedUser = sessionStorage.getItem("usuario");
+    const storedUser = localStorage.getItem("usuario");
     if (storedUser) {
       const datos = JSON.parse(storedUser);
-      const usuarioId = datos.Usuario?.ID;
+      const ideas = datos.Ideas;
       
-      if (usuarioId) {
+      if (ideas) {
         try {
-          console.log('Recargando ideas desde backend para usuario:', usuarioId);
-          const ideas = await VerIdeasDeUsuarioAsync(usuarioId);
+          console.log(`Recargando Ideas de Usuario (cache): ${ideas}`);
           setIdeas(ideas);
           setFilteredIdeas(ideas);
           console.log('Ideas cargadas desde backend:', ideas);
-        } catch (error) {
+        }
+        catch (error) {
           console.error('Error al cargar ideas desde backend:', error);
-          // Fallback: usar sessionStorage
           const ideas: Idea[] = (datos.Ideas || []).map((idea: any) => new Idea(idea));
           setIdeas(ideas);
           setFilteredIdeas(ideas);
-          console.log('Usando ideas del sessionStorage como fallback');
+          console.log('Usando ideas del localStorage como fallback');
         }
-      } else {
+      }
+      else {
         console.warn('No se pudo obtener usuarioId para recargar');
         setIdeas([]);
         setFilteredIdeas([]);
       }
-    } else {
+    }
+    else {
       console.warn('No se encontraron datos de usuario para recargar');
       setIdeas([]);
       setFilteredIdeas([]);
@@ -128,17 +132,17 @@ const MisPostulaciones: React.FC = () => {
   // Convertir el estado de la postulación a texto legible
   const obtenerEstadoTexto = (estado: string): string => {
     const estadosMap: { [key: string]: string } = {
-      'ADJ': 'Adjudicado',
-      'PEN': 'Pendiente',
-      'REC': 'Rechazado',
-      'APR': 'Aprobado',
-      'REV': 'En Revisión'
+      'Adjudicado': 'Adjudicado',
+      'Pendiente': 'Pendiente',
+      'Rechazado': 'Rechazado',
+      'Aprobado': 'Aprobado',
+      'En Revision': 'En Revisión'
     };
     return estadosMap[estado] || estado;
   };
 
   // Obtener todos los fondos de un proyecto
-  const obtenerFondosProyecto = async (proyectoId: number): Promise<FondoAsignado[]> => {
+  const ObtenerFondosProyecto = async (proyectoId: number): Promise<FondoAsignado[]> => {
     try {
       const postulaciones = await VerTodasLasPostulacionesAsync();
       const postulacionesProyecto = postulaciones.filter(postulacion => postulacion.Proyecto === proyectoId);
@@ -164,7 +168,8 @@ const MisPostulaciones: React.FC = () => {
   // La función ahora recibe el conteo de proyectos para calcular la nueva métrica
 const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparacionCount: number, totalProyectos: number) => {
     // Si no hay datos, devuelve un array vacío para evitar errores
-    if (postulaciones.length === 0 && totalProyectos === 0) return [];
+    if (postulaciones.length === 0 && totalProyectos === 0)
+      return [];
 
     // --- Métricas existentes (sin cambios) ---
     const TARGET_AMOUNT = 10000000;
@@ -209,40 +214,37 @@ const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparac
       { categoria: 'Postulaciones', A: scorePostulaciones, fullMark: 100 },
       { categoria: 'Tiempo respuesta', A: scoreTiempo, fullMark: 100 },
       { categoria: 'Diversidad fondos', A: scoreDiversidad, fullMark: 100 },
-      // --- NUEVO: Se añade el nuevo eje al gráfico ---
       { categoria: 'Actividad Pipeline', A: scorePipeline, fullMark: 100 },
     ];
 };
   
   useEffect(() => {
     const loadIdeasFromBackend = async () => {
-      const storedUser = sessionStorage.getItem("usuario");
+      const storedUser = localStorage.getItem("usuario");
       if (storedUser) {
         const datos = JSON.parse(storedUser);
-        const usuarioId = datos.Usuario?.ID;
-        
-        if (usuarioId) {
+        const ideas = datos.Ideas;
+
+        if (ideas) {
           try {
-            console.log('Cargando ideas desde backend para usuario:', usuarioId);
-            const ideas = await VerIdeasDeUsuarioAsync(usuarioId);
             setIdeas(ideas);
             setFilteredIdeas(ideas);
-            console.log('Ideas cargadas exitosamente desde backend:', ideas.length, 'ideas');
-          } catch (error) {
+          }
+          catch (error) {
             console.error('Error al cargar ideas desde backend:', error);
-            // Fallback: usar sessionStorage
             const ideas: Idea[] = (datos.Ideas || []).map((idea: any) => new Idea(idea));
             setIdeas(ideas);
             setFilteredIdeas(ideas);
-            console.log('Usando ideas del sessionStorage como fallback:', ideas.length, 'ideas');
           }
-        } else {
-          console.warn('No se pudo obtener usuarioId del sessionStorage');
+        }
+        else {
+          console.warn('No se pudo obtener usuarioId del localStorage');
           setIdeas([]);
           setFilteredIdeas([]);
         }
-      } else {
-        console.warn('No se encontraron datos de usuario en sessionStorage');
+      }
+      else {
+        console.warn('No se encontraron datos de Usuario');
         setIdeas([]);
         setFilteredIdeas([]);
       }
@@ -280,7 +282,7 @@ const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparac
 
   useEffect(() => {
     const fetchProyectos = async () => {
-        const storedUser = sessionStorage.getItem("usuario");
+        const storedUser = localStorage.getItem("usuario");
         if (!storedUser) { setErrorProyectos("No se encontró información del usuario."); return; }
         const userData = JSON.parse(storedUser);
         const empresaId = userData?.Beneficiario?.ID;
@@ -289,22 +291,26 @@ const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparac
         setLoadingProyectos(true);
         setErrorProyectos(null);
         try {
-            const response = await fetch(`http://127.0.0.1:8000/verproyectosdeempresa/${empresaId}`);
-            if (!response.ok) throw new Error(`Error ${response.status}`);
-            const data: Proyecto[] = await response.json();
-            const proyectosConFondo: ProyectoConFondo[] = await Promise.all(
-                data.map(async (proyecto) => {
-                    const fondosAsignados = await obtenerFondosProyecto(proyecto.ID);
-                    return {
-                        ...proyecto,
-                        fondosAsignados
-                    };
-                })
-            );
-            setProyectos(proyectosConFondo || []); 
-        } catch (error: any) {
+            const storedUser = localStorage.getItem("usuario");
+            if (storedUser) {
+              const datos = JSON.parse(storedUser);
+              const proyectos = datos.Proyectos;
+              const proyectosConFondo: ProyectoConFondo[] = await Promise.all(
+                  proyectos.map(async (proyecto: Proyecto) => {
+                      const fondosAsignados = await ObtenerFondosProyecto(proyecto.ID);
+                      return {
+                          ...proyecto,
+                          fondosAsignados
+                      };
+                  })
+              );
+              setProyectos(proyectosConFondo || []); 
+            }
+        }
+        catch (error: any) {
             setErrorProyectos(error.message || "Ocurrió un error inesperado.");
-        } finally {
+        }
+        finally {
             setLoadingProyectos(false);
         }
     };
@@ -314,7 +320,7 @@ const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparac
 
   useEffect(() => {
     const fetchAndProcessPostulaciones = async () => {
-      const storedUser = sessionStorage.getItem("usuario");
+      const storedUser = localStorage.getItem("usuario");
       if (!storedUser) {
         setErrorEstadisticas("No se encontró información del usuario.");
         setLoadingEstadisticas(false);
@@ -334,46 +340,38 @@ const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparac
       setErrorEstadisticas(null);
 
       try {
-        const [postulacionesResponse, proyectosResponse] = await Promise.all([
-            fetch(`http://127.0.0.1:8000/vertodaslaspostulaciones`),
-            fetch(`http://127.0.0.1:8000/verproyectosdeempresa/${empresaId}`)
-        ]);
+        const storedUser = localStorage.getItem("usuario");
+        if (storedUser) {
+          const datos = JSON.parse(storedUser);
+          const proyectos = datos.Proyectos;
+          const postulaciones = datos.Postulaciones;
+          const proyectosEnPreparacionCount = proyectos.filter(p => !proyectos.has(p.ID)).length;
+          
+          // Procesamiento para el PieChart (gráfico de torta)
+          const pieData = processPieChartData(postulaciones);
+          if (proyectosEnPreparacionCount > 0) {
+            pieData.push({
+                name: 'En preparación',
+                value: proyectosEnPreparacionCount,
+                color: colorPalette.oliveGray,
+              });
+          }
+          // CAMBIO: Ahora pasamos los conteos de proyectos a la función del RadarChart
+          const radarData = processRadarChartData(
+              postulaciones, 
+              proyectosEnPreparacionCount, 
+              proyectos.length
+          );
 
-        if (!postulacionesResponse.ok) throw new Error(`Error al obtener postulaciones: ${postulacionesResponse.statusText}`);
-        if (!proyectosResponse.ok) throw new Error(`Error al obtener proyectos: ${proyectosResponse.statusText}`);
-
-        const allPostulaciones: Postulacion[] = await postulacionesResponse.json();
-        const allProyectos: Proyecto[] = await proyectosResponse.json();
-        
-        const userPostulaciones = allPostulaciones.filter(p => p.Beneficiario === beneficiarioId);
-        
-        const projectsWithPostulaciones = new Set(userPostulaciones.map(p => p.Proyecto));
-        
-        const proyectosEnPreparacionCount = allProyectos.filter(p => !projectsWithPostulaciones.has(p.ID)).length;
-
-        // Procesamiento para el PieChart (gráfico de torta)
-        const pieData = processPieChartData(userPostulaciones);
-        if (proyectosEnPreparacionCount > 0) {
-          pieData.push({
-            name: 'En preparación',
-            value: proyectosEnPreparacionCount,
-            color: colorPalette.oliveGray,
-          });
+          setPieChartData(pieData);
+          setRadarChartData(radarData);
         }
-        
-        // CAMBIO: Ahora pasamos los conteos de proyectos a la función del RadarChart
-        const radarData = processRadarChartData(
-            userPostulaciones, 
-            proyectosEnPreparacionCount, 
-            allProyectos.length // Total de proyectos del usuario
-        );
 
-        setPieChartData(pieData);
-        setRadarChartData(radarData);
-
-      } catch (error: any) {
+      }
+      catch (error: any) {
         setErrorEstadisticas(error.message || "Ocurrió un error al cargar los datos.");
-      } finally {
+      }
+      finally {
         setLoadingEstadisticas(false);
       }
     };
@@ -382,6 +380,7 @@ const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparac
       fetchAndProcessPostulaciones();
     }
   }, [activeSection]);
+
 const colorPalette = {
   darkGreen: '#44624a',
   softGreen: '#8ba888',
@@ -433,7 +432,7 @@ const colorPalette = {
 
     try {
       console.log('Intentando eliminar idea con ID:', idToDelete);
-      const result = await BorrarIdeaAsync(idToDelete);
+      const result = await BorrarIdea(idToDelete);
       console.log('Resultado de eliminar idea:', result);
       
       // Actualizar el estado local
@@ -443,10 +442,12 @@ const colorPalette = {
       
       alert(`¡Idea eliminada exitosamente!\n\n"${ideaTitulo}" ha sido eliminada de tu lista de ideas.`);
       
-    } catch (error: any) {
+    }
+    catch (error: any) {
       console.error('Error al eliminar idea:', error);
       alert(`Error al eliminar la idea: ${error.message || 'Error desconocido'}`);
-    } finally {
+    }
+    finally {
       setDeletingIdeaId(null);
     }
   };
@@ -464,8 +465,8 @@ const colorPalette = {
     console.log('GUARDANDO IDEA PARA CONVERSION:', ideaData);
     localStorage.setItem('convertirAProyecto', JSON.stringify(ideaData));
     
-    // También guardar en sessionStorage como respaldo
-    sessionStorage.setItem('convertirAProyecto', JSON.stringify(ideaData));
+    // También guardar en localStorage como respaldo
+    localStorage.setItem('convertirAProyecto', JSON.stringify(ideaData));
     
     // Navegar a la página de construir proyecto
     navigate('/Matcha/Nuevo-proyecto');
@@ -518,10 +519,12 @@ const colorPalette = {
       // Navegar a la página de resultados de match
       navigate('/Matcha/New-idea/Creating-idea/FondoIdea');
       
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error al hacer match con IA:', error);
       alert('Error al buscar fondos compatibles. Por favor intenta nuevamente.');
-    } finally {
+    }
+    finally {
       setMatchingIdeaId(null);
     }
   };

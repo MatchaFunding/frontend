@@ -258,7 +258,7 @@ const FondosIdea: React.FC = () => {
           try {
             let usuarioId = 1;
             try {
-              const storedUser = sessionStorage.getItem("usuario");
+              const storedUser = localStorage.getItem("usuario");
               if (storedUser) usuarioId = JSON.parse(storedUser).Usuario?.ID || 1;
             } catch (userError) { console.error('Error al obtener usuario:', userError); }
             

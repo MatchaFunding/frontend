@@ -11,9 +11,9 @@ export async function VerMisIdeas(id: number) {
       throw new Error('Error al obtener los datos');
     }
     const result = await response.json();
-    return result[0];
+    return result;
   }
   catch (error) {
-    console.error('Error en VerMiUsuario:', error);
+    console.error('Error en VerMisIdeas:', error);
   }
 }

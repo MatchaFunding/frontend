@@ -18,7 +18,7 @@ const FreeSearchCard: React.FC<FreeSearchCardProps> = ({ id, title, description,
   // Verificar si existe postulación al montar el componente
   useEffect(() => {
     const VerificarPostulacion = async () => {
-      const storedUser = sessionStorage.getItem("usuario");
+      const storedUser = localStorage.getItem("usuario");
       if (!storedUser) {
         setIsCheckingPostulacion(false);
         return;

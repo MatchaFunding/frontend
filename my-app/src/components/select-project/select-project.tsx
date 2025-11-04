@@ -27,7 +27,7 @@ const SelectProjectModal: React.FC<SelectProjectModalProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       if (!isOpen) return;
-      const storedUser = sessionStorage.getItem("usuario");
+      const storedUser = localStorage.getItem("usuario");
       if (!storedUser) { 
         setError("No se encontró información del usuario."); 
         return; 
@@ -123,7 +123,7 @@ const SelectProjectModal: React.FC<SelectProjectModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      const storedUser = sessionStorage.getItem("usuario");
+      const storedUser = localStorage.getItem("usuario");
       if (!storedUser) {
         throw new Error('No se encontró información del usuario.');
       }

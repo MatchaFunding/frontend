@@ -363,14 +363,8 @@ const SignUp: React.FC = () => {
                 <button type="button" onClick={GenerarContrasena} className="generate-password-btn">
                   Generar contraseña segura
                 </button>
-<<<<<<< HEAD
-                {fieldErrors.password && (
-                  <p className="email-error">{fieldErrors.password}</p>
-                )}
-=======
                 {/* Mensaje de error para la contraseña */}
                 <p className="email-error">{fieldErrors.password || '\u00A0'}</p>
->>>>>>> main
               </div>
               {/* Checkbox */}
               <div className="checkbox-group">

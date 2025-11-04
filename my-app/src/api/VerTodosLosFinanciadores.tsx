@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function VerTodosLosFinanciadoresAsync(): Promise<Financiador[]> {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/vertodoslosfinanciadores/`, {
+    const response = await fetch(`http://127.0.0.1:8000/financiadores`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

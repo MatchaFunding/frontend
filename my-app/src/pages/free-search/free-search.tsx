@@ -4,16 +4,12 @@ import type { OrderOption } from '../../components/filters-component/filters-com
 import { useState, useMemo, useEffect } from 'react';
 import { initialFilters, filterCards } from './free-search';
 import { sortCards, mapInstrumentsToCards } from './free-search';
+import { searchProjectsByText, mapProyectosToCards } from './free-search';
 import { getPaginatedCards, calculatePagination } from './free-search';
 import { searchCardsByText, createHandlePageChange } from './free-search';
 import FreeSearchCard from '../../components/free-search-card/free-search-card.tsx';
 import FiltersComponent from '../../components/filters-component/filters-component.tsx';
 import NavBar from '../../components/NavBar/navbar';
-<<<<<<< HEAD
-=======
-import type { FiltersValues, OrderOption, CardsPerPageOption } from '../../components/filters-component/filters-component.ts';
-import { initialFilters, filterCards, sortCards, mapInstrumentsToCards, getPaginatedCards, calculatePagination, searchCardsByText, createHandlePageChange, mapProyectosToCards, searchProjectsByText } from './free-search';
->>>>>>> main
 import VerTodosLosInstrumentos from '../../api/VerTodosLosInstrumentos.tsx';
 import VerTodosLosProyectos from '../../api/VerTodosLosProyectos.tsx';
 import FreeSearchCardProject from '../../components/free-search-card-project/free-search-card-project.tsx';
@@ -29,10 +25,8 @@ function FreeSearch() {
 	const [isAnimating, setIsAnimating] = useState(false);
 	const [animatingFrom, setAnimatingFrom] = useState<'fondos' | 'proyectos' | null>(null);
 	const [containerWidth, setContainerWidth] = useState<number>(0);
+	
 	const instrumentos = VerTodosLosInstrumentos();
-<<<<<<< HEAD
-
-=======
 	const proyectos = VerTodosLosProyectos();
 	
 	// Calcular el ancho del contenedor basado en el tamaño de la ventana
@@ -87,7 +81,6 @@ function FreeSearch() {
 		}, 200);
 	};
 	
->>>>>>> main
 	const availableCards = useMemo(() => {
 		return mapInstrumentsToCards(instrumentos);
 	}, [instrumentos]);
@@ -182,17 +175,6 @@ function FreeSearch() {
 			<NavBar />
 			<div className="max-w-[95%] sm:max-w-[90%] mx-auto w-full flex-1">
 				<div className="w-full px-2 sm:px-4 mt-24 sm:mt-32">
-<<<<<<< HEAD
-					<div className="max-w-screen-2xl mx-auto">
-						<div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-							<div className="flex items-center bg-white shadow px-3 sm:px-4 py-2 w-full lg:flex-1 lg:mr-4" style={{ borderRadius: '8px' }}>
-								<img src="/svgs/search.svg" alt="Search icon" className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 mr-2" style={{ filter: 'brightness(0) saturate(100%) invert(71%) sepia(6%) saturate(329%) hue-rotate(202deg) brightness(94%) contrast(87%)' }} />
-								<input type="text" placeholder="Busca tu fondo manualmente" className="bg-transparent outline-none flex-1 text-gray-700 placeholder-[#bdbdbd] text-sm sm:text-base" value={searchTerm}
-									onChange={(e) => setSearchTerm(e.target.value)}
-								/>
-							</div>
-							<div className="w-full lg:w-auto lg:flex-shrink-0">
-=======
 					<div className="max-w-screen-2xl mx-auto flex justify-center">
 						{/* Contenedor responsive para searchbar y filtros - mismo ancho que las cards */}
 						<div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full" style={{ maxWidth: containerWidth > 0 ? `${containerWidth}px` : 'fit-content' }}>
@@ -247,77 +229,12 @@ function FreeSearch() {
 							</div>
 							{/* Filtros */}
 							<div className="bg-white p-2 sm:p-3 rounded-2xl shadow-md flex-shrink-0">
->>>>>>> main
 								<FiltersComponent order={order} setOrder={setOrder} cardsPerPage={cardsPerPage} setCardsPerPage={setCardsPerPage} filters={filters} onApplyFilters={setFilters} />
 							</div>
 						</div>
 					</div>
 				</div>
 				<div className="w-full px-2 sm:px-4">
-<<<<<<< HEAD
-					<div className="flex justify-center gap-4 sm:gap-6 flex-wrap" style={{ marginTop: '60px' }}>
-						{paginatedCards.length > 0 ? (
-							paginatedCards.map((card, idx) => (
-								<FreeSearchCard key={idx + (page - 1) * cardsPerPage} {...card} />
-							))
-						) : (
-							<div className="text-center py-12 sm:py-20 px-4">
-								<p className="text-gray-500 text-base sm:text-lg">
-									{instrumentos.length === 0 ? 
-										'Cargando instrumentos...' : 
-										'No se encontraron instrumentos que coincidan con tu búsqueda'
-									}
-								</p>
-							</div>
-						)}
-					</div>
-					<div className="flex justify-center py-4 gap-1 sm:gap-2 flex-wrap" style={{ marginTop: '40px' }}>
-						<button className={`px-2 sm:px-3 py-2 rounded-full font-semibold border ${page === 1 ? 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-[#8ba888] border-[#8ba888]'}`} onClick={() => pageHandlers.goToPrevious(page)} disabled={page === 1} aria-label="Anterior">
-							<img src="/svgs/right-arrow.svg" alt="Anterior" className="w-3 h-3 sm:w-4 sm:h-4" style={{ transform: 'rotate(180deg)', filter: page === 1 ? 'brightness(0) saturate(100%) invert(70%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(96%)' : 'brightness(0) saturate(100%) invert(63%) sepia(15%) saturate(357%) hue-rotate(73deg) brightness(95%) contrast(88%)' }} />
-						</button>
-								<button
-									className={`px-2 sm:px-3 py-1 rounded-full font-semibold bg-[#8ba888] text-white text-sm`}
-									disabled
-								>
-									{page}
-								</button>
-								{page + 1 <= totalPages && (
-									<button
-										className={`px-2 sm:px-3 py-2 font-semibold text-[#8ba888] hover:bg-gray-100 text-sm`}
-										onClick={() => pageHandlers.goToPage(page + 1)}
-									>
-										{page + 1}
-									</button>
-								)}
-								{page + 2 <= totalPages && (
-									<button
-										className={`hidden sm:block px-2 sm:px-3 py-2 font-semibold text-[#8ba888] hover:bg-gray-100 text-sm`}
-										onClick={() => pageHandlers.goToPage(page + 2)}
-									>
-										{page + 2}
-									</button>
-								)}
-								{page + 3 < totalPages && (
-									<span className="hidden sm:inline px-2">...</span>
-								)}
-								{totalPages > 1 && page !== totalPages && (page + 2 < totalPages) && (
-									<button
-										className={`hidden sm:block px-2 sm:px-3 py-2 font-semibold text-[#8ba888] hover:bg-gray-100 text-sm`}
-										onClick={() => pageHandlers.goToPage(totalPages)}
-									>
-										{totalPages}
-									</button>
-								)}
-						<button
-							className={`px-2 sm:px-3 py-2 rounded-full font-semibold border ${page === totalPages ? 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-[#8ba888] border-[#8ba888]'}`}
-							onClick={() => pageHandlers.goToNext(page)}
-							disabled={page === totalPages}
-							aria-label="Siguiente"
-						>
-							<img src="/svgs/right-arrow.svg" alt="Siguiente" className="w-3 h-3 sm:w-4 sm:h-4" style={{ filter: page === totalPages ? 'brightness(0) saturate(100%) invert(70%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(96%)' : 'brightness(0) saturate(100%) invert(63%) sepia(15%) saturate(357%) hue-rotate(73deg) brightness(95%) contrast(88%)' }} />
-						</button>
-					</div>
-=======
 					<div className="max-w-screen-2xl mx-auto flex justify-center">
 						{/* Cards paginadas - Solo se muestran cuando está activo "Fondos" */}
 						{activeView === 'fondos' && (
@@ -418,7 +335,6 @@ function FreeSearch() {
 							</button>
 						</div>
 					)}
->>>>>>> main
 				</div>
 			</div>
 		</div>

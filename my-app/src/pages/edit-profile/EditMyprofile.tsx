@@ -59,7 +59,7 @@ const EditProfile: React.FC = () => {
     useEffect(() => {
         const loadInitialData = async () => {
      
-            const storedUser = sessionStorage.getItem("usuario");
+            const storedUser = localStorage.getItem("usuario");
             if (!storedUser) {
                 setError("No se encontró información de sesión.");
                 setLoading(false);
@@ -73,8 +73,8 @@ const EditProfile: React.FC = () => {
                 if (!userId || !personaId) throw new Error("Datos de sesión incompletos.");
 
                 const [usersRes, personasRes] = await Promise.all([
-                    fetch('http://127.0.0.1:8000/vertodoslosusuarios/'),
-                    fetch('http://127.0.0.1:8000/vertodaslaspersonas/')
+                    fetch('http://127.0.0.1:8000/usuarios/'),
+                    fetch('http://127.0.0.1:8000/personas/')
                 ]);
 
                 if (!usersRes.ok || !personasRes.ok) throw new Error("Error al cargar datos del servidor.");
@@ -137,12 +137,12 @@ const EditProfile: React.FC = () => {
         try {
             // .
             const [personaResponse, usuarioResponse] = await Promise.all([
-                fetch(`http://127.0.0.1:8000/cambiarpersona/${originalPersona.ID}/`, {
+                fetch(`http://127.0.0.1:8000/persona/${originalPersona.ID}/`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(personaPayload),
                 }),
-                fetch(`http://127.0.0.1:8000/cambiarusuario/${originalUser.ID}/`, {
+                fetch(`http://127.0.0.1:8000/usuario/${originalUser.ID}/`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(usuarioPayload),

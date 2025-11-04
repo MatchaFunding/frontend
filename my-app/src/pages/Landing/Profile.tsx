@@ -79,8 +79,8 @@ const ProfileI: React.FC = () => {
           throw new Error("La información de sesión es incompleta.");
         }      
         const [membersRes, personasRes] = await Promise.all([
-            fetch('http://127.0.0.1:8000/vertodoslosmiembros/'),
-            fetch('http://127.0.0.1:8000/vertodaslaspersonas/')
+            fetch('http://127.0.0.1:8000/miembros/'),
+            fetch('http://127.0.0.1:8000/personas/')
         ]);
 
         if (!membersRes.ok || !personasRes.ok)

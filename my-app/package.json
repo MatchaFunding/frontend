@@ -14,11 +14,8 @@
     "@fortawesome/free-solid-svg-icons": "^7.0.1",
     "@fortawesome/react-fontawesome": "^3.0.2",
     "@tailwindcss/line-clamp": "^0.4.4",
-<<<<<<< HEAD
     "cors": "^2.8.5",
-=======
     "axios": "^1.13.1",
->>>>>>> main
     "lucide-react": "^0.541.0",
     "react": "^19.1.1",
     "react-chatbot-kit": "^2.2.2",

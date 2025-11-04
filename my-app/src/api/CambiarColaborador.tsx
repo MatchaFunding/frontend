@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CambiarColaboradorAsync(id: number, data: Colaborador) {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/cambiarcolaborador/${id}`, {
+    const response = await fetch(`http://127.0.0.1:8000/colaboradores/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

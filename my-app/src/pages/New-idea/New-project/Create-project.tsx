@@ -59,7 +59,7 @@ const NuevoProyecto: React.FC = () => {
     Nombre: "", Sexo: "OTR", RUT: "", FechaDeNacimiento: ""
   });
   const navigate = useNavigate();
-  const storedUser = sessionStorage.getItem("usuario");
+  const storedUser = localStorage.getItem("usuario");
   // --- INICIO: Bloque para añadir ---
 
  const AI_API_URL = "https://ai.matchafunding.com/api/v1/projects/upsertusers";
@@ -188,7 +188,7 @@ const EnviarProyecto = () => { // Ya no necesita ser 'async' aquí
         });
 
         // b) Crear Colaboradores y actualizar sesión
-        const storedUser = sessionStorage.getItem("usuario");
+        const storedUser = localStorage.getItem("usuario");
         if (storedUser) {
           const nombresMiembrosSeleccionados = new Set(formData.Miembros);
           const personasSeleccionadas = personas.filter(p => nombresMiembrosSeleccionados.has(p.Nombre));
@@ -202,7 +202,7 @@ const EnviarProyecto = () => { // Ya no necesita ser 'async' aquí
           const datos = JSON.parse(storedUser);
           if (datos.Usuario?.ID) {
             const resultado = await VerEmpresaCompletaAsync(datos.Usuario.ID);
-            if (resultado) sessionStorage.setItem('usuario', JSON.stringify(resultado));
+            if (resultado) localStorage.setItem('usuario', JSON.stringify(resultado));
           }
         }
         

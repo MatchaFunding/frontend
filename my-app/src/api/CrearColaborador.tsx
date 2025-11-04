@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function CrearColaboradorAsync(data: Colaborador) {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/crearcolaborador/`, {
+    const response = await fetch(`http://127.0.0.1:8000/crearcolaboradores/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

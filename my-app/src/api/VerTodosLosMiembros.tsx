@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function VerTodosLosMiembrosAsync(): Promise<Miembro[]> {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/vertodoslosmiembros/`, {
+    const response = await fetch(`http://127.0.0.1:8000/miembros/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

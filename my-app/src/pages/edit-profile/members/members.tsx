@@ -1,24 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Users, SquarePen, User, X, Search, UserPlus, Trash2 } from 'lucide-react';
+import type Persona from '../../../models/Persona';
+import { useState, useEffect } from 'react';
+import { Users, SquarePen } from 'lucide-react';
+import { User, X, Search } from 'lucide-react';
+import { UserPlus, Trash2 } from 'lucide-react';
 import { VerMiUsuario } from '../../../api/VerMiUsuario';
 import { VerMiBeneficiario } from '../../../api/VerMiBeneficiario';
 import { VerMisProyectos } from '../../../api/VerMisProyectos';
 import { VerMisPostulaciones } from '../../../api/VerMisPostulaciones';
 import { VerMisMiembros } from '../../../api/VerMisMiembros';
 import { VerMisIdeas } from '../../../api/VerMisIdeas';
-import type Persona from '../../../models/Persona';
-
-interface MemberRelation {
-  ID: number;
-  Persona: number;
-  Beneficiario: number;
-}
+import React from 'react';
 
 interface Tag {
   id: number;
   text: string;
 }
-
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -30,7 +26,6 @@ const colorPalette = {
   background: '#f8f9fa',
   danger: '#e53e3e',
 };
-
 
 const Members: React.FC = () => {
    
@@ -120,24 +115,17 @@ const fetchMembers = async () => {
     }
 };
 
-
 useEffect(() => {
     fetchMembers();
 }, []);
 
-
 const formatRut = (rut: string): string => {
-    
     const cleanRut = rut.replace(/[\.\-]/g, "").toUpperCase();
-    if (cleanRut.length < 2) return rut; 
-
+    if (cleanRut.length < 2)
+        return rut; 
     const body = cleanRut.slice(0, -1);
     const verifier = cleanRut.slice(-1);
-
-   
     const formattedBody = new Intl.NumberFormat('de-DE').format(parseInt(body));
-
-   
     return `${formattedBody}-${verifier}`;
 };
 
@@ -186,8 +174,6 @@ const handleSaveMember = async () => {
         }
         const newPersona: Persona[] = await personaResponse.json();
         const personaId = newPersona[0].ID;
-        
-        console.log(`Persona creada: ${JSON.stringify(newPersona[0])}`);
 
         if (personaId) {
             const miembroResponse = await fetch(`http://127.0.0.1:8000/miembros`, {
@@ -222,10 +208,12 @@ const handleSaveMember = async () => {
             handleBackToList();
             fetchMembers();
         }
-    } catch (err: any) {
+    }
+    catch (err: any) {
         setError(err.message);
         alert(`Error: ${err.message}`);
-    } finally {
+    }
+    finally {
         setIsSaving(false);
     }
 };
@@ -252,12 +240,11 @@ const handleSaveMember = async () => {
                 setMembers(miembros);
                 alert("Miembro eliminado con éxito.");
             }
-
-        } catch (err: any) {
+        }
+        catch (err: any) {
             setError(err.message || "Error al eliminar el miembro.");
         }
     };
-
 
 	const handleCloseTagModal = () => {
 		setIsTagModalOpen(false);
@@ -275,8 +262,6 @@ const handleSaveMember = async () => {
     const filteredMembers = members.filter(member => 
         member.Nombre.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
-	
 
 	return (
 		<div className="space-y-8">

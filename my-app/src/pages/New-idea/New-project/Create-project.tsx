@@ -7,7 +7,6 @@ import { Button } from "../../../components/UI/buttons";
 import { Textarea } from "../../../components/UI/textarea";
 import { StepIndicator } from "../../../components/Shared/StepIndicator";
 import { CrearProyecto } from "../../../api/CrearProyecto"; 
-import { CrearColaborador } from "../../../api/CrearColaborador";
 import { VerMiUsuario } from '../../../api/VerMiUsuario';
 import { VerMiBeneficiario } from '../../../api/VerMiBeneficiario';
 import { VerMisProyectos } from '../../../api/VerMisProyectos';
@@ -15,7 +14,6 @@ import { VerMisPostulaciones } from '../../../api/VerMisPostulaciones';
 import { VerMisMiembros } from '../../../api/VerMisMiembros';
 import { VerMisIdeas } from '../../../api/VerMisIdeas';
 import { CrearPersona } from "../../../api/CrearPersona"; 
-import Colaborador from "../../../models/Colaborador";
 import Proyecto from "../../../models/Proyecto";
 import Persona from "../../../models/Persona";
 
@@ -85,7 +83,7 @@ const NuevoProyecto: React.FC = () => {
   const navigate = useNavigate();
   const storedUser = localStorage.getItem("usuario");
   
-  const enviarProyectoAI = async (proyecto: Proyecto) => {
+  const EnviarProyectoAI = async (proyecto: Proyecto) => {
     console.log("Enviando proyecto al servicio de IA:", proyecto);
     const payload = [{
       ID: proyecto.ID,
@@ -167,92 +165,73 @@ const NuevoProyecto: React.FC = () => {
     }
   };
 
-  // --- INICIO: Bloque para reemplazar ---
-const EnviarProyecto = () => {
-  if (formData.Titulo.length < 10) {
-    alert("El título debe tener al menos 10 caracteres.");
-    return;
-  }
-  if (!formData.Alcance || !formData.Area) {
-    alert("Debes seleccionar un Alcance y un Área.");
-    return;
-  }
-  const proyectoParaEnviar = new Proyecto({
-    Beneficiario: formData.Beneficiario,
-    Titulo: formData.Titulo,
-    Descripcion: formData.Descripcion,
-    DuracionEnMesesMinimo: formData.DuracionEnMesesMinimo,
-    DuracionEnMesesMaximo: formData.DuracionEnMesesMaximo,
-    Alcance: formData.Alcance,
-    Area: formData.Area,
-    ID: 0,
-  });
+  
+  const EnviarProyecto = async () => {
+    console.log(`Formulario" ${JSON.stringify(formData)}`);
 
-  console.log("1. Llamando a CrearProyecto...", proyectoParaEnviar);
-
-  CrearProyecto(proyectoParaEnviar)
-    .then(proyectoCreado => {
-      console.log("2. ¡Éxito! Proyecto recibido del backend:", proyectoCreado);
-
-      if (!proyectoCreado || !proyectoCreado.ID) {
-        throw new Error("El proyecto se creó, pero el backend no devolvió un ID válido.");
-      }
-
-      console.log(`3. Iniciando tareas secundarias para el proyecto ID: ${proyectoCreado.ID}`);
-      
-      (async () => {
-        enviarProyectoAI(proyectoCreado).catch(err => {
-          console.warn("Advertencia: Falló el envío a la IA, pero el proceso continúa.", err);
-        });
-
-        const storedUser = localStorage.getItem("usuario");
-        if (storedUser) {
-          const nombresMiembrosSeleccionados = new Set(formData.Miembros);
-          const personasSeleccionadas = personas.filter(p => nombresMiembrosSeleccionados.has(p.Nombre));
-
-          if (personasSeleccionadas.length > 0) {
-            const promesasColaboradores = personasSeleccionadas.map(p => CrearColaborador(new Colaborador({ Persona: p.ID, Proyecto: proyectoCreado!.ID })));
-            await Promise.all(promesasColaboradores);
-            console.log("   - Colaboradores creados exitosamente.");
+    if (formData.Titulo.length < 10) {
+      alert("El título debe tener al menos 10 caracteres.");
+      return;
+    }
+    if (!formData.Alcance || !formData.Area) {
+      alert("Debes seleccionar un Alcance y un Área.");
+      return;
+    }
+    try { 
+      const storedUser = localStorage.getItem("usuario");
+      if (storedUser) {
+        const datos = JSON.parse(storedUser);
+        const enteId = datos.Beneficiario?.ID;
+        const id = datos.Usuario?.ID;
+        if (id && enteId) {
+          const proyectoParaEnviar = new Proyecto({
+            ID: 0,
+            Beneficiario: enteId,
+            Titulo: formData.Titulo,
+            Descripcion: formData.Descripcion,
+            DuracionEnMesesMinimo: formData.DuracionEnMesesMinimo,
+            DuracionEnMesesMaximo: formData.DuracionEnMesesMaximo,
+            Alcance: formData.Alcance,
+            Area: formData.Area,
+            Innovacion: "",
+            ObjetivoEspecifico: "",
+            ObjetivoGeneral: "",
+            Proposito: "",
+            ResultadoEsperado: "",
+            Usuario: id
+          });
+          const creado = await CrearProyecto(proyectoParaEnviar);
+          console.log(`Proyecto creado: ${JSON.stringify(creado)}`);
+          
+          const usuario = await VerMiUsuario(id);
+          const beneficiario = await VerMiBeneficiario(id);
+          const proyectos = await VerMisProyectos(id);
+          const postulaciones = await VerMisPostulaciones(id);
+          const miembros = await VerMisMiembros(id);
+          const ideas = await VerMisIdeas(id);
+          
+          const datos = {
+            "Usuario":usuario,
+            "Beneficiario":beneficiario,
+            "Proyectos":proyectos,
+            "Postulaciones":postulaciones,
+            "Miembros":miembros,
+            "Ideas":ideas
           }
-          const datos = JSON.parse(storedUser);
-          const id = datos.Usuario?.ID;
-          if (id) {
-            const usuario = await VerMiUsuario(id);
-            const beneficiario = await VerMiBeneficiario(id);
-            const proyectos = await VerMisProyectos(id);
-            const postulaciones = await VerMisPostulaciones(id);
-            const miembros = await VerMisMiembros(id);
-            const ideas = await VerMisIdeas(id);
-            
-            const datos = {
-              "Usuario":usuario,
-              "Beneficiario":beneficiario,
-              "Proyectos":proyectos,
-              "Postulaciones":postulaciones,
-              "Miembros":miembros,
-              "Ideas":ideas
-            }
-            localStorage.setItem("usuario", JSON.stringify(datos));
-          }
+          localStorage.setItem("usuario", JSON.stringify(datos));
+          alert("¡Proyecto creado exitosamente!");
+          navigate("/Home-i");
         }
-        
-        alert("¡Proyecto creado exitosamente!");
-        navigate("/Home-i");
-
-      })().catch(secondaryError => {
-        console.error("💥 FALLARON LAS TAREAS SECUNDARIAS:", secondaryError);
-        alert(`El proyecto fue creado, pero ocurrió un error al procesar los colaboradores: ${secondaryError.message}`);
-        navigate("/Home-i"); // Navegamos de todas formas
-      });
-
-    })
-    .catch(error => {
-      console.error("💥 FALLÓ LA CREACIÓN DEL PROYECTO (capturado en .catch):", error);
+      }
+    }
+    catch (error) {
+      console.error("FALLÓ LA CREACIÓN DEL PROYECTO (capturado en .catch):", error);
       const errorMessage = error instanceof Error ? error.message : "Ocurrió un error desconocido.";
       alert(`No se pudo crear el proyecto: ${errorMessage}`);
-    });
-};
+    }
+  };
+
+  // --- INICIO: Bloque para reemplazar ---
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 

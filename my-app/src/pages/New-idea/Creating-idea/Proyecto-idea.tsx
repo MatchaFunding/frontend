@@ -1,21 +1,24 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../../../components/UI/cards";
+import { useState, useEffect } from "react";
 import { Input } from "../../../components/UI/input";
 import { Button } from "../../../components/UI/buttons";
 import { Textarea } from "../../../components/UI/textarea";
 import { StepIndicator } from "../../../components/Shared/StepIndicator";
 import { CrearProyecto } from "../../../api/CrearProyecto"; 
 import { CrearColaborador } from "../../../api/CrearColaborador";
-import { VerEmpresaCompletaAsync } from "../../../api/VerEmpresaCompleta";
-import { useState, useEffect } from "react";
+import { VerMiUsuario } from '../../../api/VerMiUsuario';
+import { VerMiBeneficiario } from '../../../api/VerMiBeneficiario';
+import { VerMisProyectos } from '../../../api/VerMisProyectos';
+import { VerMisPostulaciones } from '../../../api/VerMisPostulaciones';
+import { VerMisMiembros } from '../../../api/VerMisMiembros';
+import { VerMisIdeas } from '../../../api/VerMisIdeas';
+import { CrearPersona } from "../../../api/CrearPersona";
 import NavBar from "../../../components/NavBar/navbar";
-import PersonaClass from "../../../models/Persona";
+import Persona from "../../../models/Persona";
 import Proyecto from "../../../models/Proyecto";
 import Colaborador from "../../../models/Colaborador";
 import React from "react";
-
-interface PersonaPayload { Nombre: string; Sexo: string; RUT: string; FechaDeNacimiento: string; }
-
 
 interface ProyectoForm {
   Beneficiario: number;
@@ -36,15 +39,25 @@ const colorPalette = {
 };
 
 const opcionesAlcance = [
-    { value: 'AP', label: 'Arica y Parinacota' }, { value: 'TA', label: 'Tarapacá' },
-    { value: 'AN', label: 'Antofagasta' }, { value: 'AT', label: 'Atacama' },
-    { value: 'CO', label: 'Coquimbo' }, { value: 'VA', label: 'Valparaíso' },
-    { value: 'RM', label: 'Metropolitana' }, { value: 'LI', label: 'O\'Higgins' },
-    { value: 'ML', label: 'Maule' }, { value: 'NB', label: 'Ñuble' },
-    { value: 'BI', label: 'Biobío' }, { value: 'AR', label: 'La Araucanía' },
-    { value: 'LR', label: 'Los Ríos' }, { value: 'LL', label: 'Los Lagos' },
-    { value: 'AI', label: 'Aysén' }, { value: 'MA', label: 'Magallanes' }
+  { value: '', label: 'Seleccionar región' },
+  { value: 'Arica y Parinacota', label: 'Arica y Parinacota' },
+  { value: 'Tarapaca', label: 'Tarapacá' },
+  { value: 'Antofagasta', label: 'Antofagasta' },
+  { value: 'Atacama', label: 'Atacama' },
+  { value: 'Coquimbo', label: 'Coquimbo' },
+  { value: 'Valparaiso', label: 'Valparaíso' },
+  { value: 'Santiago', label: 'Metropolitana' },
+  { value: 'O\'Higgins', label: 'O\'Higgins' },
+  { value: 'Maule', label: 'Maule' },
+  { value: 'Nuble', label: 'Ñuble' },
+  { value: 'Biobio', label: 'Biobío' },
+  { value: 'La Araucania', label: 'La Araucanía' },
+  { value: 'Los Rios', label: 'Los Ríos' },
+  { value: 'Los Lagos', label: 'Los Lagos' },
+  { value: 'Aysen', label: 'Aysén' },
+  { value: 'Magallanes', label: 'Magallanes' }
 ];
+
 const opcionesArea = [ "Salud", "Innovación", "Tecnología", "Construcción", "Servicios", "Educación", "Medio Ambiente" ];
 
 const NuevoProyecto: React.FC = () => {
@@ -54,15 +67,19 @@ const NuevoProyecto: React.FC = () => {
     Beneficiario: 0, Titulo: "", Descripcion: "", DuracionEnMesesMinimo: 6,
     DuracionEnMesesMaximo: 12, Alcance: "", Area: "", Miembros: [],
   });
-  const [personas, setPersonas] = useState<PersonaClass[]>([]);
+  const [personas, setPersonas] = useState<Persona[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [nuevaPersonaData, setNuevaPersonaData] = useState<PersonaPayload>({
-    Nombre: "", Sexo: "OTR", RUT: "", FechaDeNacimiento: ""
+  const [nuevaPersonaData, setNuevaPersonaData] = useState<Persona>({
+    ID: 0,
+    Nombre: "",
+    Sexo: "Otro",
+    RUT: "",
+    FechaDeNacimiento: ""
   });
   const navigate = useNavigate();
   const storedUser = sessionStorage.getItem("usuario");
   
-  const enviarProyectoAI = async (proyecto: Proyecto) => {
+  const EnviarProyectoAI = async (proyecto: Proyecto) => {
     console.log("Enviando proyecto al servicio de IA:", proyecto);
 
     const payload = [{
@@ -82,16 +99,15 @@ const NuevoProyecto: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Error desconocido del servidor de IA.' }));
         console.error('Error al enviar datos a la IA:', response.status, errorData);
         throw new Error(`El servidor de IA respondió con el estado ${response.status}`);
       }
-
       const result = await response.json();
       console.log('Respuesta exitosa del servicio de IA:', result);
-    } catch (error) {
+    }
+    catch (error) {
       console.error("Falló la comunicación con el endpoint de la IA:", error);
     }
   };
@@ -100,11 +116,11 @@ const NuevoProyecto: React.FC = () => {
     if (storedUser) {
       const usuario = JSON.parse(storedUser);
       setFormData((prev) => ({ ...prev, Beneficiario: usuario.Beneficiario.ID }));
-      setPersonas(usuario.Miembros.map((m: any) => new PersonaClass(m)));
+      setPersonas(usuario.Miembros.map((m: any) => new Persona(m)));
     }
   }, [storedUser]);
 
-  console.log("Personas de la empresa: " + JSON.stringify(personas));
+  console.log("Personas de la empresa: ", JSON.stringify(personas));
 
   const handleChange = ( e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> ) => {
     const { name, value } = e.target;
@@ -123,102 +139,93 @@ const NuevoProyecto: React.FC = () => {
         return;
     }
     try {
-        const resPersona = await fetch("https://backend.matchafunding.com/crearpersona/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevaPersonaData) });
-        if (!resPersona.ok) throw new Error("No se pudo crear la persona. Verifique los datos.");
-        const personaCreada = await resPersona.json();
-        setFormData(prev => ({ ...prev, Miembros: [...prev.Miembros, personaCreada.Nombre] }));
-        setPersonas(prev => [...prev, new PersonaClass(personaCreada)]);
-        alert("Persona creada y añadida al proyecto exitosamente.");
+      const persona = await CrearPersona(nuevaPersonaData);
+      if (persona) {
+        setFormData(prev => ({ ...prev, Miembros: [...prev.Miembros, persona.Nombre] }));
+        setPersonas(prev => [...prev, new Persona(persona)]);
         setIsModalOpen(false);
-        setNuevaPersonaData({ Nombre: "", Sexo: "OTR", RUT: "", FechaDeNacimiento: "" });
+        setNuevaPersonaData({
+          ID: 0,
+          Nombre: "",
+          Sexo: "Otro",
+          RUT: "",
+          FechaDeNacimiento: ""
+        });
+        alert("Persona creada y añadida al proyecto exitosamente.");
+      }
     }
     catch (error) {
-        if (error instanceof Error) alert(error.message);
-        else alert("Ocurrió un error inesperado al crear la persona.");
+      if (error instanceof Error)
+        alert(error.message);
+      else
+        alert("Ocurrió un error inesperado al crear la persona.");
     }
   };
 
-  // --- INICIO: Bloque para reemplazar ---
-// En tu componente NuevoProyecto.tsx
+  const EnviarProyecto = async () => {
+    console.log(`Formulario" ${JSON.stringify(formData)}`);
 
-const EnviarProyecto = () => { // Ya no necesita ser 'async' aquí
-  // --- 1. Validaciones del formulario (se mantienen igual) ---
-  if (formData.Titulo.length < 10) { alert("El título debe tener al menos 10 caracteres."); return; }
-  // ... resto de tus validaciones ...
-  if (!formData.Alcance || !formData.Area) { alert("Debes seleccionar un Alcance y un Área."); return; }
-
-  const proyectoParaEnviar = new Proyecto({
-    Beneficiario: formData.Beneficiario,
-    Titulo: formData.Titulo,
-    Descripcion: formData.Descripcion,
-    DuracionEnMesesMinimo: formData.DuracionEnMesesMinimo,
-    DuracionEnMesesMaximo: formData.DuracionEnMesesMaximo,
-    Alcance: formData.Alcance,
-    Area: formData.Area,
-    ID: 0,
-  });
-
-  console.log("1. Llamando a CrearProyecto...", proyectoParaEnviar);
-
-  // --- 2. Lógica con .then() y .catch() ---
-  CrearProyecto(proyectoParaEnviar)
-    .then(proyectoCreado => {
-      // ESTE BLOQUE SOLO SE EJECUTA SI LA PROMESA FUE EXITOSA
-      console.log("2. ¡Éxito! Proyecto recibido del backend:", proyectoCreado);
-
-      // Verificación CRÍTICA
-      if (!proyectoCreado || !proyectoCreado.ID) {
-        // Lanzamos un error para ser capturado por el .catch() de abajo
-        throw new Error("El proyecto se creó, pero el backend no devolvió un ID válido.");
-      }
-
-      console.log(`3. Iniciando tareas secundarias para el proyecto ID: ${proyectoCreado.ID}`);
-      
-      // Para poder usar 'await' aquí dentro, envolvemos la lógica en una función async auto-ejecutable
-      (async () => {
-        // a) Enviar a la IA (no detiene el flujo si falla)
-        enviarProyectoAI(proyectoCreado).catch(err => {
-          console.warn("Advertencia: Falló el envío a la IA, pero el proceso continúa.", err);
-        });
-
-        // b) Crear Colaboradores y actualizar sesión
-        const storedUser = sessionStorage.getItem("usuario");
-        if (storedUser) {
-          const nombresMiembrosSeleccionados = new Set(formData.Miembros);
-          const personasSeleccionadas = personas.filter(p => nombresMiembrosSeleccionados.has(p.Nombre));
-
-          if (personasSeleccionadas.length > 0) {
-            const promesasColaboradores = personasSeleccionadas.map(p => CrearColaborador(new Colaborador({ Persona: p.ID, Proyecto: proyectoCreado!.ID })));
-            await Promise.all(promesasColaboradores);
-            console.log("   - Colaboradores creados exitosamente.");
+    if (formData.Titulo.length < 10) {
+      alert("El título debe tener al menos 10 caracteres.");
+      return;
+    }
+    if (!formData.Alcance || !formData.Area) {
+      alert("Debes seleccionar un Alcance y un Área.");
+      return;
+    }
+    try { 
+      const storedUser = localStorage.getItem("usuario");
+      if (storedUser) {
+        const datos = JSON.parse(storedUser);
+        const enteId = datos.Beneficiario?.ID;
+        const id = datos.Usuario?.ID;
+        if (id && enteId) {
+          const proyectoParaEnviar = new Proyecto({
+            ID: 0,
+            Beneficiario: enteId,
+            Titulo: formData.Titulo,
+            Descripcion: formData.Descripcion,
+            DuracionEnMesesMinimo: formData.DuracionEnMesesMinimo,
+            DuracionEnMesesMaximo: formData.DuracionEnMesesMaximo,
+            Alcance: formData.Alcance,
+            Area: formData.Area,
+            Innovacion: "",
+            ObjetivoEspecifico: "",
+            ObjetivoGeneral: "",
+            Proposito: "",
+            ResultadoEsperado: "",
+            Usuario: id
+          });
+          const creado = await CrearProyecto(proyectoParaEnviar);
+          console.log(`Proyecto creado: ${JSON.stringify(creado)}`);
+          
+          const usuario = await VerMiUsuario(id);
+          const beneficiario = await VerMiBeneficiario(id);
+          const proyectos = await VerMisProyectos(id);
+          const postulaciones = await VerMisPostulaciones(id);
+          const miembros = await VerMisMiembros(id);
+          const ideas = await VerMisIdeas(id);
+          
+          const datos = {
+            "Usuario":usuario,
+            "Beneficiario":beneficiario,
+            "Proyectos":proyectos,
+            "Postulaciones":postulaciones,
+            "Miembros":miembros,
+            "Ideas":ideas
           }
-
-          const datos = JSON.parse(storedUser);
-          if (datos.Usuario?.ID) {
-            const resultado = await VerEmpresaCompletaAsync(datos.Usuario.ID);
-            if (resultado) sessionStorage.setItem('usuario', JSON.stringify(resultado));
-          }
+          localStorage.setItem("usuario", JSON.stringify(datos));
+          alert("¡Proyecto creado exitosamente!");
+          navigate("/Home-i");
         }
-        
-        // c) Finalización y Navegación
-        alert("¡Proyecto creado exitosamente!");
-        navigate("/Home-i");
-
-      })().catch(secondaryError => {
-        // Este catch es para errores DENTRO de las tareas secundarias
-        console.error("💥 FALLARON LAS TAREAS SECUNDARIAS:", secondaryError);
-        alert(`El proyecto fue creado, pero ocurrió un error al procesar los colaboradores: ${secondaryError.message}`);
-        navigate("/Home-i"); // Navegamos de todas formas
-      });
-
-    })
-    .catch(error => {
-      // ESTE BLOQUE SOLO SE EJECUTA SI LA PROMESA FALLÓ EN CUALQUIER PUNTO
-      console.error("💥 FALLÓ LA CREACIÓN DEL PROYECTO (capturado en .catch):", error);
+      }
+    }
+    catch (error) {
+      console.error("FALLÓ LA CREACIÓN DEL PROYECTO (capturado en .catch):", error);
       const errorMessage = error instanceof Error ? error.message : "Ocurrió un error desconocido.";
       alert(`No se pudo crear el proyecto: ${errorMessage}`);
-    });
-};
+    }
+  };
 // --- FIN: Bloque para reemplazar ---
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);

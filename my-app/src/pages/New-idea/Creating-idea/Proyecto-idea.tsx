@@ -1,13 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../../../components/UI/cards";
-//import { useState, useEffect } from "react";
-import { useState } from "react";
 import { Input } from "../../../components/UI/input";
 import { Button } from "../../../components/UI/buttons";
 import { Textarea } from "../../../components/UI/textarea";
 import { StepIndicator } from "../../../components/Shared/StepIndicator";
 import { CrearProyecto } from "../../../api/CrearProyecto"; 
-//import { CrearColaborador } from "../../../api/CrearColaborador";
+import { CrearColaborador } from "../../../api/CrearColaborador";
 import { VerMiUsuario } from '../../../api/VerMiUsuario';
 import { VerMiBeneficiario } from '../../../api/VerMiBeneficiario';
 import { VerMisProyectos } from '../../../api/VerMisProyectos';
@@ -15,10 +13,11 @@ import { VerMisPostulaciones } from '../../../api/VerMisPostulaciones';
 import { VerMisMiembros } from '../../../api/VerMisMiembros';
 import { VerMisIdeas } from '../../../api/VerMisIdeas';
 import { CrearPersona } from "../../../api/CrearPersona";
+import { useState, useEffect } from "react";
 import NavBar from "../../../components/NavBar/navbar";
 import Persona from "../../../models/Persona";
 import Proyecto from "../../../models/Proyecto";
-//import Colaborador from "../../../models/Colaborador";
+import Colaborador from "../../../models/Colaborador";
 import React from "react";
 
 interface ProyectoForm {
@@ -78,7 +77,6 @@ const NuevoProyecto: React.FC = () => {
     FechaDeNacimiento: ""
   });
   const navigate = useNavigate();
-  /*
   const storedUser = sessionStorage.getItem("usuario");
   
   const EnviarProyectoAI = async (proyecto: Proyecto) => {
@@ -121,7 +119,6 @@ const NuevoProyecto: React.FC = () => {
       setPersonas(usuario.Miembros.map((m: any) => new Persona(m)));
     }
   }, [storedUser]);
-   */
 
   console.log("Personas de la empresa: ", JSON.stringify(personas));
 
@@ -142,10 +139,11 @@ const NuevoProyecto: React.FC = () => {
         return;
     }
     try {
-      const persona = await CrearPersona(nuevaPersonaData);
+      const persona: Persona = await CrearPersona(nuevaPersonaData);
       if (persona) {
+        console.log(`Se creo la Persona: ${JSON.stringify(persona)}`);
         setFormData(prev => ({ ...prev, Miembros: [...prev.Miembros, persona.Nombre] }));
-        setPersonas(prev => [...prev, new Persona(persona)]);
+        setPersonas(prev => [...prev, persona]);
         setIsModalOpen(false);
         setNuevaPersonaData({
           ID: 0,
@@ -200,7 +198,21 @@ const NuevoProyecto: React.FC = () => {
             Usuario: id
           });
           const creado = await CrearProyecto(proyectoParaEnviar);
+          const vector = await EnviarProyectoAI(creado);
+          if (creado) {
+            for (let i =0; i < personas.length; i++) {
+              const payload = new Colaborador({
+                ID: 0,
+                Persona: personas[i].ID,
+                Proyecto: creado.ID,
+                Usuario: id
+              })
+              const colaborador = await CrearColaborador(payload);
+              console.log(`Se creo un Colaborador: ${colaborador}`);
+            }
+          }
           console.log(`Proyecto creado: ${JSON.stringify(creado)}`);
+          console.log(`Proyecto creado (AI): ${JSON.stringify(vector)}`);
           
           const usuario = await VerMiUsuario(id);
           const beneficiario = await VerMiBeneficiario(id);
@@ -352,9 +364,9 @@ const NuevoProyecto: React.FC = () => {
                             <div>
                                 <label className="block text-sm font-medium mb-1" style={{ color: colorPalette.oliveGray }}>Sexo</label>
                                 <select name="Sexo" value={nuevaPersonaData.Sexo} onChange={handleModalChange} required className="mt-1 block w-full pl-3 pr-10 py-2 text-base rounded-md" style={{ borderColor: colorPalette.softGreen, color: colorPalette.oliveGray }}>
-                                    <option value="VAR">Varón</option>
-                                    <option value="MUJ">Mujer</option>
-                                    <option value="OTR">Otro</option>
+                                    <option value="Hombre">Hombre</option>
+                                    <option value="Mujer">Mujer</option>
+                                    <option value="Otro">Otro</option>
                                 </select>
                             </div>
                             <div>

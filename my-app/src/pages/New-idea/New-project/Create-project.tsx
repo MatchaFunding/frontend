@@ -1,6 +1,3 @@
-//import React, { useState, useEffect } from "react";
-import React, { useState } from "react";
-import NavBar from "../../../components/NavBar/navbar";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../../../components/UI/cards";
 import { Input } from "../../../components/UI/input";
@@ -8,15 +5,20 @@ import { Button } from "../../../components/UI/buttons";
 import { Textarea } from "../../../components/UI/textarea";
 import { StepIndicator } from "../../../components/Shared/StepIndicator";
 import { CrearProyecto } from "../../../api/CrearProyecto"; 
+import { CrearColaborador } from "../../../api/CrearColaborador";
 import { VerMiUsuario } from '../../../api/VerMiUsuario';
 import { VerMiBeneficiario } from '../../../api/VerMiBeneficiario';
 import { VerMisProyectos } from '../../../api/VerMisProyectos';
 import { VerMisPostulaciones } from '../../../api/VerMisPostulaciones';
 import { VerMisMiembros } from '../../../api/VerMisMiembros';
 import { VerMisIdeas } from '../../../api/VerMisIdeas';
-import { CrearPersona } from "../../../api/CrearPersona"; 
-import Proyecto from "../../../models/Proyecto";
+import { CrearPersona } from "../../../api/CrearPersona";
+import { useState, useEffect } from "react";
+import NavBar from "../../../components/NavBar/navbar";
 import Persona from "../../../models/Persona";
+import Proyecto from "../../../models/Proyecto";
+import Colaborador from "../../../models/Colaborador";
+import React from "react";
 
 interface ProyectoForm {
   Beneficiario: number;
@@ -36,7 +38,7 @@ const colorPalette = {
   lightGray: "#f1f5f9",
 };
 
-const opcionesAlcance =  [
+const opcionesAlcance = [
   { value: '', label: 'Seleccionar región' },
   { value: 'Arica y Parinacota', label: 'Arica y Parinacota' },
   { value: 'Tarapaca', label: 'Tarapacá' },
@@ -55,15 +57,8 @@ const opcionesAlcance =  [
   { value: 'Aysen', label: 'Aysén' },
   { value: 'Magallanes', label: 'Magallanes' }
 ];
-const opcionesArea = [
-  "Salud",
-  "Innovación",
-  "Tecnología",
-  "Construcción",
-  "Servicios",
-  "Educación",
-  "Medio Ambiente"
-];
+
+const opcionesArea = [ "Salud", "Innovación", "Tecnología", "Construcción", "Servicios", "Educación", "Medio Ambiente" ];
 
 const NuevoProyecto: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -82,11 +77,11 @@ const NuevoProyecto: React.FC = () => {
     FechaDeNacimiento: ""
   });
   const navigate = useNavigate();
-  /**
-  const storedUser = localStorage.getItem("usuario");
+  const storedUser = sessionStorage.getItem("usuario");
   
   const EnviarProyectoAI = async (proyecto: Proyecto) => {
     console.log("Enviando proyecto al servicio de IA:", proyecto);
+
     const payload = [{
       ID: proyecto.ID,
       Beneficiario: proyecto.Beneficiario,
@@ -97,6 +92,7 @@ const NuevoProyecto: React.FC = () => {
       Alcance: proyecto.Alcance,
       Area: proyecto.Area,
     }];
+
     try {
       const response = await fetch("https://ai.matchafunding.com/api/v1/projects/upsertusers", {
         method: 'POST',
@@ -104,9 +100,7 @@ const NuevoProyecto: React.FC = () => {
         body: JSON.stringify(payload),
       });
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({
-          message: 'Error desconocido del servidor de IA.'
-        }));
+        const errorData = await response.json().catch(() => ({ message: 'Error desconocido del servidor de IA.' }));
         console.error('Error al enviar datos a la IA:', response.status, errorData);
         throw new Error(`El servidor de IA respondió con el estado ${response.status}`);
       }
@@ -117,6 +111,7 @@ const NuevoProyecto: React.FC = () => {
       console.error("Falló la comunicación con el endpoint de la IA:", error);
     }
   };
+
   useEffect(() => {
     if (storedUser) {
       const usuario = JSON.parse(storedUser);
@@ -124,7 +119,6 @@ const NuevoProyecto: React.FC = () => {
       setPersonas(usuario.Miembros.map((m: any) => new Persona(m)));
     }
   }, [storedUser]);
-  */
 
   console.log("Personas de la empresa: " + JSON.stringify(personas));
 
@@ -145,12 +139,11 @@ const NuevoProyecto: React.FC = () => {
         return;
     }
     try {
-        const persona: Persona = await CrearPersona(nuevaPersonaData);
-        if (!persona)
-          throw new Error("No se pudo crear la persona. Verifique los datos.");
+      const persona: Persona = await CrearPersona(nuevaPersonaData);
+      if (persona) {
+        console.log(`Se creo la Persona: ${JSON.stringify(persona)}`);
         setFormData(prev => ({ ...prev, Miembros: [...prev.Miembros, persona.Nombre] }));
-        setPersonas(prev => [...prev, new Persona(persona)]);
-        alert("Persona creada y añadida al proyecto exitosamente.");
+        setPersonas(prev => [...prev, persona]);
         setIsModalOpen(false);
         setNuevaPersonaData({
           ID: 0,
@@ -159,6 +152,8 @@ const NuevoProyecto: React.FC = () => {
           RUT: "",
           FechaDeNacimiento: ""
         });
+        alert("Persona creada y añadida al proyecto exitosamente.");
+      }
     }
     catch (error) {
       if (error instanceof Error)
@@ -204,7 +199,21 @@ const NuevoProyecto: React.FC = () => {
             Usuario: id
           });
           const creado = await CrearProyecto(proyectoParaEnviar);
+          const vector = await EnviarProyectoAI(creado);
+          if (creado) {
+            for (let i =0; i < personas.length; i++) {
+              const payload = new Colaborador({
+                ID: 0,
+                Persona: personas[i].ID,
+                Proyecto: creado.ID,
+                Usuario: id
+              })
+              const colaborador = await CrearColaborador(payload);
+              console.log(`Se creo un Colaborador: ${colaborador}`);
+            }
+          }
           console.log(`Proyecto creado: ${JSON.stringify(creado)}`);
+          console.log(`Proyecto creado (AI): ${JSON.stringify(vector)}`);
           
           const usuario = await VerMiUsuario(id);
           const beneficiario = await VerMiBeneficiario(id);

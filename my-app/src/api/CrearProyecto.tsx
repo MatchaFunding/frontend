@@ -25,8 +25,8 @@ export const CrearProyecto = async (data: Proyecto): Promise<Proyecto> => {
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const result: Proyecto = await response.json();
-    return result;
+    const result: Proyecto[] = await response.json();
+    return result[0];
   }
   catch (error) {
     throw new Error('Error al obtener los datos');

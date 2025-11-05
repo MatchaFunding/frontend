@@ -2,7 +2,7 @@ import Persona from '../models/Persona.tsx'
 
 export async function CrearPersona(data: Persona) {
   try {
-    const response = await fetch(`https://backend.matchafunding.com/personas/`, {
+    const response = await fetch(`https://backend.matchafunding.com/personas`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -18,8 +18,8 @@ export async function CrearPersona(data: Persona) {
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
-    const result: Persona = await response.json();
-    return result;
+    const result: Persona[] = await response.json();
+    return result[0];
   }
   catch (error) {
     throw new Error('Error al obtener los datos');

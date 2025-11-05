@@ -91,7 +91,6 @@ const defaultFondo: Fondo = {
     categoria: "",
 };
 
-
 const CrearProyectoMatch: React.FC = () => {
   const [step, setStep] = useState(1);
   const [activeTab, setActiveTab] = useState<"presentacion" | "publico">("presentacion");
@@ -119,8 +118,6 @@ const CrearProyectoMatch: React.FC = () => {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   
   const storedUser = localStorage.getItem("usuario");
-
-
 
   // useEffect para manejar conversión de ideas - solo se ejecuta una vez
   useEffect(() => {
@@ -337,8 +334,7 @@ const CrearProyectoMatch: React.FC = () => {
               "Alcance":proyectoData.Alcance,
               "Area":proyectoData.Area,
               "Usuario":id
-            }
-            )
+            })
           });
           if (!resProyecto.ok) {
             if (resProyecto.status === 400)

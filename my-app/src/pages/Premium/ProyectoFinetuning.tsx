@@ -592,12 +592,9 @@ const formDataToSet = {
 {step === 5 && (
   <CardContent className="space-y-6">
     <h2 className="text-2xl font-semibold text-center text-slate-800">Propuesta de Valor</h2>
+   
     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">Propósito</label>
-      <Textarea name="Proposito" rows={4} value={formData.Proposito} onChange={handleChange} required placeholder="¿Cuál es el propósito o la misión de tu proyecto? ¿Por qué es importante?" />
-    </div>
-    <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">Innovación</label>
+      <label className="block text-sm font-medium text-slate-700 mb-1">Solución</label>
       <Textarea name="Innovacion" rows={4} value={formData.Innovacion} onChange={handleChange} required placeholder="¿Qué hace que tu proyecto sea innovador, diferente o único en comparación con otras soluciones?" />
     </div>
     <div>

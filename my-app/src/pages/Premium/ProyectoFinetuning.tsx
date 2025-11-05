@@ -8,7 +8,7 @@ import { Input } from "../../components/UI/input";
 import { Card } from "../../components/UI/cards";
 import Persona from "../../models/Persona";
 import React from "react";
-import Proyecto from "../../models/Proyecto";
+//import Proyecto from "../../models/Proyecto";
 import { VerMiUsuario } from '../../api/VerMiUsuario';
 import { VerMiBeneficiario } from '../../api/VerMiBeneficiario';
 import { VerMisProyectos } from '../../api/VerMisProyectos';
@@ -38,6 +38,8 @@ interface ProyectoForm {
   ResultadoEsperado: string; isFromConvertedIdea?: boolean;
 }
 
+
+/*
 interface PaginatorProps {
   data: ProyectoForm;
   colorPalette: { [key: string]: string };
@@ -119,6 +121,8 @@ const ProjectPreviewPaginator: React.FC<PaginatorProps> = ({ data, colorPalette 
     </div>
   );
 };
+*/
+
 export const StepIndicator: React.FC<{ currentStep: number; totalSteps: number }> = ({
   currentStep,
   totalSteps,
@@ -594,14 +598,16 @@ const EnviarProyecto = async () => {
     setPreviewData((prev) => ({ ...prev, [name]: value }));
   };
 
+  /*
   const mockproyectoidea = {
-  "ID": 0,
-  "Usuario": 0,
-  "Campo": "Conservación, Educación ambiental, Tecnología",
-  "Problema": "Sappea busca cerrar la brecha en el acceso y acción científica en torno al estudio de anfibios silvestres de Chile, así cómo levantar una base de datos, registros e información de anfibios.",
-  "Publico": "Amplio, comunidad científica, comunidades escolares, personas interesadas en la biodiversidad y actividades en espacios abiertos y naturales. ",
-  "Innovacion": "Sappea utiliza reconocimiento en tiempo real de vocalizaciones de anfibios silvestres utilizando inteligencia artificial, facilitando su identificación y ampliando la cantidad de registros e información"
-}
+    "ID": 0,
+    "Usuario": 0,
+    "Campo": "Conservación, Educación ambiental, Tecnología",
+    "Problema": "Sappea busca cerrar la brecha en el acceso y acción científica en torno al estudio de anfibios silvestres de Chile, así cómo levantar una base de datos, registros e información de anfibios.",
+    "Publico": "Amplio, comunidad científica, comunidades escolares, personas interesadas en la biodiversidad y actividades en espacios abiertos y naturales. ",
+    "Innovacion": "Sappea utiliza reconocimiento en tiempo real de vocalizaciones de anfibios silvestres utilizando inteligencia artificial, facilitando su identificación y ampliando la cantidad de registros e información"
+  }
+  */
 
   const handleConfirmAndSaveIdea = async () => {
   // 1. Validación inicial (igual que la original)

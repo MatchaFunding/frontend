@@ -194,7 +194,17 @@ function FreeSearch() {
 									>
 										Fondos
 									</button>
-									<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+									<svg 
+										width="24" 
+										height="24" 
+										viewBox="0 0 24 24" 
+										fill="none" 
+										xmlns="http://www.w3.org/2000/svg" 
+										className="flex-shrink-0 cursor-pointer hover:opacity-70 transition-opacity"
+										onClick={() => handleViewChange(activeView === 'fondos' ? 'proyectos' : 'fondos')}
+										role="button"
+										aria-label="Intercambiar vista"
+									>
 										<path d="M16,16L16,12L21,17L16,22L16,18L4,18L4,16L16,16ZM8,2L8,5.9990234375L20,6L20,8L8,8L8,12L3,7L8,2Z" fill="#44624a"/>
 									</svg>
 									<button 

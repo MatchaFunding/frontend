@@ -1,187 +1,277 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 //import React, { useEffect } from 'react';
 import NavBar from '../../components/NavBar/navbar';
 import { useNavigate } from 'react-router-dom';
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLightbulb, faWrench, faEquals } from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import FreeSearchCard from '../../components/free-search-card/free-search-card.tsx';
+import VerTodosLosInstrumentos from '../../api/VerTodosLosInstrumentos.tsx';
+import { mapInstrumentsToCards } from '../free-search/free-search';
 
 const MatchaHomePage: React.FC = () => {
   const navigate = useNavigate();
-  const colors = {
-  darkGreen: "#44624a",
-  softGreen: "#8ba888",
-};
 
-  /*
+  // Estado para el carrusel
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+  const instrumentos = VerTodosLosInstrumentos();
+  
+  // Estados para datos del usuario
+  const [userName, setUserName] = useState<string>("");
+  const [userSexo, setUserSexo] = useState<string>("");
+  
+  // Seleccionar 10 fondos aleatorios
+  const randomFondos = useMemo(() => {
+    if (instrumentos.length === 0) return [];
+    const shuffled = [...instrumentos].sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, 10);
+    return mapInstrumentsToCards(selected);
+  }, [instrumentos]);
+
+  // Inicializar en el array del medio
   useEffect(() => {
-    const storedUser = sessionStorage.getItem('usuario');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        console.log('Datos del usuario cargados desde sessionStorage:', parsedUser);
-      } 
-      catch (error) {
-        console.error('Error al parsear datos del usuario desde sessionStorage:', error);
-      }
-    } else {
-      console.log('No se encontraron datos de usuario en sessionStorage');
+    if (!initialized && randomFondos.length > 0) {
+      setCurrentIndex(randomFondos.length);
+      setInitialized(true);
     }
+  }, [randomFondos.length, initialized]);
+
+  // Cargar datos de la persona del usuario
+  useEffect(() => {
+    const fetchUserPersona = async () => {
+      const storedUser = sessionStorage.getItem("usuario");
+      if (!storedUser) return;
+
+      try {
+        const datos = JSON.parse(storedUser);
+        const user = datos.Usuario;
+        const personaId = user?.Persona;
+
+        if (!personaId) return;
+
+        const response = await fetch('https://backend.matchafunding.com/vertodaslaspersonas/');
+        if (!response.ok) return;
+
+        const allPersonas: any[] = await response.json();
+        const persona = allPersonas.find(p => p.ID === personaId);
+
+        if (persona) {
+          setUserName(persona.Nombre || "Usuario");
+          setUserSexo(persona.Sexo || "");
+        }
+      } catch (error) {
+        console.error('Error al cargar datos de la persona:', error);
+      }
+    };
+
+    fetchUserPersona();
   }, []);
-  */
+
+  const handleNext = () => {
+    if (isAnimating || randomFondos.length === 0) return;
+    setIsAnimating(true);
+    setCurrentIndex((prevIndex) => prevIndex + 2);
+  };
+
+  const handlePrev = () => {
+    if (isAnimating || randomFondos.length === 0) return;
+    setIsAnimating(true);
+    setCurrentIndex((prevIndex) => prevIndex - 2);
+  };
+
+  // Manejar el fin de la transición
+  const handleTransitionEnd = () => {
+    if (!isAnimating) return;
+    
+    setIsAnimating(false);
+    if (currentIndex >= randomFondos.length * 2) {
+      const newIndex = currentIndex - randomFondos.length;
+      setCurrentIndex(newIndex);
+    } else if (currentIndex < randomFondos.length) {
+      const newIndex = currentIndex + randomFondos.length;
+      setCurrentIndex(newIndex);
+    }
+  };
 
   return (
-  <div className="bg-slate-50 min-h-screen flex flex-col">
+  <div className="bg-slate-50 flex flex-col">
     <NavBar />
-   <main className="flex-grow p-2 md:p-4 lg:p-8 w-full pt-28 sm:pt-32 md:pt-20 lg:pt-20 xl:pt-24 flex justify-center items-center">
-  <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8 lg:gap-12 w-full max-w-none px-4 py-2">
+   <main className="h-screen p-2 md:p-4 lg:p-8 w-full pt-32 sm:pt-36 md:pt-32 lg:pt-32 xl:pt-36 flex flex-col items-center justify-end overflow-hidden pb-8">
+  
+  {/* Saludo personalizado */}
+  {userName && (
+    <div className="w-full max-w-none px-4 mb-8 flex-shrink-0">
+      <h2 className="text-2xl lg:text-3xl font-semibold text-black text-center">
+        {userSexo === "VAR" ? "Bienvenido" : userSexo === "MUJ" ? "Bienvenida" : "Bienvenide"} a MatchaFunding, {userName}
+      </h2>
+    </div>
+  )}
+
+  {/* Cuadrado con gradiente - TAMAÑO DINÁMICO */}
+  <div 
+    className="w-full max-w-none px-4 mb-12 flex-1"
+  >
+    <div
+      className="rounded-2xl shadow-lg h-full"
+      style={{
+        background: 'linear-gradient(135deg, #44624A 0%, #8BC897 100%)',
+        minHeight: '100px',
+      }}
+    />
+  </div>
+
+  {/* Botones principales - ALTURA AUTOMÁTICA */}
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 w-full max-w-none px-4 py-2 flex-shrink-0">
    <div
       onClick={() => navigate("/Matcha/Select-Idea")}
-      className="lg:col-span-3 bg-white p-4 lg:p-8 rounded-2xl shadow-lg flex flex-col justify-between cursor-pointer hover:shadow-2xl transition-shadow w-full min-h-[400px] lg:min-h-[600px]"
+      className="bg-white rounded-2xl shadow-lg flex flex-col cursor-pointer hover:shadow-2xl transition-shadow w-full overflow-hidden h-auto"
+      style={{ display: 'grid', gridTemplateRows: '1fr 2fr' }}
     >
-      <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-12 h-full w-full">
-    
-        <div className="w-full lg:w-1/2 flex flex-row md:flex-col items-center justify-between md:justify-center gap-4 md:gap-6">
-          <div className="text flex-1 md:flex-none text-left md:text-center px-2 mb-0 md:mb-2 lg:mb-6">
-            <span className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl text-gray-500">Haz</span>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-black tracking-tighter">
-              Match
-            </h1>
-            <span className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl text-gray-500 block">
-              con un fondo
-            </span>
-          </div>
-          <img
-            src="./Tevolador.png"
-            alt="Taza de matcha colgando"
-            className="w-24 sm:w-28 md:w-36 lg:w-52 h-auto object-contain shadow-lg rounded-full flex-shrink-0 mt-0 md:mt-1 lg:mt-0"
-          />
-        </div>
-
-       
-        <div className="w-full lg:w-1/2 space-y-3 lg:space-y-8 mt-3 lg:mt-0">
-     
-          <div className="flex items-start gap-4">
-            <FontAwesomeIcon
-              icon={faLightbulb}
-              size="lg"
-              className="mt-1 md:hidden"
-              style={{ color: colors.softGreen }}
-            />
-            <FontAwesomeIcon
-              icon={faLightbulb}
-              size="2x"
-              className="mt-1 hidden md:block"
-              style={{ color: colors.softGreen }}
-            />
-            <div>
-              <span className="text-lg block font-semibold text-[#44624a]">
-                ¿Tienes una idea?
-              </span>
-              <p className="text-gray-600 mt-2 text-sm lg:text-base">
-                Convierte esa idea inicial en un proyecto real y estructurado a
-                través de la Inteligencia Artificial.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-4">
-            <FontAwesomeIcon
-              icon={faWrench}
-              size="lg"
-              className="mt-1 md:hidden"
-              style={{ color: colors.softGreen }}
-            />
-            <FontAwesomeIcon
-              icon={faWrench}
-              size="2x"
-              className="mt-1 hidden md:block"
-              style={{ color: colors.softGreen }}
-            />
-            <div>
-              <span className="text-lg block font-semibold text-[#44624a]">
-                Construye tu proyecto
-              </span>
-              <p className="text-gray-600 mt-2 text-sm lg:text-base">
-                Si ya tienes una idea clara, te guiamos paso a paso para
-                transformarla en un proyecto sólido.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-4">
-            <FontAwesomeIcon
-              icon={faEquals}
-              size="lg"
-              className="mt-1 md:hidden"
-              style={{ color: colors.softGreen }}
-            />
-            <FontAwesomeIcon
-              icon={faEquals}
-              size="2x"
-              className="mt-1 hidden md:block"
-              style={{ color: colors.softGreen }}
-            />
-            <div>
-              <span className="text-lg block font-semibold text-[#44624a]">
-                Encuentra tu fondo ideal
-              </span>
-              <p className="text-gray-600 mt-2 text-sm lg:text-base">
-                Compara tu idea o proyecto con las distintas oportunidades de
-                financiamiento abiertas actualmente.
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className="bg-[#f9f2de] flex items-center justify-center">
+        <img
+          src="./buscando.png"
+          alt="Taza de matcha colgando"
+          className="w-20 h-20 lg:w-24 lg:h-24 object-contain rounded-full"
+        />
+      </div>
+      <div className="px-6 pt-6 pb-6 flex flex-col">
+        <h1 className="text-3xl lg:text-4xl font-semibold text-black tracking-tighter text-center mb-3">
+          Crea y busca un Match
+        </h1>
+        <p className="text-gray-600 text-xs lg:text-sm leading-relaxed">
+          Transforma tu idea en un proyecto sólido y estructurado. Nuestra inteligencia artificial convertirá tu idea en un plan de acción detallado. Además, podrás comparar tu proyecto con otros similares para identificar tus fortalezas y, finalmente, conectar con el fondo de financiamiento ideal que mejor se adapta a tus necesidades.
+        </p>
       </div>
     </div>
 
     <div 
-      className="lg:col-span-2 flex flex-col gap-6 md:gap-8 lg:gap-12 w-full"
-      >
-      <div 
-        className="bg-white p-6 rounded-2xl shadow-lg flex items-center cursor-pointer hover:shadow-2xl transition-shadow min-h-[240px] lg:min-h-[280px] w-full"
-        onClick={() => navigate("/premium")}
-        >
-          <div className="flex-shrink-0 mr-4">
-            <img 
-              src="./premium-icon.jpg"
-              alt="Servicios Premium"
-              className="w-32 h-32 lg:w-36 lg:h-36 object-cover rounded-full shadow-lg" 
-            />
-          </div>
-          <div className="flex-1 min-w-0"> 
-            <span className="text-gray-500 text-lg">¡Desbloquea todo tu potencial!</span>
-            <h2 className="text-3xl lg:text-4xl xl:text-5xl font-semibold text-black">Premium</h2>
-            <p className="text-gray-600 mt-3 text-sm lg:text-base leading-relaxed">
-             ¡Estás a un paso de acceder a nuestras herramientas más poderosas! Con el plan Premium, tu asistente se vuelve más inteligente y personalizado.
-            </p>
-          </div>
-        </div>
-      <div 
-        onClick={() => navigate("/free-search")}
-        className="bg-white p-6 rounded-2xl shadow-lg flex items-center cursor-pointer hover:shadow-2xl transition-shadow min-h-[240px] lg:min-h-[280px] w-full"
-        >
-        <div className="flex-1 min-w-0 mr-4">
-          <span className="text-gray-500 text-lg">Busca</span>
-          <h2 className="text-3xl lg:text-4xl xl:text-5xl font-semibold text-black">Fondos</h2>
-          <span className="text-gray-500 text-lg">en un mismo lugar</span>
-          <p className="text-gray-600 mt-3 text-sm lg:text-base leading-relaxed">
-          Explora en un solo lugar fondos públicos y privados en Chile (CORFO, ANID, fondos.gob), siempre actualizados y listos para filtrar sin recorrer varias plataformas.
-
-          </p>
-        </div>
-        <div className="flex-shrink-0">
+      onClick={() => navigate("/free-search")}
+      className="bg-white rounded-2xl shadow-lg flex flex-col cursor-pointer hover:shadow-2xl transition-shadow w-full overflow-hidden h-auto"
+      style={{ display: 'grid', gridTemplateRows: '1fr 2fr' }}
+    >
+      <div className="bg-[#f8e9cf] flex items-center justify-center">
         <img 
-            src="./fondito.png"
-            alt="Buscar fondos"
-            className="w-32 h-32 lg:w-36 lg:h-36 object-cover rounded-full shadow-lg" 
-          />
-        </div>
+          src="./fondito.png"
+          alt="Buscar fondos"
+          className="w-20 h-20 lg:w-24 lg:h-24 object-cover rounded-full" 
+        />
+      </div>
+      <div className="px-6 pt-6 pb-6 flex flex-col">
+        <h2 className="text-3xl lg:text-4xl font-semibold text-black text-center mb-3">Busca fondos y proyectos</h2>
+        <p className="text-gray-600 text-xs lg:text-sm leading-relaxed">
+          Explora manualmente, todo en un solo lugar, tanto la totalidad de fondos públicos y privados disponibles en Chile como los proyectos que ya han resultado ganadores. Mantenemos toda esta valiosa información siempre actualizada por ti, para que puedas filtrar con precisión y encontrar exactamente lo que necesitas sin perder tiempo recorriendo y comparando múltiples plataformas.
+        </p>
+      </div>
+    </div>
+
+    <div 
+      className="bg-white rounded-2xl shadow-lg flex flex-col cursor-pointer hover:shadow-2xl transition-shadow w-full overflow-hidden h-auto"
+      onClick={() => navigate("/premium")}
+      style={{ display: 'grid', gridTemplateRows: '1fr 2fr' }}
+    >
+      <div className="bg-[#f5efdf] flex items-center justify-center">
+        <img 
+          src="./premium-icon.jpg"
+          alt="Servicios Premium"
+          className="w-20 h-20 lg:w-24 lg:h-24 object-cover rounded-full" 
+        />
+      </div>
+      <div className="px-6 pt-6 pb-6 flex flex-col">
+        <h2 className="text-3xl lg:text-4xl font-semibold text-black text-center mb-3">Accede a Premium</h2>
+        <p className="text-gray-600 text-xs lg:text-sm leading-relaxed">
+          ¡Estás a un paso de acceder a nuestras herramientas más poderosas! Con el plan Premium, tu asistente de IA evoluciona: se vuelve proactivo, más inteligente y profundamente personalizado. Aprenderá de los detalles de tu proyecto para entregarte alertas a medida, recomendaciones de optimización y oportunidades que ni siquiera sabías que existían.
+        </p>
       </div>
     </div>
   </div>
 </main>
+
+  {/* Carrusel de fondos aleatorios */}
+  {randomFondos.length > 0 && (
+    <div className="w-full bg-slate-50 py-8 px-4">
+      <div className="mx-auto" style={{ maxWidth: '1600px' }}>
+        <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-center text-black">
+          Fondos destacados
+        </h2>
+        <div className="relative mx-auto flex items-center justify-center gap-8">
+          {/* Botón anterior */}
+          <button
+            onClick={handlePrev}
+            className="flex-shrink-0 bg-white hover:bg-gray-100 rounded-full p-3 shadow-lg transition-all"
+            aria-label="Anterior"
+          >
+            <FontAwesomeIcon icon={faChevronLeft} className="text-[#44624a]" size="lg" />
+          </button>
+
+          {/* Contenedor de tarjetas */}
+          <div className="overflow-hidden relative" style={{ width: 'calc(304px * 4 + 24px * 3)' }}>
+            <div 
+              className="flex gap-6"
+              onTransitionEnd={handleTransitionEnd}
+              style={{ 
+                transform: `translateX(calc(-${currentIndex} * (304px + 24px)))`,
+                transition: isAnimating ? 'transform 0.5s ease-in-out' : 'none'
+              }}
+            >
+              {randomFondos.concat(randomFondos).concat(randomFondos).map((card, idx) => (
+                <div 
+                  key={`carousel-${card.id}-${idx}`} 
+                  className="flex-shrink-0"
+                  style={{ 
+                    width: '304px',
+                    boxShadow: 'none'
+                  }}
+                >
+                  <FreeSearchCard
+                      id={card.id}
+                      title={card.title}
+                      description={card.description}
+                      topic={card.topic}
+                      benefit={card.benefit}
+                      image={card.image}
+                      fechaApertura={card.fechaApertura}
+                      fechaCierre={card.fechaCierre}
+                      link={card.link}
+                    />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Botón siguiente */}
+          <button
+            onClick={handleNext}
+            className="flex-shrink-0 bg-white hover:bg-gray-100 rounded-full p-3 shadow-lg transition-all"
+            aria-label="Siguiente"
+          >
+            <FontAwesomeIcon icon={faChevronRight} className="text-[#44624a]" size="lg" />
+          </button>
+        </div>
+
+        {/* Indicadores de posición */}
+        <div className="flex justify-center gap-2 mt-6">
+          {Array.from({ length: Math.ceil(randomFondos.length / 2) }).map((_, idx) => {
+            // Normalizar el currentIndex al rango del array original
+            const normalizedIndex = ((currentIndex % randomFondos.length) + randomFondos.length) % randomFondos.length;
+            const activeIndex = Math.floor(normalizedIndex / 2);
+            
+            return (
+              <div
+                key={idx}
+                className={`h-2 rounded-full transition-all ${
+                  activeIndex === idx 
+                    ? 'w-8 bg-[#44624a]' 
+                    : 'w-2 bg-gray-300'
+                }`}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  )}
     </div>
   );
 };

@@ -167,9 +167,9 @@ const Login: React.FC = () => {
                 <p className="email-error">{fieldErrors.password || '\u00A0'}</p>
                 
                 {/* Enlace de olvidé mi contraseña */}
-                <a href="#" className="forgot-password-link">
+                {/* <a href="#" className="forgot-password-link">
                   ¿Olvidaste tu contraseña?
-                </a>
+                </a> */}
               </div>
               
               {/* Botón de login */}

@@ -6,17 +6,20 @@ import { Textarea } from "../../components/UI/textarea";
 import { Button } from "../../components/UI/buttons";
 import { Input } from "../../components/UI/input";
 import { Card } from "../../components/UI/cards";
-import Persona from "../../models/Persona";
-import React from "react";
-//import Proyecto from "../../models/Proyecto";
 import { VerMiUsuario } from '../../api/VerMiUsuario';
 import { VerMiBeneficiario } from '../../api/VerMiBeneficiario';
 import { VerMisProyectos } from '../../api/VerMisProyectos';
 import { VerMisPostulaciones } from '../../api/VerMisPostulaciones';
 import { VerMisMiembros } from '../../api/VerMisMiembros';
 import { VerMisIdeas } from '../../api/VerMisIdeas';
+import { CrearColaborador } from "../../api/CrearColaborador";
 import { CrearProyecto } from "../../api/CrearProyecto";
+import { CrearPersona } from "../../api/CrearPersona";
 import { AnimatePresence, motion } from "framer-motion";
+import Colaborador from "../../models/Colaborador";
+import Proyecto from "../../models/Proyecto";
+import Persona from "../../models/Persona";
+import React from "react";
 
 const BASE_URL = "https://ai.matchafunding.com/api/v1/premium";
 const ENDPOINTS = {
@@ -28,7 +31,6 @@ const ENDPOINTS = {
   resultado: `${BASE_URL}/resultado`,
 };
 
-
 interface ProyectoForm {
   Beneficiario: number; Titulo: string; Descripcion: string;
   DuracionEnMesesMinimo: number; DuracionEnMesesMaximo: number;
@@ -37,91 +39,6 @@ interface ProyectoForm {
   ObjetivoEspecifico: string; Proposito: string; Innovacion: string;
   ResultadoEsperado: string; isFromConvertedIdea?: boolean;
 }
-
-
-/*
-interface PaginatorProps {
-  data: ProyectoForm;
-  colorPalette: { [key: string]: string };
-}
-
-const ProjectPreviewPaginator: React.FC<PaginatorProps> = ({ data, colorPalette }) => {
-
-  const [currentPage, setCurrentPage] = React.useState(0);
-  const pages = [
-    {
-      title: "Información General",
-      content: (
-        <>
-          <p><strong>Título:</strong> {data.Titulo}</p>
-          <p className="text-slate-600 text-sm mt-1">{data.Descripcion}</p>
-        </>
-      ),
-    },
-    {
-      title: "Problema y Objetivos",
-      content: (
-        <>
-          <p><strong>Problema:</strong> {data.Problema}</p>
-          <p className="mt-1"><strong>Público Objetivo:</strong> {data.PublicoObjetivo}</p>
-          <p className="mt-1"><strong>Objetivo General:</strong> {data.ObjetivoGeneral}</p>
-        </>
-      ),
-    },
-    {
-      title: "Propuesta de Valor",
-      content: (
-        <>
-          <p><strong>Propósito:</strong> {data.Proposito}</p>
-          <p className="mt-1"><strong>Innovación:</strong> {data.Innovacion}</p>
-          <p className="mt-1"><strong>Resultados Esperados:</strong> {data.ResultadoEsperado}</p>
-        </>
-      ),
-    },
-  ];
-
-  const handleNext = () => setCurrentPage((p) => Math.min(p + 1, pages.length - 1));
-  const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 0));
-
-  return (
-    <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-      <h3 className="text-lg font-semibold border-b pb-2 mb-3" style={{ color: colorPalette.darkGreen }}>
-        {pages[currentPage].title}
-      </h3>
-      
-      <div className="text-slate-700 space-y-2 min-h-[120px]">
-        {pages[currentPage].content}
-      </div>
-
-      <div className="flex justify-between items-center mt-6">
-        <button
-          type="button"
-          onClick={handlePrev}
-          disabled={currentPage === 0}
-          className="px-4 py-2 rounded-full text-sm font-medium transition disabled:opacity-50"
-          style={{ backgroundColor: colorPalette.lightGray, color: colorPalette.oliveGray }}
-        >
-          ← Anterior
-        </button>
-
-        <span className="text-sm font-medium" style={{ color: colorPalette.softGreen }}>
-          {currentPage + 1} / {pages.length}
-        </span>
-
-        <button
-          type="button"
-          onClick={handleNext}
-          disabled={currentPage === pages.length - 1}
-          className="px-4 py-2 rounded-full text-sm font-medium transition disabled:opacity-50"
-          style={{ backgroundColor: colorPalette.darkGreen, color: "white" }}
-        >
-          Siguiente →
-        </button>
-      </div>
-    </div>
-  );
-};
-*/
 
 export const StepIndicator: React.FC<{ currentStep: number; totalSteps: number }> = ({
   currentStep,
@@ -190,7 +107,6 @@ export const StepIndicator: React.FC<{ currentStep: number; totalSteps: number }
     </div>
   );
 };
-interface PersonaPayload { Nombre: string; Sexo: string; RUT: string; FechaDeNacimiento: string; }
 interface ProyectoForm {
   Beneficiario: number;
   Titulo: string;
@@ -281,19 +197,54 @@ const CrearProyectoFine: React.FC = () => {
 
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [nuevaPersonaData, setNuevaPersonaData] = useState<PersonaPayload>({
-    Nombre: "", Sexo: "OTR", RUT: "", FechaDeNacimiento: ""
+  const [nuevaPersonaData, setNuevaPersonaData] = useState<Persona>({
+    ID: 0,
+    Nombre: "",
+    Sexo: "Otro",
+    RUT: "",
+    FechaDeNacimiento: ""
   });
   const [isFromConvertedIdea, setIsFromConvertedIdea] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   
   const storedUser = sessionStorage.getItem("usuario");
 
+  const EnviarProyectoAI = async (proyecto: Proyecto) => {
+    console.log("Enviando proyecto al servicio de IA:", proyecto);
+
+    const payload = [{
+      ID: proyecto.ID,
+      Beneficiario: proyecto.Beneficiario,
+      Titulo: proyecto.Titulo,
+      Descripcion: proyecto.Descripcion,
+      DuracionEnMesesMinimo: proyecto.DuracionEnMesesMinimo,
+      DuracionEnMesesMaximo: proyecto.DuracionEnMesesMaximo,
+      Alcance: proyecto.Alcance,
+      Area: proyecto.Area,
+    }];
+
+    try {
+      const response = await fetch("https://ai.matchafunding.com/api/v1/projects/upsertusers", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Error desconocido del servidor de IA.' }));
+        console.error('Error al enviar datos a la IA:', response.status, errorData);
+        throw new Error(`El servidor de IA respondió con el estado ${response.status}`);
+      }
+      const result = await response.json();
+      console.log('Respuesta exitosa del servicio de IA:', result);
+    }
+    catch (error) {
+      console.error("Falló la comunicación con el endpoint de la IA:", error);
+    }
+  };
 
   useEffect(() => {
     console.log('INICIO CARGA DE DATOS - CONVERSION');
     
-   
     const ideaAConvertir = localStorage.getItem('convertirAProyecto') || 
                           sessionStorage.getItem('convertirAProyecto');
     console.log('localStorage convertirAProyecto:', localStorage.getItem('convertirAProyecto'));
@@ -304,7 +255,7 @@ const CrearProyectoFine: React.FC = () => {
       try {
         const ideaParsed = JSON.parse(ideaAConvertir);
         console.log('IDEA PARSEADA:', ideaParsed);
-     
+      
         const resumenLLM = ideaParsed.Propuesta || 
                           ideaParsed.ResumenLLM || 
                           ideaParsed.propuesta || 
@@ -316,40 +267,36 @@ const CrearProyectoFine: React.FC = () => {
         
         console.log('DESCRIPCION A ESTABLECER:', descripcionDeIdea);
         
-     
-const formDataToSet = {
-  Beneficiario: 0,
-  Titulo: "", 
-  Descripcion: descripcionDeIdea, 
-  DuracionEnMesesMinimo: 6,
-  DuracionEnMesesMaximo: 12,
-  Alcance: "", 
-  Area: ideaParsed.Campo || "", 
-  Miembros: [],
-  isFromConvertedIdea: true,
-
-  Problema: "",
-  PublicoObjetivo: "",
-  ObjetivoGeneral: "",
-  ObjetivoEspecifico: "",
-  Proposito: "",
-  Innovacion: "",
-  ResultadoEsperado: ""
-};
+        const formDataToSet = {
+          Beneficiario: 0,
+          Titulo: "", 
+          Descripcion: descripcionDeIdea, 
+          DuracionEnMesesMinimo: 6,
+          DuracionEnMesesMaximo: 12,
+          Alcance: "", 
+          Area: ideaParsed.Campo || "", 
+          Miembros: [],
+          isFromConvertedIdea: true,
+          Problema: "",
+          PublicoObjetivo: "",
+          ObjetivoGeneral: "",
+          ObjetivoEspecifico: "",
+          Proposito: "",
+          Innovacion: "",
+          ResultadoEsperado: ""
+        };
         
         console.log('FORMDATA A ESTABLECER:', formDataToSet);
         setFormData(formDataToSet);
         setIsFromConvertedIdea(true);
-        
+
         localStorage.removeItem('convertirAProyecto');
         sessionStorage.removeItem('convertirAProyecto');
-        
-      
         setIsDataLoaded(true);
-        
         console.log('CONVERSION COMPLETADA');
         return;
-      } catch (e) {
+      }
+      catch (e) {
         console.error('Error al parsear idea para convertir:', e);
         setIsFromConvertedIdea(false);
       }
@@ -454,29 +401,38 @@ const formDataToSet = {
         return;
     }
     try {
-        const resPersona = await fetch("https://backend.matchafunding.com/crearpersona/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevaPersonaData) });
-        if (!resPersona.ok) throw new Error("No se pudo crear la persona. Verifique los datos.");
-        
-        const personaCreada = await resPersona.json();
-        setFormData(prev => ({ ...prev, Miembros: [...prev.Miembros, personaCreada.Nombre] }));
-        setPersonas(prev => [...prev, new Persona(personaCreada)]);
+        //const resPersona = await fetch("https://backend.matchafunding.com/persona", {
+        //  method: "POST",
+        //  headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevaPersonaData) });
+        //if (!resPersona.ok) throw new Error("No se pudo crear la persona. Verifique los datos.");
+        //
+        //const personaCreada = await resPersona.json();
+        const persona = await CrearPersona(nuevaPersonaData);
+        setFormData(prev => ({ ...prev, Miembros: [...prev.Miembros, persona.Nombre] }));
+        setPersonas(prev => [...prev, persona]);
         
         alert("Persona creada y añadida al proyecto exitosamente.");
         setIsModalOpen(false);
-        setNuevaPersonaData({ Nombre: "", Sexo: "OTR", RUT: "", FechaDeNacimiento: "" });
-    } catch (error) {
-        if (error instanceof Error) alert(error.message);
-        else alert("Ocurrió un error inesperado al crear la persona.");
+        setNuevaPersonaData({
+          ID: 0,
+          Nombre: "",
+          Sexo: "Otro",
+          RUT: "",
+          FechaDeNacimiento: ""
+        });
+    }
+    catch (error) {
+        if (error instanceof Error)
+          alert(error.message);
+        else
+          alert("Ocurrió un error inesperado al crear la persona.");
     }
   };
 
-
    // En tu archivo ProyectoFinetuning.tsx
-
 const EnviarProyecto = async () => {
   // Tu console.log inicial está bien para depurar el formulario completo
   console.log(`Datos completos del formulario: ${JSON.stringify(formData)}`);
-
   // --- Tus validaciones se quedan igual ---
   if (formData.Titulo.length < 10) {
     alert("El título debe tener al menos 10 caracteres.");
@@ -500,12 +456,7 @@ const EnviarProyecto = async () => {
     if (!id || !enteId) {
         throw new Error("Información de usuario incompleta. No se pudo obtener el ID del usuario o beneficiario.");
     }
-
-    // ======================================================================
-    // CORRECCIÓN CLAVE AQUÍ:
-    // Creamos un objeto que contiene SOLAMENTE los campos que el servicio
-    // `CrearProyecto` va a procesar. Omitimos `Problema`, `PublicoObjetivo`, etc.
-    // ======================================================================
+    
     const proyectoParaEnviar = {
       ID: 0,
       Beneficiario: enteId,
@@ -522,57 +473,64 @@ const EnviarProyecto = async () => {
       Proposito: formData.Proposito,
       ResultadoEsperado: formData.ResultadoEsperado,
     };
-    
     // Opcional pero recomendado: un log para ver exactamente lo que envías
     console.log("Objeto ajustado que se envía al servicio CrearProyecto:", JSON.stringify(proyectoParaEnviar));
-
     // Llamamos al servicio con el objeto limpio y ajustado
     const creado = await CrearProyecto(proyectoParaEnviar);
-    console.log(`Proyecto creado exitosamente: ${JSON.stringify(creado)}`);
-    
-    // --- El resto de tu lógica para actualizar datos y navegar se queda igual ---
-    const usuario = await VerMiUsuario(id);
-    const beneficiario = await VerMiBeneficiario(id);
-    const proyectos = await VerMisProyectos(id);
-    const postulaciones = await VerMisPostulaciones(id);
-    const miembros = await VerMisMiembros(id);
-    const ideas = await VerMisIdeas(id);
-    
-    const datosActualizados = {
-      "Usuario": usuario,
-      "Beneficiario": beneficiario,
-      "Proyectos": proyectos,
-      "Postulaciones": postulaciones,
-      "Miembros": miembros,
-      "Ideas": ideas
-    };
+    const vector = await EnviarProyectoAI(creado);
+    if (creado) {
+      for (let i =0; i < personas.length; i++) {
+        const payload = new Colaborador({
+          ID: 0,
+          Persona: personas[i].ID,
+          Proyecto: creado.ID,
+          Usuario: id
+        })
+        const colaborador = await CrearColaborador(payload);
+        console.log(`Se creo un Colaborador: ${colaborador}`);
+      }
+    }
+    console.log(`Proyecto creado: ${JSON.stringify(creado)}`);
+    console.log(`Proyecto creado (AI): ${JSON.stringify(vector)}`);
 
-    localStorage.setItem("usuario", JSON.stringify(datosActualizados));
-    alert("¡Proyecto creado exitosamente!");
-    navigate("/Home-i");
-    
-  } catch (error) {
+    if (creado) {
+      console.log(`Proyecto creado exitosamente: ${JSON.stringify(creado)}`);
+      const usuario = await VerMiUsuario(id);
+      const beneficiario = await VerMiBeneficiario(id);
+      const proyectos = await VerMisProyectos(id);
+      const postulaciones = await VerMisPostulaciones(id);
+      const miembros = await VerMisMiembros(id);
+      const ideas = await VerMisIdeas(id);
+      
+      const datosActualizados = {
+        "Usuario": usuario,
+        "Beneficiario": beneficiario,
+        "Proyectos": proyectos,
+        "Postulaciones": postulaciones,
+        "Miembros": miembros,
+        "Ideas": ideas
+      };
+
+      localStorage.setItem("usuario", JSON.stringify(datosActualizados));
+      alert("¡Proyecto creado exitosamente!");
+      navigate("/Home-i");
+    }
+  }
+  catch (error) {
     console.error("FALLÓ LA CREACIÓN DEL PROYECTO (capturado en .catch):", error);
     const errorMessage = error instanceof Error ? error.message : "Ocurrió un error desconocido.";
     alert(`No se pudo crear el proyecto: ${errorMessage}`);
   }
 };
- 
-
-  
 
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
  
-
   // 🧠 useEffect opcional: detectar cambios o debug
   useEffect(() => {
     console.log("Datos actuales:", formData);
   }, [formData]);
-
- 
-
 
    const [previewData, setPreviewData] = useState({
     field: "",
@@ -588,8 +546,6 @@ const EnviarProyecto = async () => {
 
   // 🔹 Control de vista: formulario inicial o siguiente paso
   
-
-
   // 🧩 Maneja cambios en los inputs
   const handlePreviewChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -597,17 +553,6 @@ const EnviarProyecto = async () => {
     const { name, value } = e.target;
     setPreviewData((prev) => ({ ...prev, [name]: value }));
   };
-
-  /*
-  const mockproyectoidea = {
-    "ID": 0,
-    "Usuario": 0,
-    "Campo": "Conservación, Educación ambiental, Tecnología",
-    "Problema": "Sappea busca cerrar la brecha en el acceso y acción científica en torno al estudio de anfibios silvestres de Chile, así cómo levantar una base de datos, registros e información de anfibios.",
-    "Publico": "Amplio, comunidad científica, comunidades escolares, personas interesadas en la biodiversidad y actividades en espacios abiertos y naturales. ",
-    "Innovacion": "Sappea utiliza reconocimiento en tiempo real de vocalizaciones de anfibios silvestres utilizando inteligencia artificial, facilitando su identificación y ampliando la cantidad de registros e información"
-  }
-  */
 
   const handleConfirmAndSaveIdea = async () => {
   // 1. Validación inicial (igual que la original)
@@ -632,8 +577,8 @@ const EnviarProyecto = async () => {
     Innovacion: previewData.uniqueness,
   };
 
+  // 3. Creamos un array de "promesas" de fetch, una para cada endpoint.
   try {
-    // 3. Creamos un array de "promesas" de fetch, una para cada endpoint.
     const fetchPromises = Object.values(ENDPOINTS).map(endpointUrl =>
       fetch(endpointUrl, {
         method: "POST",
@@ -641,10 +586,8 @@ const EnviarProyecto = async () => {
         body: JSON.stringify(payload),
       })
     );
-
     // 4. Ejecutamos todas las llamadas a la API en paralelo y esperamos a que todas terminen.
     const responses = await Promise.all(fetchPromises);
-
     // Verificamos que todas las respuestas fueron exitosas (código 2xx).
     for (const response of responses) {
       if (!response.ok) {
@@ -652,10 +595,8 @@ const EnviarProyecto = async () => {
         throw new Error(`Error en la respuesta del servidor para ${response.url}: ${response.statusText}`);
       }
     }
-
     // 5. Convertimos todas las respuestas a formato JSON.
     const jsonResponses = await Promise.all(responses.map(res => res.json()));
-
     // 6. Guardamos la respuesta de cada endpoint en su propia constante.
     const [
       respuestaProblema,
@@ -674,24 +615,26 @@ const EnviarProyecto = async () => {
     console.log("✅ Respuesta de /obgen:", respuestaObgen);
     console.log("✅ Respuesta de /obes:", respuestaObes);
     console.log("✅ Respuesta de /resultado:", respuestaResultado);
-     setAiResponses({
-        problema: respuestaProblema.ResumenLLM || '',
-        solucion: respuestaSolucion.ResumenLLM || '', 
-        pubob: respuestaPubob.ResumenLLM || '',
-        obgen: respuestaObgen.ResumenLLM || '',
-        obes: respuestaObes.ResumenLLM || '',
-        resultado: respuestaResultado.ResumenLLM || '',
-      });
-    
+
+    setAiResponses({
+      problema: respuestaProblema.ResumenLLM || '',
+      solucion: respuestaSolucion.ResumenLLM || '', 
+      pubob: respuestaPubob.ResumenLLM || '',
+      obgen: respuestaObgen.ResumenLLM || '',
+      obes: respuestaObes.ResumenLLM || '',
+      resultado: respuestaResultado.ResumenLLM || '',
+    });
     // 7. Actualizamos la interfaz de usuario con la información que necesites.
     // Aquí, por ejemplo, mostramos la solución refinada como en tu código original.
     setRefinedIdea(respuestaSolucion.refinedIdea || "No se pudo generar una propuesta de solución.");
     setShowRefinedIdea(true);
 
-  } catch (error) {
+  }
+  catch (error) {
     console.error("Error enviando datos a la IA:", error);
     alert("Ocurrió un error al procesar tu idea. Revisa la consola para más detalles.");
-  } finally {
+  }
+  finally {
     setIsProcessing(false);
   }
 };
@@ -709,9 +652,7 @@ useEffect(() => {
     }
   }, [formData.Problema]);
 
-      
   return (
-
     <div className="min-h-screen w-full bg-slate-50">
     <NavBar />
 

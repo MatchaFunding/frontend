@@ -295,7 +295,7 @@ const SignUp: React.FC = () => {
   return (
     <div className="signup-container">
       {isLoading ? (
-        <div className="loading-container">
+        <div className="loading-container form-wrapper">
           <div className="loading-content">
             <div className="loading-spinner"></div>
             <h2 className="loading-title">Creando tu cuenta</h2>
@@ -303,7 +303,7 @@ const SignUp: React.FC = () => {
           </div>
         </div>
       ) : !showStepForm ? (
-        <div className="initial-form-container">
+        <div className="initial-form-container form-wrapper">
           <div className="form-panel">
             {/* Titulo de "comencemos" */}
             <h1 className="main-title">Comencemos</h1>
@@ -425,7 +425,7 @@ const SignUp: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="step-form-main">
+          <div className="step-form-main form-wrapper">
             <div className="form-panel">
               {currentStep === 1 && (
                 <div>

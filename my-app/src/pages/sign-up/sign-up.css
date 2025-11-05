@@ -591,3 +591,27 @@
   font-style: italic;
   min-height: 1.125rem;
 }
+
+/* NUEVA CLASE PARA UNIFICAR CONTENEDORES */
+.form-wrapper {
+  width: 100%;
+  max-width: 42rem; /* Ancho máximo consistente */
+  min-height: 620px; /* Alto mínimo consistente para todos los pasos */
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 2rem; /* Un padding base consistente */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* Evita que el contenido se desborde */
+}
+
+/* Ajustes para dispositivos móviles */
+@media (max-width: 640px) {
+  .form-wrapper {
+    min-height: auto; /* Dejamos que el contenido defina la altura */
+    padding: 1.5rem;
+  }
+}

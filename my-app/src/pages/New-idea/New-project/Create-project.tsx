@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+//import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import NavBar from "../../../components/NavBar/navbar";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../../../components/UI/cards";
@@ -81,6 +82,7 @@ const NuevoProyecto: React.FC = () => {
     FechaDeNacimiento: ""
   });
   const navigate = useNavigate();
+  /**
   const storedUser = localStorage.getItem("usuario");
   
   const EnviarProyectoAI = async (proyecto: Proyecto) => {
@@ -122,6 +124,7 @@ const NuevoProyecto: React.FC = () => {
       setPersonas(usuario.Miembros.map((m: any) => new Persona(m)));
     }
   }, [storedUser]);
+  */
 
   console.log("Personas de la empresa: " + JSON.stringify(personas));
 

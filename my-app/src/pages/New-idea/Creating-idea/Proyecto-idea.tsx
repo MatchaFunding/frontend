@@ -1,12 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../../../components/UI/cards";
-import { useState, useEffect } from "react";
+//import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Input } from "../../../components/UI/input";
 import { Button } from "../../../components/UI/buttons";
 import { Textarea } from "../../../components/UI/textarea";
 import { StepIndicator } from "../../../components/Shared/StepIndicator";
 import { CrearProyecto } from "../../../api/CrearProyecto"; 
-import { CrearColaborador } from "../../../api/CrearColaborador";
+//import { CrearColaborador } from "../../../api/CrearColaborador";
 import { VerMiUsuario } from '../../../api/VerMiUsuario';
 import { VerMiBeneficiario } from '../../../api/VerMiBeneficiario';
 import { VerMisProyectos } from '../../../api/VerMisProyectos';
@@ -17,7 +18,7 @@ import { CrearPersona } from "../../../api/CrearPersona";
 import NavBar from "../../../components/NavBar/navbar";
 import Persona from "../../../models/Persona";
 import Proyecto from "../../../models/Proyecto";
-import Colaborador from "../../../models/Colaborador";
+//import Colaborador from "../../../models/Colaborador";
 import React from "react";
 
 interface ProyectoForm {
@@ -77,6 +78,7 @@ const NuevoProyecto: React.FC = () => {
     FechaDeNacimiento: ""
   });
   const navigate = useNavigate();
+  /*
   const storedUser = sessionStorage.getItem("usuario");
   
   const EnviarProyectoAI = async (proyecto: Proyecto) => {
@@ -119,6 +121,7 @@ const NuevoProyecto: React.FC = () => {
       setPersonas(usuario.Miembros.map((m: any) => new Persona(m)));
     }
   }, [storedUser]);
+   */
 
   console.log("Personas de la empresa: ", JSON.stringify(personas));
 

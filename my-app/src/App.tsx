@@ -26,6 +26,7 @@ import EditmyProfile from './pages/edit-profile/EditMyprofile.tsx';
 import PremiumOptions from './pages/Premium/Premium-options.tsx';
 import PremiumRag from './pages/Premium/Premium-rag.tsx';
 import RagChat from './pages/Premium/RagChat.tsx';
+import CrearProyectoFine from './pages/Premium/ProyectoFinetuning.tsx';
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
         <Route path="/Matcha/My-projects" element={<MisProyectosH/>} />
         <Route path="/Matcha/My-projects/proyectos-historicos" element={<ProyectosHistoricosConPorcentaje/>} />
         <Route path="/Matcha/My-projects/proyectos-historicos/Detalle/:proyectoId" element={<DetalleProyecto/>} />
+        <Route path="/premium/fine-tuning" element={<CrearProyectoFine />} />
       </Routes>
     </BrowserRouter>
   );

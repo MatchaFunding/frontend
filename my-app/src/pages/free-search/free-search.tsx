@@ -9,10 +9,10 @@ import { getPaginatedCards, calculatePagination } from './free-search';
 import { searchCardsByText, createHandlePageChange } from './free-search';
 import FreeSearchCard from '../../components/free-search-card/free-search-card.tsx';
 import FiltersComponent from '../../components/filters-component/filters-component.tsx';
-import NavBar from '../../components/NavBar/navbar';
 import VerTodosLosInstrumentos from '../../api/VerTodosLosInstrumentos.tsx';
 import VerTodosLosProyectos from '../../api/VerTodosLosProyectos.tsx';
 import FreeSearchCardProject from '../../components/free-search-card-project/free-search-card-project.tsx';
+import NavBar from '../../components/NavBar/navbar';
 import './free-search.css';
 
 function FreeSearch() {
@@ -197,7 +197,17 @@ function FreeSearch() {
 									>
 										Fondos
 									</button>
-									<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+									<svg 
+										width="24" 
+										height="24" 
+										viewBox="0 0 24 24" 
+										fill="none" 
+										xmlns="http://www.w3.org/2000/svg" 
+										className="flex-shrink-0 cursor-pointer hover:opacity-70 transition-opacity"
+										onClick={() => handleViewChange(activeView === 'fondos' ? 'proyectos' : 'fondos')}
+										role="button"
+										aria-label="Intercambiar vista"
+									>
 										<path d="M16,16L16,12L21,17L16,22L16,18L4,18L4,16L16,16ZM8,2L8,5.9990234375L20,6L20,8L8,8L8,12L3,7L8,2Z" fill="#44624a"/>
 									</svg>
 									<button 

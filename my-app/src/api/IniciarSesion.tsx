@@ -1,4 +1,4 @@
-export async function IniciarSesion(correo, contrasena) {
+export async function IniciarSesion(correo: string, contrasena: string) {
   try {
     const response = await fetch(`http://127.0.0.1:8000/iniciar-sesion`, {
       method: 'POST',

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CrearIdea } from "../../../api/CrearIdea";
 import { CambiarIdea } from "../../../api/CambiarIdea";
-import { CrearIdeaIAAsync } from "../../../api/CrearIdeaIa";
+import { CrearIdeaIA } from "../../../api/CrearIdeaIA";
 import { VerMiUsuario } from '../../../api/VerMiUsuario';
 import { VerMiBeneficiario } from '../../../api/VerMiBeneficiario';
 import { VerMisProyectos } from '../../../api/VerMisProyectos';
@@ -138,7 +138,7 @@ const CreateIdea: React.FC = () => {
       
       if (ideaBackend && ideaBackend.ID) {
         IdeaDato.ID = ideaBackend.ID;
-        const ideaRespuesta = await CrearIdeaIAAsync(IdeaDato);
+        const ideaRespuesta = await CrearIdeaIA(IdeaDato);
         
         if (ideaRespuesta && ideaRespuesta.ResumenLLM) {
           try {

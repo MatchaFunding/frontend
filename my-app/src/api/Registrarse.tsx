@@ -1,4 +1,4 @@
-export async function Registrarse(formulario, nombre, contrasena, correo) {
+export async function Registrarse(formulario: any, nombre: string, contrasena: string, correo: string) {
   try {
     const response = await fetch(`http://127.0.0.1:8000/registrarse`, {
       method: 'POST',

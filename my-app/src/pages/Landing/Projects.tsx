@@ -1,5 +1,4 @@
-import type { FiltersIdeaValues } from '../../components/filters-ideas/filters-idea';
-import React, { useEffect, useState } from 'react';
+import type { FiltersIdeaValues } from '../../components/filters-ideas/filters-idea.ts';
 import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie } from 'recharts';
 import { Cell, Tooltip } from 'recharts';
@@ -8,15 +7,17 @@ import { Legend, RadarChart } from 'recharts';
 import { PolarGrid, PolarAngleAxis } from 'recharts';
 import { PolarRadiusAxis, Radar } from 'recharts';
 import { applyFiltersAndSorting } from '../../components/filters-ideas/filters-idea';
-import { BorrarIdea } from '../../api/BorrarIdea';
 import { getMatchFondosAsync } from '../../api/MatchFondos';
 import { VerTodasLasPostulacionesAsync } from "../../api/VerTodasLasPostulaciones";
 import { VerTodosLosInstrumentosAsync } from "../../api/VerTodosLosInstrumentos"; 
-import NavBar from '../../components/NavBar/navbar';
-import FiltersIdea from '../../components/filters-ideas/filters-idea.tsx';
-import Idea from "../../models/Idea";
-import Postulacion from "../../models/Postulacion"; 
+import { BorrarIdea } from '../../api/BorrarIdea';
+import { useEffect, useState, useRef } from 'react';
 import IdeaRefinadaModal from '../../components/IdeaRefinadaModal/IdeaRefinadaModal';
+import FiltersIdea from '../../components/filters-ideas/filters-idea.tsx';
+import Postulacion from "../../models/Postulacion"; 
+import React from 'react';
+import NavBar from '../../components/NavBar/navbar';
+import Idea from "../../models/Idea";
 
 interface PostulacionData {
   name: string;
@@ -55,7 +56,6 @@ const colorPalette = {
 
 const ChartBarIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5 mr-3"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>);
 const PaperAirplaneIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5 mr-3"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>);
-const ClockIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5 mr-3"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>);
 const LightBulbIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5 mr-3"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>);
 const TrashIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>);
 const PencilIcon = ({ className }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-5 w-5"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>);
@@ -76,17 +76,28 @@ const MisPostulaciones: React.FC = () => {
   const [errorProyectos, setErrorProyectos] = useState<string | null>(null);
   const [deletingIdeaId, setDeletingIdeaId] = useState<number | null>(null);
   const [matchingIdeaId, setMatchingIdeaId] = useState<number | null>(null);
+  const isProcessingMatch = useRef(false);
 
   const [pieChartData, setPieChartData] = useState<PostulacionData[]>([]);
   const [loadingEstadisticas, setLoadingEstadisticas] = useState<boolean>(true);
   const [errorEstadisticas, setErrorEstadisticas] = useState<string | null>(null);
-
-  const [filtersIdea, setFiltersIdea] = useState<FiltersIdeaValues>({ campo: '', publico: '', orderBy: 'none', searchIdea: '', searchCampo: '', fecha: '' });
+  const [filtersIdea, setFiltersIdea] = useState<FiltersIdeaValues>(
+    {campo: '',
+    publico: '',
+    orderBy: 'none',
+    searchIdea: '',
+    searchCampo: '',
+    fecha: ''
+  });
+  const [currentPageIdeas, setCurrentPageIdeas] = useState(1);
+  const ITEMS_PER_PAGE_IDEAS = 5;
   
   // Función para truncar texto largo
   const truncateText = (text: string, maxLength: number = 120): string => {
-    if (!text) return '';
-    if (text.length <= maxLength) return text;
+    if (!text)
+      return '';
+    if (text.length <= maxLength)
+      return text;
     return text.substring(0, maxLength).trim() + '...';
   };
   
@@ -155,7 +166,8 @@ const MisPostulaciones: React.FC = () => {
         };
       });
       return fondosAsignados;
-    } catch (error) {
+    }
+    catch (error) {
       console.error("Error al obtener fondos del proyecto:", error);
       return [];
     }
@@ -252,12 +264,17 @@ const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparac
   useEffect(() => {
     const filtered = applyFiltersAndSorting(ideas, filtersIdea);
     setFilteredIdeas(filtered);
+    setCurrentPageIdeas(1); // Resetear página al cambiar filtros
   }, [ideas, filtersIdea]);
 
-  // Auto-select first idea when entering ideas section
+  // Auto-select first idea when entering ideas section or when selected idea is no longer available
   useEffect(() => {
-    if (activeSection === 'ideas' && filteredIdeas.length > 0 && !selectedIdea) {
-      setSelectedIdea(filteredIdeas[0]);
+    if (activeSection === 'ideas' && filteredIdeas.length > 0) {
+      // Solo cambiar selectedIdea si no hay una seleccionada o si la seleccionada ya no existe
+      const ideaExists = selectedIdea && filteredIdeas.find(idea => idea.ID === selectedIdea.ID);
+      if (!selectedIdea || !ideaExists) {
+        setSelectedIdea(filteredIdeas[0]);
+      }
     }
   }, [activeSection, filteredIdeas]);
 
@@ -274,7 +291,12 @@ const processRadarChartData = (postulaciones: Postulacion[], proyectosEnPreparac
     return () => window.removeEventListener('focus', handleFocus);
   }, [activeSection]);
 
-  
+  // Cálculos para paginación de ideas
+  const totalPagesIdeas = Math.ceil(filteredIdeas.length / ITEMS_PER_PAGE_IDEAS);
+  const paginatedIdeas = filteredIdeas.slice(
+    (currentPageIdeas - 1) * ITEMS_PER_PAGE_IDEAS,
+    currentPageIdeas * ITEMS_PER_PAGE_IDEAS
+  );
 
   useEffect(() => {
     const fetchProyectos = async () => {
@@ -396,7 +418,6 @@ const colorPalette = {
       'ADJ': { name: 'Adjudicadas', color: colorPalette.softGreen },
       'PEN': { name: 'Pendientes', color: colorPalette.darkGreen },
       'REC': { name: 'Rechazadas', color: colorPalette.tan},
-  
       'APR': { name: 'Aprobadas', color: colorPalette.softGreen },
       'REV': { name: 'En Revisión', color: colorPalette.lightGreen },
     };
@@ -415,7 +436,6 @@ const colorPalette = {
   };
   const handleFiltersIdeaChange = (newFilters: FiltersIdeaValues) => { setFiltersIdea(newFilters); };
   const handleDeleteIdea = async (idToDelete: number) => {
-    // Encontrar la idea para mostrar detalles en la confirmación
     const ideaToDelete = ideas.find(idea => idea.ID === idToDelete);
     const ideaTitulo = ideaToDelete ? ideaToDelete.Problema : `Idea #${idToDelete}`;
 
@@ -483,9 +503,16 @@ const colorPalette = {
   };
   
   const handleMatchIdea = async (idea: Idea) => {
+    // Prevenir llamadas múltiples usando ref
+    if (isProcessingMatch.current || matchingIdeaId !== null) {
+      return;
+    }
+    
+    isProcessingMatch.current = true;
     setMatchingIdeaId(idea.ID);
+    
     try {
-      console.log('Iniciando match de idea con fondos...', idea);
+      // Llamar a la API para hacer el match
       const matchResults = await getMatchFondosAsync({
         idea_id: idea.ID,
         top_k: 10
@@ -511,6 +538,7 @@ const colorPalette = {
     }
     finally {
       setMatchingIdeaId(null);
+      isProcessingMatch.current = false;
     }
   };
   
@@ -520,7 +548,6 @@ const colorPalette = {
   };
   const handleEditProyecto = (proyecto: Proyecto) => { alert(`Funcionalidad para editar el proyecto "${proyecto.Titulo}" no implementada.`); };
   const handleDeleteProyecto = (proyectoId: number) => { if (window.confirm("¿Seguro que quieres eliminar este proyecto?")) { alert(`Funcionalidad para eliminar el proyecto con ID ${proyectoId} no implementada.`); } };
-  const postulacionesHistoricas: any[] = [];
  
   return (
     <div style={{ backgroundColor: colorPalette.background }} className="min-h-screen">
@@ -532,7 +559,6 @@ const colorPalette = {
             {/* Mobile: Horizontal menu */}
             <nav className="lg:hidden flex overflow-x-auto space-x-2 pt-8 pb-4 mb-6 border-b border-slate-200">
               <button onClick={() => setActiveSection('ideas')} className={`flex items-center px-4 py-3 font-semibold rounded-lg transition-colors duration-200 whitespace-nowrap`} style={{ backgroundColor: activeSection === 'ideas' ? colorPalette.softGreen : 'transparent', color: activeSection === 'ideas' ? 'white' : colorPalette.oliveGray }}><LightBulbIcon className="h-5 w-5 mr-2" />Ideas</button>
-              <button onClick={() => setActiveSection('historial')} className={`flex items-center px-4 py-3 font-semibold rounded-lg transition-colors duration-200 whitespace-nowrap`} style={{ backgroundColor: activeSection === 'historial' ? colorPalette.softGreen : 'transparent', color: activeSection === 'historial' ? 'white' : colorPalette.oliveGray }}><ClockIcon className="h-5 w-5 mr-2" />Historial</button>
               <button onClick={() => setActiveSection('proyectos')} className={`flex items-center px-4 py-3 font-semibold rounded-lg transition-colors duration-200 whitespace-nowrap`} style={{ backgroundColor: activeSection === 'proyectos' ? colorPalette.softGreen : 'transparent', color: activeSection === 'proyectos' ? 'white' : colorPalette.oliveGray }}><PaperAirplaneIcon className="h-5 w-5 mr-2" />Proyectos</button>
               <button onClick={() => setActiveSection('estadisticas')} className={`flex items-center px-4 py-3 font-semibold rounded-lg transition-colors duration-200 whitespace-nowrap`} style={{ backgroundColor: activeSection === 'estadisticas' ? colorPalette.softGreen : 'transparent', color: activeSection === 'estadisticas' ? 'white' : colorPalette.oliveGray }}><ChartBarIcon className="h-5 w-5 mr-2" />Estadísticas</button>
             </nav>
@@ -540,7 +566,6 @@ const colorPalette = {
             {/* Desktop: Vertical menu */}
             <nav className="hidden lg:block space-y-2">
               <button onClick={() => setActiveSection('ideas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'ideas' ? colorPalette.softGreen : 'transparent', color: activeSection === 'ideas' ? 'white' : colorPalette.oliveGray }}><LightBulbIcon />Mis Ideas</button>
-              <button onClick={() => setActiveSection('historial')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'historial' ? colorPalette.softGreen : 'transparent', color: activeSection === 'historial' ? 'white' : colorPalette.oliveGray }}><ClockIcon />Historial</button>
               <button onClick={() => setActiveSection('proyectos')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'proyectos' ? colorPalette.softGreen : 'transparent', color: activeSection === 'proyectos' ? 'white' : colorPalette.oliveGray }}><PaperAirplaneIcon />Mis Proyectos</button>
               <button onClick={() => setActiveSection('estadisticas')} className={`w-full flex items-center px-4 py-3 text-left font-semibold rounded-lg transition-colors duration-200`} style={{ backgroundColor: activeSection === 'estadisticas' ? colorPalette.softGreen : 'transparent', color: activeSection === 'estadisticas' ? 'white' : colorPalette.oliveGray }}><ChartBarIcon />Estadísticas</button>
             </nav>
@@ -679,8 +704,8 @@ const colorPalette = {
                       <div className="text-sm font-semibold text-center" style={{ color: colorPalette.oliveGray, textAlign: 'left', width: '5%' }}>Acciones</div>
                     </div>
                     
-                    {filteredIdeas.length > 0 ? (
-                      filteredIdeas.map((idea) => (
+                    {paginatedIdeas.length > 0 ? (
+                      paginatedIdeas.map((idea) => (
                         <div 
                           key={idea.ID} 
                           className={`relative py-4 border-b border-slate-200 last:border-b-0 transition-all duration-200 ${
@@ -793,8 +818,8 @@ const colorPalette = {
 
                   {/* MOBILE: Card view */}
                   <div className="md:hidden space-y-4 p-4">
-                    {filteredIdeas.length > 0 ? (
-                      filteredIdeas.map((idea) => (
+                    {paginatedIdeas.length > 0 ? (
+                      paginatedIdeas.map((idea) => (
                         <div
                           key={idea.ID}
                           className={`relative p-4 rounded-lg border-2 transition-all duration-200 ${
@@ -888,16 +913,98 @@ const colorPalette = {
                       </div>
                     )}
                   </div>
-                </div>
-              </div>
-            )}
-            {activeSection === 'historial' && (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold" style={{ color: colorPalette.darkGreen }}>Listado de postulaciones históricas</h1>
-                </div>
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-                    {postulacionesHistoricas.length === 0 ? (<div className="flex flex-col items-center justify-center text-center py-20 space-y-4"><EmptyBoxIcon /><p style={{ color: colorPalette.oliveGray }}>No hay postulaciones históricas disponibles.</p></div>) : (<div></div>)}
+                  
+                  {/* Paginación */}
+                  {filteredIdeas.length > ITEMS_PER_PAGE_IDEAS && (
+                    <div className="flex justify-center py-4 gap-1 sm:gap-2 flex-wrap" style={{ marginTop: '40px' }}>
+                      {/* Flecha izquierda */}
+                      <button 
+                        className={`px-2 sm:px-3 py-2 rounded-full font-semibold border ${
+                          currentPageIdeas === 1 
+                            ? 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed' 
+                            : 'bg-white text-[#8ba888] border-[#8ba888]'
+                        }`} 
+                        onClick={() => setCurrentPageIdeas(prev => Math.max(prev - 1, 1))} 
+                        disabled={currentPageIdeas === 1} 
+                        aria-label="Anterior"
+                      >
+                        <img 
+                          src="/svgs/right-arrow.svg" 
+                          alt="Anterior" 
+                          className="w-3 h-3 sm:w-4 sm:h-4" 
+                          style={{ 
+                            transform: 'rotate(180deg)', 
+                            filter: currentPageIdeas === 1 
+                              ? 'brightness(0) saturate(100%) invert(70%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(96%)' 
+                              : 'brightness(0) saturate(100%) invert(63%) sepia(15%) saturate(357%) hue-rotate(73deg) brightness(95%) contrast(88%)' 
+                          }} 
+                        />
+                      </button>
+                      
+                      {/* Página actual */}
+                      <button className={`px-2 sm:px-3 py-1 rounded-full font-semibold bg-[#8ba888] text-white text-sm`} disabled>
+                        {currentPageIdeas}
+                      </button>
+                      
+                      {/* Página siguiente */}
+                      {currentPageIdeas + 1 <= totalPagesIdeas && (
+                        <button 
+                          className={`px-2 sm:px-3 py-2 font-semibold text-[#8ba888] hover:bg-gray-100 text-sm`} 
+                          onClick={() => setCurrentPageIdeas(currentPageIdeas + 1)}
+                        >
+                          {currentPageIdeas + 1}
+                        </button>
+                      )}
+                      
+                      {/* Página siguiente +1 - Solo visible en pantallas medianas y grandes */}
+                      {currentPageIdeas + 2 <= totalPagesIdeas && (
+                        <button
+                          className={`hidden sm:block px-2 sm:px-3 py-2 font-semibold text-[#8ba888] hover:bg-gray-100 text-sm`}
+                          onClick={() => setCurrentPageIdeas(currentPageIdeas + 2)}
+                        >
+                          {currentPageIdeas + 2}
+                        </button>
+                      )}
+                      
+                      {/* ... si hay más páginas entre medio - Solo visible en pantallas medianas y grandes */}
+                      {currentPageIdeas + 3 < totalPagesIdeas && (
+                        <span className="hidden sm:inline px-2">...</span>
+                      )}
+                      
+                      {/* Última página si no es visible como subsiguiente - Solo visible en pantallas medianas y grandes */}
+                      {totalPagesIdeas > 1 && currentPageIdeas !== totalPagesIdeas && (currentPageIdeas + 2 < totalPagesIdeas) && (
+                        <button
+                          className={`hidden sm:block px-2 sm:px-3 py-2 font-semibold text-[#8ba888] hover:bg-gray-100 text-sm`}
+                          onClick={() => setCurrentPageIdeas(totalPagesIdeas)}
+                        >
+                          {totalPagesIdeas}
+                        </button>
+                      )}
+                      
+                      {/* Flecha derecha */}
+                      <button
+                        className={`px-2 sm:px-3 py-2 rounded-full font-semibold border ${
+                          currentPageIdeas === totalPagesIdeas 
+                            ? 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed' 
+                            : 'bg-white text-[#8ba888] border-[#8ba888]'
+                        }`}
+                        onClick={() => setCurrentPageIdeas(prev => Math.min(prev + 1, totalPagesIdeas))}
+                        disabled={currentPageIdeas === totalPagesIdeas}
+                        aria-label="Siguiente"
+                      >
+                        <img 
+                          src="/svgs/right-arrow.svg" 
+                          alt="Siguiente" 
+                          className="w-3 h-3 sm:w-4 sm:h-4" 
+                          style={{ 
+                            filter: currentPageIdeas === totalPagesIdeas 
+                              ? 'brightness(0) saturate(100%) invert(70%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(96%)' 
+                              : 'brightness(0) saturate(100%) invert(63%) sepia(15%) saturate(357%) hue-rotate(73deg) brightness(95%) contrast(88%)' 
+                          }} 
+                        />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

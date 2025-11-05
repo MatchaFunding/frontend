@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { initialFormData, dropdownOptions, getNextStep, getPrevStep, getSelectedOption, validarCamposStep1, validarCamposStep2, manejarErrorServidor, ObtenerDatosFormulario, validarFormularioInicial, isStepValid, isInitialFormValid, isValidEmail, validateFieldPure, handleInputChangePure, handleDropdownChangePure, toggleDropdownPure, GenerarContrasenaNueva } from './sign-up';
 import { VerificarEmailExiste } from '../../api/VerificarEmail';
 import { Registrarse } from '../../api/Registrarse';
-import { Autorizar } from '../../api/Autorizar';
 import { useState, useRef, useEffect } from 'react';
 import React from 'react';
 import './sign-up.css';
@@ -14,8 +13,6 @@ const SignUp: React.FC = () => {
   const [showStepForm, setShowStepForm] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [isUpdatingPersona, setIsUpdatingPersona] = useState(false);
-  const [isUpdatingBeneficiario, setIsUpdatingBeneficiario] = useState(false);
   const [correo, setCorreo] = useState<string>('');
   const [contrasena, setContrasena] = useState<string>('');
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
@@ -25,6 +22,9 @@ const SignUp: React.FC = () => {
   const [emailExists, setEmailExists] = useState(false);
   const [emailCheckTimeout, setEmailCheckTimeout] = useState<number | null>(null);
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+
+  const isUpdatingBeneficiario = false;
+  const isUpdatingPersona = false;
   
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const setDropdownRef = (field: string) => (ref: HTMLDivElement | null) => {

@@ -1,7 +1,6 @@
 import Colaborador from '../models/Colaborador.tsx'
-import { useEffect, useState } from 'react';
 
-export async function CrearColaboradorAsync(data: Colaborador) {
+export async function CrearColaborador(data: Colaborador) {
   try {
     const response = await fetch(`http://127.0.0.1:8000/crearcolaboradores/`, {
       method: 'POST',
@@ -24,14 +23,3 @@ export async function CrearColaboradorAsync(data: Colaborador) {
     throw new Error('Error al obtener los datos');
   }
 }
-export function CrearColaborador(data: Colaborador) {
-  const [Colaborador, setColaborador] = useState<Colaborador>();
-
-  useEffect(() => {
-      CrearColaboradorAsync(data).then((out) => {
-      setColaborador(out);
-      });
-  }, );
-  return Colaborador;
-}
-export default CrearColaborador;

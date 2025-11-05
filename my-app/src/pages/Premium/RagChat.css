@@ -20,7 +20,7 @@
   width: 100%;
   max-width: 1400px;
   display: grid;
-  grid-template-columns: 65% 35%;
+  grid-template-columns: 70% 30%;
   grid-auto-rows: 1fr; /* Hacer que las filas tengan la misma altura */
   gap: 2rem;
   padding: 0 1rem;
@@ -166,7 +166,7 @@
 }
 
 .react-chatbot-kit-chat-message-container {
-  padding: 1.5rem;
+  padding: 0.75rem;
   background: #f8fafc;
   /* Scroll automático al final */
 }
@@ -190,6 +190,7 @@
   margin-bottom: 1rem;
   animation: fadeIn 0.3s ease;
   width: 100%;
+  gap: 0.5rem; 
 }
 
 .react-chatbot-kit-chat-bot-avatar-container {
@@ -200,7 +201,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 0.75rem;
+  margin-right: 0; /* Sin margen adicional, el gap se encarga del espacio */
   flex-shrink: 0;
   align-self: flex-start; /* Mantener avatar arriba */
 }
@@ -221,17 +222,16 @@
   background: linear-gradient(135deg, #44624a 0%, #8ba888 100%);
   padding: 1rem 1.25rem;
   border-radius: 0.75rem;
-  max-width: calc(100% - 56px); /* CRÍTICO: Resta avatar + gap */
+  min-width: 200px; /* Ancho mínimo */
+  width: 70%; /* Ancho fijo similar al usuario */
   color: white;
   line-height: 1.5;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   word-wrap: break-word;
   overflow-wrap: break-word;
-  flex: 0 1 auto; /* CRÍTICO: Evita expansión infinita */
+  flex: 0 0 auto; /* No crecer ni encogerse automáticamente */
   text-align: left; /* Alinear texto a la izquierda */
-  align-self: flex-start; /* Alinear el div a la izquierda del contenedor */
-  margin-right: auto; /* Forzar a la izquierda, no centrado */
-  margin-left: 0; /* Asegurar que no haya margen izquierdo */
+  margin-left: 0.5rem; /* Pequeño margen para separar del avatar */
 }
 
 .react-chatbot-kit-user-chat-message-container {
@@ -417,4 +417,13 @@
     min-height: 350px;
     max-height: 350px;
   }
+}
+
+/* Estilos para las flechas de los mensajes */
+.react-chatbot-kit-chat-bot-message-arrow {
+  border-right-color: #44624a !important; /* Color de la flecha del bot */
+}
+
+.react-chatbot-kit-user-chat-message-arrow {
+  border-left-color: #84a182 !important; /* Color de la flecha del usuario */
 }

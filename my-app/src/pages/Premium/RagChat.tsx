@@ -26,25 +26,18 @@ const RagChat: React.FC = () => {
       const sendButton = document.querySelector('.react-chatbot-kit-chat-btn-send') as HTMLButtonElement;
       
       if (!chatInput || !sendButton) {
-        // Intentar de nuevo en el próximo ciclo si los elementos no están listos
         setTimeout(setupInputValidation, 100);
         return;
       }
-
-      // Función para actualizar el estado del botón
       const updateButtonState = () => {
         const isEmpty = !chatInput.value.trim();
         sendButton.disabled = isEmpty;
       };
-
-      // Actualizar estado inicial
       updateButtonState();
 
-      // Escuchar cambios en el input
       chatInput.addEventListener('input', updateButtonState);
       chatInput.addEventListener('keyup', updateButtonState);
 
-      // Cleanup
       return () => {
         chatInput.removeEventListener('input', updateButtonState);
         chatInput.removeEventListener('keyup', updateButtonState);
@@ -55,17 +48,13 @@ const RagChat: React.FC = () => {
     return cleanup;
   }, []);
 
-  // Función para manejar clics en preguntas sugeridas
   const handleSuggestedQuestionClick = useCallback((question: string) => {
-    // Obtener instancia global del ActionProvider
     const provider = getActionProviderInstance();
-    
     if (!provider) {
       console.error('ActionProvider no está disponible');
       alert('El chat aún se está inicializando. Por favor, espera un momento e intenta de nuevo.');
       return;
     }
-    
     if (typeof provider.handleSuggestedClick !== 'function') {
       console.error('handleSuggestedClick no está disponible');
       return;
@@ -100,7 +89,7 @@ const RagChat: React.FC = () => {
                 config={config}
                 messageParser={MessageParser}
                 actionProvider={ActionProvider}
-                headerText="Asistente RAG"
+                headerText="Matchito - Asistente de Documentos"
                 placeholderText="Escribe tu pregunta aquí..."
               />
             </div>

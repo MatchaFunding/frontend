@@ -1,7 +1,7 @@
 // hooks/useCrearProyecto.ts
 import { useState } from 'react';
 import type Proyecto from '../../../models/Proyecto';
-import { CrearProyectoAsync } from '../../../api/CrearProyecto';
+import { CrearProyecto } from '../../../api/CrearProyecto';
 
 
 export function useCrearProyecto() {
@@ -13,7 +13,7 @@ export function useCrearProyecto() {
     setLoading(true);
     setError(null);
     try {
-      const nuevoProyecto = await CrearProyectoAsync(data);
+      const nuevoProyecto = await CrearProyecto(data);
       setProyecto(nuevoProyecto);
       return nuevoProyecto;
     } catch (err) {

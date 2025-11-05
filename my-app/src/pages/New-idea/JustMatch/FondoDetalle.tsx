@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import NavBar from '../../../components/NavBar/navbar';
-import { Card } from '../../../components/UI/cards';
 import { VerFondosIAAsync } from '../../../api/VerFondosIA';
+import { Card } from '../../../components/UI/cards';
+import NavBar from '../../../components/NavBar/navbar';
+import Instrumento from '../../../models/Instrumento';
+import React from 'react';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -10,26 +12,6 @@ const colorPalette = {
   oliveGray: '#505143',
   lightGray: '#f1f5f9',
 };
-
-// --- PASO 1: Interfaz actualizada para coincidir con la estructura real de la API ---
-interface Fondo {
-  ID: number;
-  Titulo: string;
-  Descripcion: string;
-  Beneficios: string;
-  Requisitos: string;
-  Estado: string;
-  FechaDeApertura: string;
-  FechaDeCierre: string;
-  MontoMinimo: number;
-  MontoMaximo: number;
-  DuracionEnMeses: number;
-  Alcance: string;
-  TipoDeBeneficio: string;
-  TipoDePerfil: string;
-  EnlaceDeLaFoto: string;
-  EnlaceDelDetalle: string;
-}
 
 // --- Componente auxiliar para el estado del concurso ---
 const StatusBadge: React.FC<{ estado: string }> = ({ estado }) => {
@@ -60,7 +42,7 @@ const DetalleFondo: React.FC = () => {
   const navigate = useNavigate();
   const { fondoId } = useParams<{ fondoId: string }>();
 
-  const [fondo, setFondo] = useState<Fondo | null>(null);
+  const [fondo, setFondo] = useState<Instrumento | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,27 +55,26 @@ const DetalleFondo: React.FC = () => {
         if (!response || !response.funds) {
           throw new Error('No se pudo obtener la lista de fondos desde la API.');
         }
-
-        const todosLosFondos: Fondo[] = response.funds;
+        const todosLosFondos: Instrumento[] = response.funds;
         const fondoEncontrado = todosLosFondos.find(f => f.ID === parseInt(fondoId));
-
         if (fondoEncontrado) {
           setFondo(fondoEncontrado);
-        } else {
+        }
+        else {
           setError('El fondo solicitado no fue encontrado.');
         }
-      } catch (err: any) {
+      }
+      catch (err: any) {
         setError(err.message || 'Ocurrió un error al cargar los datos del fondo.');
-      } finally {
+      }
+      finally {
         setLoading(false);
       }
     };
-
     fetchFondo();
   }, [fondoId]);
 
   const handleBack = () => navigate(-1);
-
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Cargando detalles del fondo...</div>;
   }
@@ -101,14 +82,12 @@ const DetalleFondo: React.FC = () => {
     return <div className="flex justify-center items-center h-screen text-red-500">Error: {error}</div>;
   }
   if (!fondo) {
-    return <div className="flex justify-center items-center h-screen">Fondo no disponible.</div>;
+    return <div className="flex justify-center items-center h-screen">Instrumento no disponible.</div>;
   }
-
-  // --- PASO 2: Renderizado actualizado para mostrar todos los nuevos campos ---
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: colorPalette.lightGray }}>
       <NavBar />
-      <main className="flex-grow p-6 md:p-10 mt-[5%]">
+      <main className="flex-grow p-6 md:p-10 mt-24 sm:mt-32">
         <div className="max-w-5xl mx-auto space-y-8">
           <div>
             <button onClick={handleBack} className="px-4 py-2 font-semibold text-white rounded-lg shadow-md transition-all duration-300 hover:bg-[rgba(68,98,74,0.8)]" style={{ backgroundColor: colorPalette.darkGreen }}>
@@ -121,8 +100,6 @@ const DetalleFondo: React.FC = () => {
           <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden shadow-xl">
             <img src={fondo.EnlaceDeLaFoto || '/sin-foto.png'} alt={fondo.Titulo} className="w-full h-full object-cover" />
           </div>
-          
-          {/* --- Sección de Resumen con datos clave --- */}
           <Card>
             <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
               <div>
@@ -141,18 +118,14 @@ const DetalleFondo: React.FC = () => {
               </div>
             </div>
           </Card>
-
-          {/* --- Tarjeta de Descripción --- */}
           <Card>
             <div className="p-6 md:p-8">
-              <h2 className="text-2xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Descripción del Fondo</h2>
+              <h2 className="text-2xl font-semibold mb-4" style={{ color: colorPalette.darkGreen }}>Descripción del Instrumento</h2>
               <p className="text-base leading-relaxed whitespace-pre-wrap" style={{ color: colorPalette.oliveGray }}>
                 {fondo.Descripcion}
               </p>
             </div>
           </Card>
-
-          {/* --- Tarjeta de Requisitos --- */}
           {fondo.Requisitos && (
             <Card>
               <div className="p-6 md:p-8">
@@ -163,8 +136,6 @@ const DetalleFondo: React.FC = () => {
               </div>
             </Card>
           )}
-
-          {/* --- Tarjeta de Beneficios --- */}
           {fondo.Beneficios && (
             <Card>
               <div className="p-6 md:p-8">
@@ -175,7 +146,6 @@ const DetalleFondo: React.FC = () => {
               </div>
             </Card>
           )}
-
           <div className="flex justify-end pt-4">
             <button
               onClick={() => window.open(fondo.EnlaceDelDetalle, '_blank')}

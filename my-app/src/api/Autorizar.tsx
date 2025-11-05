@@ -1,4 +1,4 @@
-export async function Autorizar(correo, contrasena) {
+export async function Autorizar(correo: string, contrasena: string) {
   try {
     const response = await fetch(`http://127.0.0.1:8000/autorizar`, {
       method: 'POST',

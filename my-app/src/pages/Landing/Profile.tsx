@@ -5,21 +5,13 @@ import { Briefcase, ShieldCheck } from 'lucide-react';
 import { UserCircle2, Building2 } from 'lucide-react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Users, MapPin } from 'lucide-react';
-
-import { Card } from '../../components/UI/cards';
 import { useNavigate } from 'react-router-dom';
-import NavBar from '../../components/NavBar/navbar';
-import React from 'react';
-
+import { Card } from '../../components/UI/cards';
+import Beneficiario from '../../models/Beneficiario';
 import Persona from "../../models/Persona";
 import Usuario from "../../models/Usuario";
-import Beneficiario from '../../models/Beneficiario';
-
-interface MemberRelation {
-  ID: number;
-  Persona: number;
-  Beneficiario: number;
-}
+import NavBar from '../../components/NavBar/navbar';
+import React from 'react';
 
 const colorPalette = {
   darkGreen: '#44624a',
@@ -46,8 +38,6 @@ const ProfileI: React.FC = () => {
   const [members, setMembers] = useState<Persona[]>([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // --- PAGINACIÓN ---
   const [currentPage, setCurrentPage] = useState(1);
   const MEMBERS_PER_PAGE = 3;
 
@@ -67,39 +57,19 @@ const ProfileI: React.FC = () => {
       try {
         const datos = JSON.parse(storedUser);
         const user: Usuario = datos.Usuario;
+        
+        const persona: Persona = datos.Miembros?.find((p: Persona) => p.ID === user.Persona) || datos.Miembros[0];
         const beneficiario: Beneficiario = datos.Beneficiario;
-        //const beneficiarioId = beneficiario?.ID;
+        const allMembers: Persona[] = datos.Miembros;
 
-        /*
-
-        if (!user || !beneficiarioId) {
+        if (!user || !persona || !beneficiario) {
           throw new Error("La información de sesión es incompleta.");
-        }      
-        const [membersRes, personasRes] = await Promise.all([
-            fetch('http://127.0.0.1:8000/miembros/'),
-            fetch('http://127.0.0.1:8000/personas/')
-        ]);
+        }
 
-        if (!membersRes.ok || !personasRes.ok)
-          throw new Error("Error al obtener datos del servidor.");
-
-        const allMemberRelations: MemberRelation[] = await membersRes.json();
-        const allPersonas: Persona[] = await personasRes.json();
-        const currentUserPersona = allPersonas.find(p => p.ID === user.Persona);
-
-        if(!currentUserPersona)
-          throw new Error("No se encontraron los datos de la persona del usuario.");
-
-        const companyMemberRelations = allMemberRelations.filter(rel => rel.Beneficiario === beneficiarioId);
-        const companyMembers = companyMemberRelations
-          .map(relation => allPersonas.find(p => p.ID === relation.Persona))
-          .filter((p): p is Persona => p !== undefined); 
-          */
-
-        //setProfileUser(user);
-        //setProfilePersona(currentUserPersona);
-        //setCompanyInfo(beneficiario);
-        //setMembers(companyMembers);
+        setProfileUser(user);
+        setProfilePersona(persona);
+        setCompanyInfo(beneficiario);
+        setMembers(allMembers);
       }
       catch (err: any) {
         setError(err.message || "Ocurrió un error al cargar el perfil.");
@@ -153,10 +123,11 @@ const ProfileI: React.FC = () => {
         setProfilePersona(persona);
         setCompanyInfo(beneficiario);
         setMembers(allMembers);
-
-      } catch (err: any) {
+      }
+      catch (err: any) {
         setError(err.message || "Ocurrió un error al cargar el perfil.");
-      } finally {
+      }
+      finally {
         setLoading(false);
       }
     };

@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react'; // Se importa useEffect
+import { useState, useEffect } from 'react'; // Se importa useEffect
+import { VerMisProyectos } from '../../../api/VerMisProyectos';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../../../components/NavBar/navbar';
 import Proyecto from "../../../models/Proyecto";
+import React from 'react'; // Se importa useEffect
 
 // El componente ProjectCard no necesita cambios, está perfecto.
 const ProjectCard: React.FC<{ proyecto: Proyecto; onSelect: () => void }> = ({ proyecto, onSelect }) => {
@@ -23,7 +25,25 @@ const ProjectCard: React.FC<{ proyecto: Proyecto; onSelect: () => void }> = ({ p
             {proyecto.Area}
           </span>
         </div>
-        <button onClick={onSelect} className="w-full bg-[#8ba888] hover:bg-[#3a523f] text-white font-semibold py-2.5 sm:py-3 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-1 text-sm sm:text-base">
+        <button 
+          onClick={onSelect} 
+          className="w-full text-white font-semibold py-2.5 sm:py-3 rounded-xl shadow-md text-sm sm:text-base"
+          style={{
+            background: 'linear-gradient(to right, #44624a 0%, #8ba888 50%, #44624a 100%)',
+            backgroundSize: '200% 100%',
+            backgroundPosition: '0% 0%',
+            transition: 'all 0.6s ease',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundPosition = '100% 0%';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundPosition = '0% 0%';
+            e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+          }}
+        >
           Seleccionar y Buscar Fondos
         </button>
       </div>
@@ -33,12 +53,11 @@ const ProjectCard: React.FC<{ proyecto: Proyecto; onSelect: () => void }> = ({ p
 
 const MisProyectosH: React.FC = () => {
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
-  const [loading, setLoading] = useState<boolean>(true); // Estado para la carga
-  const [error, setError] = useState<string | null>(null); // Estado para errores
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
-  // --- NUEVA LÓGICA PARA OBTENER PROYECTOS ---
   useEffect(() => {
     const fetchProyectos = async () => {
       setLoading(true);
@@ -48,33 +67,26 @@ const MisProyectosH: React.FC = () => {
         if (!storedUser) {
           throw new Error("No se encontró información del usuario en la sesión.");
         }
-        
         const userData = JSON.parse(storedUser);
-        // Usamos la misma ruta que en el código de referencia para obtener el ID
-        const empresaId = userData?.Usuario?.ID;
-        if (!empresaId) {
+        const id = userData?.Usuario?.ID;
+        if (!id) {
           throw new Error("No se pudo obtener el ID de la empresa del usuario.");
         }
-
-        const response = await fetch(`http://127.0.0.1:8000/usuarios/${empresaId}/proyectos`);
-        if (!response.ok) {
-          throw new Error(`Error al cargar los proyectos: ${response.statusText}`);
+        const proyectos = await VerMisProyectos(id);
+        if (proyectos) {
+          setProyectos(proyectos);
         }
-
-        const data: Proyecto[] = await response.json();
-        setProyectos(data);
-
-      } catch (err: any) {
+      }
+      catch (err: any) {
         setError(err.message || "Ocurrió un error inesperado al cargar los proyectos.");
-      } finally {
+      }
+      finally {
         setLoading(false);
       }
     };
-
     fetchProyectos();
-  }, []); // El array vacío [] asegura que se ejecute solo una vez al montar el componente
+  }, []);
 
-  // La lógica de filtrado ahora usa el estado 'proyectos'
   const filteredProyectos = proyectos.filter(p =>
     p.Titulo.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -84,7 +96,6 @@ const MisProyectosH: React.FC = () => {
     navigate('/Matcha/My-projects/proyectos-historicos');
   };
 
-  // --- MANEJO DE ESTADOS DE CARGA Y ERROR EN LA VISTA ---
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f1f5f9] flex flex-col">
@@ -95,7 +106,6 @@ const MisProyectosH: React.FC = () => {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="min-h-screen bg-[#f1f5f9] flex flex-col">
@@ -106,8 +116,6 @@ const MisProyectosH: React.FC = () => {
       </div>
     );
   }
-
-  // --- VISTA PRINCIPAL (CUANDO LOS DATOS YA CARGARON) ---
   return (
     <div className="min-h-screen bg-[#f1f5f9]">
       <NavBar />

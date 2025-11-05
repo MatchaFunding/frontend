@@ -1,7 +1,7 @@
 import Idea from '../models/Idea.tsx'
-import IdeaRespuesta from '../models/IdeaRespuesta.ts'
+import IdeaRespuesta from '../models/IdeaRespuesta.tsx'
 
-export async function CrearIdeaIAAsync(data: Idea) {
+export async function CrearIdeaIA(data: Idea) {
   try {
     const response = await fetch(`https://ai.matchafunding.com/api/v1/ideas/`, {
       method: 'POST',
@@ -29,4 +29,4 @@ export async function CrearIdeaIAAsync(data: Idea) {
   }
 }
 
-export default CrearIdeaIAAsync;
+export default CrearIdeaIA;

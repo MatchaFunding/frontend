@@ -14,7 +14,7 @@ OUTPUT_FILENAME = "qr_proyecto_final_color.png"
 # --- NUEVAS OPCIONES DE COLOR ---
 # Color de los módulos del QR (ejemplo: un tono de verde para "matcha")
 # Usa el formato de código hexadecimal (#RRGGBB) o nombre de color ('red', 'blue', etc.)
-QR_COLOR = "#919C2B"  # Verde esmeralda (similar al matcha)
+QR_COLOR = "#44624a"  # Verde esmeralda (similar al matcha)
 
 # Color de fondo del QR. Cuidado: un color oscuro puede dificultar el escaneo.
 # Se recomienda mantener el fondo BLANCO o muy claro.

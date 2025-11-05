@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import NavBar from '../../components/NavBar/navbar';
 import { Card } from '../../components/UI/cards';
 import { useNavigate } from 'react-router-dom';
+import { CambiarUsuario } from '../../api/CambiarUsuario';
+import { CambiarPersona } from '../../api/CambiarPersona';
 import { VerMiUsuario } from '../../api/VerMiUsuario';
 import { VerMiBeneficiario } from '../../api/VerMiBeneficiario';
 import { VerMisProyectos } from '../../api/VerMisProyectos';
@@ -125,23 +127,11 @@ const EditProfile: React.FC = () => {
         };
 
         try {
-            const [personaResponse, usuarioResponse] = await Promise.all([
-                fetch(`http://127.0.0.1:8000/personas/${originalPersona.ID}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(personaPayload),
-                }),
-                fetch(`http://127.0.0.1:8000/usuarios/${originalUser.ID}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(usuarioPayload),
-                })
-            ]);
+            const personaResponse = await CambiarPersona(originalPersona.ID, personaPayload);
+            const usuarioResponse = await CambiarUsuario(originalUser.ID, usuarioPayload);
 
-            if (!personaResponse.ok || !usuarioResponse.ok) {
-                const personaError = personaResponse.ok ? null : await personaResponse.text();
-                const usuarioError = usuarioResponse.ok ? null : await usuarioResponse.text();
-                throw new Error(`Error al guardar: ${personaError || ''} ${usuarioError || ''}`);
+            if (!personaResponse || !usuarioResponse) {
+                throw new Error('Error al guardar datos');
             }
 
             const userData = localStorage.getItem("usuario");

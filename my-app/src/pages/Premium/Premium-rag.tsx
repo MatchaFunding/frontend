@@ -20,29 +20,21 @@ function PremiumRag() {
 		const calculateContainerWidth = () => {
 			const windowWidth = window.innerWidth;
 			const cardWidth = windowWidth >= 640 ? 304 : 320; 
-			
 			const gapSmall = 16; 
 			const gapLarge = 24; 
 			const currentGap = windowWidth >= 640 ? gapLarge : gapSmall;
-		
 			const containerPercentage = windowWidth >= 640 ? 0.90 : 0.95;
 			let containerWidth = windowWidth * containerPercentage;
-			
 			const maxScreenWidth = 1536;
 			if (containerWidth > maxScreenWidth) {
 				containerWidth = maxScreenWidth;
 			}
-
 			const paddingPerSide = windowWidth >= 640 ? 16 : 8;
 			const totalPadding = paddingPerSide * 2;
-			
 			const availableWidth = containerWidth - totalPadding;
-			
 			let cardsPerRow = Math.floor((availableWidth + currentGap) / (cardWidth + currentGap));
 			cardsPerRow = Math.max(1, cardsPerRow); 
-			
 			const totalWidth = (cardsPerRow * cardWidth) + ((cardsPerRow - 1) * currentGap);
-			
 			setContainerWidth(totalWidth);
 		};
 		
@@ -89,11 +81,9 @@ function PremiumRag() {
 		const availableWidth = containerWidth - totalPadding;
 		let cardsPerRow = Math.floor((availableWidth + currentGap) / (cardWidth + currentGap));
 		cardsPerRow = Math.max(1, cardsPerRow);
-		
 		// Calcular cuántas cards fantasma necesitamos
 		const remainder = paginatedCards.length % cardsPerRow;
 		const ghostCount = remainder === 0 ? 0 : cardsPerRow - remainder;
-		
 		return [...paginatedCards, ...Array(ghostCount).fill(null)];
 	}, [paginatedCards]);
 

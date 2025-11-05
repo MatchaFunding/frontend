@@ -1,7 +1,6 @@
 import Persona from '../models/Persona.tsx'
-import { useEffect, useState } from 'react';
 
-export async function CrearPersonaAsync(data: Persona) {
+export async function CrearPersona(data: Persona) {
   try {
     const response = await fetch(`http://127.0.0.1:8000/personas/`, {
       method: 'POST',
@@ -26,14 +25,3 @@ export async function CrearPersonaAsync(data: Persona) {
     throw new Error('Error al obtener los datos');
   }
 }
-export function CrearPersona(data: Persona) {
-  const [Persona, setPersona] = useState<Persona>();
-
-  useEffect(() => {
-      CrearPersonaAsync(data).then((out) => {
-      setPersona(out);
-      });
-  }, );
-  return Persona;
-}
-export default CrearPersona;

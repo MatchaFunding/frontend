@@ -1,9 +1,9 @@
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+import Idea from '../../models/Idea'
+
 // Tipos para FiltersIdea
 export type OrderOption = 'none' | 'idea-asc' | 'idea-desc' | 'campo-asc' | 'campo-desc' | 'fecha-desc' | 'fecha-asc';
 export type CardsPerPageOption = 8 | 10 | 15 | 25 | 40 | 999;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Estado de los filtros aplicados para ideas
 export interface FiltersIdeaValues {
   campo: string;
@@ -20,7 +20,6 @@ export interface FiltersIdeaProps {
   onApplyFilters: (filters: FiltersIdeaValues) => void;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Datos estáticos para ideas
 
 // Campos de ideas (puedes ajustar según tus necesidades)
@@ -55,7 +54,6 @@ export const showOptions = [
     { value: 999, label: 'Todas' }
 ];
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Detecta cuando el usuario hace clic fuera de ciertos elementos
 export const handleClickOutside = (
   event: MouseEvent,
@@ -90,24 +88,24 @@ export const initialFiltersIdea: FiltersIdeaValues = {
   fecha: ''
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Funciones de ordenamiento para ideas
 
 // Interfaz para representar una idea (ajusta según tu estructura de datos)
-export interface IdeaItem {
+/*
+export interface Idea {
   ID: number;
   Usuario: number;
   Campo: string;
   Problema: string;
   Publico: string;
   Innovacion: string;
-  Oculta: boolean;
   FechaDeCreacion: string | null;
   Propuesta: string | null;
 }
+*/
 
 // Función principal de ordenamiento
-export function sortIdeas(ideas: IdeaItem[], orderBy: OrderOption): IdeaItem[] {
+export function sortIdeas(ideas: Idea[], orderBy: OrderOption): Idea[] {
   const sortedIdeas = [...ideas];
   switch (orderBy) {
     case 'idea-asc':
@@ -125,7 +123,7 @@ export function sortIdeas(ideas: IdeaItem[], orderBy: OrderOption): IdeaItem[] {
 }
 
 // Función para filtrar ideas por campo
-export function filterIdeasByCampo(ideas: IdeaItem[], Campo: string): IdeaItem[] {
+export function filterIdeasByCampo(ideas: Idea[], Campo: string): Idea[] {
   if (!Campo || Campo === '') {
     return ideas;
   }
@@ -133,7 +131,7 @@ export function filterIdeasByCampo(ideas: IdeaItem[], Campo: string): IdeaItem[]
 }
 
 // Función para filtrar ideas por público objetivo
-export function filterIdeasByAudience(ideas: IdeaItem[], Publico: string): IdeaItem[] {
+export function filterIdeasByAudience(ideas: Idea[], Publico: string): Idea[] {
   if (!Publico || Publico === '') {
     return ideas;
   }
@@ -141,7 +139,7 @@ export function filterIdeasByAudience(ideas: IdeaItem[], Publico: string): IdeaI
 }
 
 // Función para filtrar ideas por texto en idea/problema
-export function filterIdeasByIdeaText(ideas: IdeaItem[], searchText: string): IdeaItem[] {
+export function filterIdeasByIdeaText(ideas: Idea[], searchText: string): Idea[] {
   if (!searchText || searchText.trim() === '') {
     return ideas;
   }
@@ -152,7 +150,7 @@ export function filterIdeasByIdeaText(ideas: IdeaItem[], searchText: string): Id
 }
 
 // Función para filtrar ideas por texto en campo
-export function filterIdeasByCampoText(ideas: IdeaItem[], searchText: string): IdeaItem[] {
+export function filterIdeasByCampoText(ideas: Idea[], searchText: string): Idea[] {
   if (!searchText || searchText.trim() === '') {
     return ideas;
   }
@@ -163,7 +161,7 @@ export function filterIdeasByCampoText(ideas: IdeaItem[], searchText: string): I
 }
 
 // Función combinada para aplicar todos los filtros y ordenamiento
-export function applyFiltersAndSorting(ideas: IdeaItem[], filters: FiltersIdeaValues): IdeaItem[] {
+export function applyFiltersAndSorting(ideas: Idea[], filters: FiltersIdeaValues): Idea[] {
   let filteredIdeas = [...ideas];
   filteredIdeas = filterIdeasByCampo(filteredIdeas, filters.campo);
   filteredIdeas = filterIdeasByAudience(filteredIdeas, filters.publico);

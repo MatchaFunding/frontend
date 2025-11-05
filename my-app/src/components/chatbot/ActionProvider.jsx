@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+import { sendRagQuestion } from '../../api/RagChat';
 
 // Instancia global para acceso desde componentes externos
 let globalActionProviderInstance = null;
@@ -69,24 +69,7 @@ class ActionProvider {
   }
 
   /**
-   * Maneja las consultas del usuario enviándolas a la API RAG externa
-   * 
-   * IMPORTANTE: CONFIGURACIÓN DE CORS
-   * ================================
-   * Para que esta implementación funcione correctamente, la API RAG externa DEBE tener
-   * CORS (Cross-Origin Resource Sharing) habilitado para permitir peticiones desde el
-   * dominio del frontend (ej: localhost:3000 en desarrollo, o tu dominio en producción).
-   * 
-   * En el backend de tu compañero, debe incluir headers como:
-   * - Access-Control-Allow-Origin: http://localhost:3000 (o *)
-   * - Access-Control-Allow-Methods: POST, GET, OPTIONS
-   * - Access-Control-Allow-Headers: Content-Type
-   * 
-   * Si están usando FastAPI, pueden usar:
-   * from fastapi.middleware.cors import CORSMiddleware
-   * 
-   * Si usan Flask:
-   * from flask_cors import CORS
+   * Maneja las consultas del usuario enviándolas a la API RAG
    * 
    * @param {string} userMessage - El mensaje/pregunta del usuario
    */
@@ -116,31 +99,17 @@ class ActionProvider {
     }));
 
     try {
-      // URL de la API RAG externa - CAMBIAR ESTA URL POR LA REAL
-      const API_URL = 'http://localhost:8000/api/rag/query'; // Ejemplo: Ajusta según la API de tu compañero
-      
-      // Realizar la petición POST a la API RAG
-      const response = await axios.post(
-        API_URL,
-        {
-          query: userMessage,
-          // Puedes agregar parámetros adicionales según la API:
-          // fondo_id: fondoId, // Si necesitas especificar el fondo
-          // max_results: 5,    // Número máximo de resultados
-          // context: true,     // Si quieres contexto adicional
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          // Timeout de 30 segundos
-          timeout: 30000,
-        }
-      );
+      // Obtener el nombre del fondo desde la URL (si está disponible)
+      const pathParts = window.location.pathname.split('/');
+      const fondoNombre = pathParts[pathParts.length - 1] !== 'rag' 
+        ? decodeURIComponent(pathParts[pathParts.length - 1]) 
+        : undefined;
+
+      // Llamar a la API RAG
+      const response = await sendRagQuestion(userMessage, fondoNombre);
 
       // Extraer la respuesta de la API
-      // AJUSTAR según la estructura de respuesta de tu API
-      const botResponse = response.data.answer || response.data.response || 'No pude obtener una respuesta.';
+      const botResponse = response.answer || 'No pude obtener una respuesta.';
 
       // Crear mensaje del bot con la respuesta
       const message = this.createChatBotMessage(botResponse);
@@ -157,14 +126,12 @@ class ActionProvider {
       let errorMessage = 'Lo siento, hubo un error al procesar tu consulta.';
 
       // Mensajes de error más específicos
-      if (error.code === 'ECONNABORTED') {
+      if (error.message?.includes('NetworkError') || error.message?.includes('Failed to fetch')) {
+        errorMessage = '🔌 No se pudo conectar con el servidor de IA (ai.matchafunding.com). Verifica que esté activo.';
+      } else if (error.message?.includes('timeout')) {
         errorMessage = '⏱️ La consulta tardó demasiado tiempo. Por favor, intenta de nuevo.';
-      } else if (error.response) {
-        // El servidor respondió con un código de error
-        errorMessage = `❌ Error del servidor: ${error.response.status}. ${error.response.data?.message || 'Por favor, intenta más tarde.'}`;
-      } else if (error.request) {
-        // La petición se hizo pero no hubo respuesta
-        errorMessage = '🔌 No se pudo conectar con el servidor. Verifica que la API RAG esté activa y que CORS esté habilitado.';
+      } else if (error.message?.includes('CORS')) {
+        errorMessage = '🚫 Error de CORS. Contacta al administrador del sistema.';
       }
 
       const message = this.createChatBotMessage(errorMessage);

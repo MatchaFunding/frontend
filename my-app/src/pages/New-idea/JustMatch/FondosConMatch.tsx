@@ -1,24 +1,12 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import type Proyecto from '../../../models/Proyecto';
+import { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
-import NavBar from '../../../components/NavBar/navbar';
 import { DisclaimerModal } from '../../../components/Shared/Disclaimer';
-import LoopAnimation from '../../../components/Shared/animationFrame';
-
 import { VerFondosIAAsync } from '../../../api/VerFondosIA';
 import { getMatchProyectoFondosAsync } from '../../../api/MatchFondos';
-import type Proyecto from '../../../models/Proyecto';
-
-/*
-const colorPalette = {
-  darkGreen: '#44624a',
-  softGreen: '#8ba888',
-  oliveGray: '#505143',
-  lightGray: '#f1f5f9',
-};
-*/
-
-// --- INTERFACES ---
+import LoopAnimation from '../../../components/Shared/animationFrame';
+import NavBar from '../../../components/NavBar/navbar';
+import React from 'react';
 
 interface ProyectoSeleccionado {
   id: number;
@@ -44,7 +32,6 @@ interface Fondo {
   TipoDePerfil: string;
   EnlaceDeLaFoto: string;
   EnlaceDelDetalle: string;
-
   compatibilidad?: number;
   semantic_score?: number;
   topic_score?: number;
@@ -63,67 +50,7 @@ interface VerFondosResponse {
   funds: Fondo[];
 }
 
-interface ScoreData {
-  semantic_score?: number;
-  topic_score?: number;
-  rules_score?: number;
-}
-
-interface FondoCardProps extends Fondo {
-  onRightClick: (event: React.MouseEvent, scores: ScoreData) => void;
-}
-
-// --- COMPONENTE PARA EL MENÚ CONTEXTUAL (SCORE CONTEXT MENU) ---
-
-interface ContextMenuProps {
-    x: number;
-    y: number;
-    scores: ScoreData;
-    onClose: () => void;
-}
-
-const ScoreContextMenu: React.FC<ContextMenuProps> = ({ x, y, scores, onClose }) => {
-  const formatScore = (score?: number) => {
-    if (score === undefined || score === null) return 'N/A';
-    return `${(score * 100).toFixed(1)}%`;
-  };
-
-  console.log(onClose);
-
-  return (
-    <div
-      style={{ top: y, left: x }}
-      className="absolute bg-white rounded-lg shadow-2xl p-4 z-50 border border-slate-200 w-64 animate-fade-in-fast"
-      // Detiene la propagación del click dentro del menú para que no se cierre inmediatamente
-      onContextMenu={(e) => e.stopPropagation()} 
-      onClick={(e) => e.stopPropagation()}
-    >
-      <h4 className="font-bold text-slate-800 text-lg mb-2">Detalle de Afinidad</h4>
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between items-center">
-          <span className="text-slate-600">Puntaje Semántico:</span>
-          <span className="font-semibold text-slate-800 bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
-            {formatScore(scores.semantic_score)}
-          </span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-slate-600">Puntaje Temático:</span>
-          <span className="font-semibold text-slate-800 bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
-            {formatScore(scores.topic_score)}
-          </span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-slate-600">Puntaje por Reglas:</span>
-          <span className="font-semibold text-slate-800 bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
-            {formatScore(scores.rules_score)}
-          </span>
-        </div>
-      </div>
-       <p className="text-xs text-slate-400 mt-3 italic">Estos puntajes miden qué tan bien coincide tu proyecto con el fondo en diferentes aspectos.</p>
-    </div>
-  );
-};
-
+interface FondoCardProps extends Fondo {}
 
 const SearchIcon: React.FC = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#505143" className="w-5 h-5">
@@ -151,45 +78,216 @@ const formatDate = (dateString: string) => {
   }
 };
 
-// --- COMPONENTE FondoCard (Corregido) ---
-const FondoCard: React.FC<FondoCardProps> = ({ ID, Titulo, Descripcion, compatibilidad, Estado, FechaDeCierre, MontoMaximo, TipoDeBeneficio, EnlaceDeLaFoto, semantic_score, topic_score, rules_score, onRightClick }) => {
+// --- COMPONENTE FondoCard siguiendo el formato de free-search-card ---
+const FondoCard: React.FC<FondoCardProps> = ({ ID, Titulo, Descripcion, compatibilidad, Estado, FechaDeApertura, FechaDeCierre, MontoMaximo, TipoDeBeneficio, EnlaceDeLaFoto, semantic_score, topic_score, rules_score }) => {
   const navigate = useNavigate();
   const defaultImage = '/sin-foto.png';
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-  const handleContextMenu = (event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation(); // Importante: Detener la propagación
-    onRightClick(event, { semantic_score, topic_score, rules_score });
+  const handleMouseEnter = () => {
+    setShowTooltip(true);
+  };
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    setTooltipPosition({ x: event.clientX, y: event.clientY });
+  };
+
+  const handleMouseLeave = () => {
+    setShowTooltip(false);
   };
 
   return (
-    <div onContextMenu={handleContextMenu} className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80 cursor-pointer h-[560px]">
-      <div className="relative h-52 flex-shrink-0">
-        <img src={EnlaceDeLaFoto || defaultImage} alt={Titulo} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = defaultImage; }} />
-        {compatibilidad !== undefined && (<span className="absolute top-4 left-4 bg-[rgba(68,98,74,0.8)] backdrop-blur-sm text-white text-sm font-semibold py-1 px-3 rounded-lg">{compatibilidad}% compatibilidad</span>)}
+    <div 
+      className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-slate-200/80 overflow-hidden w-full sm:w-[19rem] max-w-[20rem] h-auto sm:h-[33rem] min-h-64"
+      style={{
+        fontFamily: "'Roboto', sans-serif"
+      }}
+    >
+      {/* Imagen container - exactamente como free-search-card */}
+      <div 
+        className="relative w-full overflow-hidden flex-shrink-0"
+        style={{ height: '9rem' }}
+      >
+        <img 
+          src={EnlaceDeLaFoto || defaultImage} 
+          alt={Titulo} 
+          className="w-full object-cover object-center block" 
+          style={{ height: '9rem' }}
+          onError={(e) => { e.currentTarget.src = defaultImage; }}
+          onMouseEnter={handleMouseEnter}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        />
+        
+        {/* Badges en la imagen */}
+        {compatibilidad !== undefined && (
+          <span className="absolute top-4 left-4 bg-[rgba(68,98,74,0.8)] backdrop-blur-sm text-white text-sm font-semibold py-1 px-3 rounded-lg">
+            {compatibilidad}% compatibilidad
+          </span>
+        )}
         <StatusBadge estado={Estado} className="absolute top-4 right-4" />
-      </div>
-      <div className="p-6 flex flex-col flex-grow">
-        <h2 className="text-xl font-bold text-slate-800 mb-2 line-clamp-2">{Titulo}</h2>
-        <p className="text-slate-500 text-sm mb-4 line-clamp-3">{Descripcion}</p>
-        <div className="mt-auto border-t border-slate-200 pt-4 space-y-3">
-          <div className="flex items-center text-sm text-slate-600">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 text-slate-400"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M-4.5 12h22.5" /></svg>
-            <strong>Cierre:</strong><span className="ml-2">{formatDate(FechaDeCierre)}</span>
-          </div>
-          {MontoMaximo > 0 && (
-            <div className="flex items-center text-sm text-slate-600">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 text-slate-400"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              <strong>Monto Máx:</strong><span className="ml-2">{new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(MontoMaximo)}</span>
+        
+        {/* Tooltip que sigue el mouse */}
+        {showTooltip && (
+          <div
+            style={{ 
+              position: 'fixed', 
+              top: tooltipPosition.y + 10, 
+              left: tooltipPosition.x + 10,
+              zIndex: 1000
+            }}
+            className="bg-white rounded-lg shadow-2xl p-4 border border-slate-200 w-64 animate-fade-in-fast pointer-events-none"
+          >
+            <h4 className="font-bold text-slate-800 text-lg mb-2">Puntaje de afinidad</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-600">Semántico:</span>
+                <span className="font-semibold text-slate-800 bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                  {semantic_score !== undefined ? `${(semantic_score * 100).toFixed(1)}%` : 'N/A'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-600">Temático:</span>
+                <span className="font-semibold text-slate-800 bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
+                  {topic_score !== undefined ? `${(topic_score * 100).toFixed(1)}%` : 'N/A'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-600">Por reglas:</span>
+                <span className="font-semibold text-slate-800 bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
+                  {rules_score !== undefined ? `${(rules_score * 100).toFixed(1)}%` : 'N/A'}
+                </span>
+              </div>
             </div>
-          )}
-          <div className="flex justify-start">
-            <span className="bg-[rgba(139,168,136,0.2)] text-[rgba(68,98,74,1)] text-xs font-semibold px-3 py-1 rounded-full">{TipoDeBeneficio}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Content - siguiendo estructura de free-search-card */}
+      <div 
+        className="flex flex-col items-start w-full h-full box-border flex-1"
+        style={{ padding: '1.5rem' }}
+      >
+        {/* Título */}
+        <h2 
+          className="font-bold text-slate-800 mb-2 w-full overflow-hidden text-ellipsis"
+          style={{
+            fontSize: '1.25rem',
+            lineHeight: '1.2',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            minHeight: '3rem'
+          }}
+        >
+          {Titulo}
+        </h2>
+        
+        {/* Descripción */}
+        <p 
+          className="text-slate-500 mb-4 font-normal w-full flex-1 break-words"
+          style={{
+            fontSize: '0.875rem',
+            lineHeight: '1.4',
+            display: '-webkit-box',
+            WebkitLineClamp: 4,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxHeight: '4.9rem',
+            hyphens: 'auto'
+          }}
+        >
+          {Descripcion}
+        </p>
+
+        {/* Fechas - formato free-search-card */}
+        <div 
+          className="mb-2 flex w-full border-t border-slate-200"
+          style={{ paddingTop: '0.5rem' }}
+        >
+          <div className="flex flex-col items-start w-1/2 min-w-0">
+            <span className="text-xs font-medium text-slate-500 mb-0.5">Apertura:</span>
+            <span className="text-xs font-semibold text-slate-700 break-words">
+              {formatDate(FechaDeApertura)}
+            </span>
+          </div>
+          <div className="flex flex-col items-start w-1/2 min-w-0">
+            <span className="text-xs font-medium text-slate-500 mb-0.5">Cierre:</span>
+            <span className="text-xs font-semibold text-slate-700 break-words">
+              {formatDate(FechaDeCierre)}
+            </span>
           </div>
         </div>
-        <button onClick={() => navigate(`/Matcha/Select-Project/fondos/detalle/${ID}`)} className="w-full bg-[#8ba888] hover:bg-[rgba(68,98,74,0.8)] text-white font-bold py-3 px-4 rounded-xl transition-colors duration-300 mt-4">
-          Ver más detalles
-        </button>
+
+        {/* Bottom section */}
+        <div className="flex flex-col mt-auto w-full">
+          {/* Metadata - exactamente como free-search-card */}
+          <div 
+            className="flex flex-col items-stretch border-t border-slate-200 mb-4 gap-2"
+            style={{ paddingTop: '0.5rem' }}
+          >
+            {/* Topic y monto en línea superior */}
+            <div className="flex justify-between items-center w-full">
+              <span 
+                className="inline-block whitespace-nowrap"
+                style={{
+                  background: 'rgba(139, 168, 136, 0.2)',
+                  color: 'rgba(68, 98, 74, 1)',
+                  fontSize: '0.75rem',
+                  fontWeight: '600',
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '9999px',
+                  lineHeight: '1.2'
+                }}
+              >
+                {TipoDeBeneficio}
+              </span>
+              <div className="flex-shrink-0 w-5 h-5">
+                {/* Espacio para bookmark si se necesita */}
+              </div>
+            </div>
+            
+            {/* Monto máximo */}
+            {MontoMaximo > 0 && (
+              <div 
+                className="font-bold text-slate-800 w-full text-left break-words"
+                style={{
+                  fontSize: '1.125rem',
+                  lineHeight: '1.2'
+                }}
+              >
+                {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(MontoMaximo)}
+              </div>
+            )}
+          </div>
+
+          {/* Botón - exactamente como free-search-card */}
+          <button 
+            onClick={() => navigate(`/Matcha/Select-Project/fondos/detalle/${ID}`)} 
+            className="w-full text-white border-none cursor-pointer font-bold rounded-xl mt-auto"
+            style={{
+              background: 'linear-gradient(to right, #44624a 0%, #8ba888 50%, #44624a 100%)',
+              backgroundSize: '200% 100%',
+              backgroundPosition: '0% 0%',
+              padding: '0.75rem 1rem',
+              fontSize: '1rem',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+              transition: 'all 0.6s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundPosition = '100% 0%';
+              e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundPosition = '0% 0%';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+            }}
+          >
+            Ver más detalles
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -208,13 +306,7 @@ const FondosconPorcentaje: React.FC = () => {
   const [sortBy, setSortBy] = useState<'compatibilidad' | 'alfabetico' | 'presupuesto'>('compatibilidad');
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
-  
-  // Estado para el menú contextual
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; scores: ScoreData } | null>(null);
-  
-  const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 8;
-  
+
   // --- FUNCIONES ASÍNCRONAS ---
 
   const enviarProyectoAI = async (proyecto: Proyecto): Promise<void> => {
@@ -298,28 +390,7 @@ const FondosconPorcentaje: React.FC = () => {
     CargarFondosConMatch();
   }, []);
 
-  // --- useEffect CORREGIDO para cerrar el menú ---
-  useEffect(() => {
-    const handleClickOutside = () => setContextMenu(null);
-
-    if (contextMenu) {
-      // Añadir listeners solo cuando el menú está visible
-      window.addEventListener('click', handleClickOutside);
-      window.addEventListener('contextmenu', handleClickOutside);
-    }
-
-    return () => {
-      // Limpiar listeners al desmontar o al cerrar el menú
-      window.removeEventListener('click', handleClickOutside);
-      window.removeEventListener('contextmenu', handleClickOutside);
-    };
-  }, [contextMenu]); // Dependencia clave
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, tipoBeneficioFilter, sortBy]);
-
-  // --- LÓGICA DE FILTRADO, ORDENAMIENTO Y PAGINACIÓN ---
+  // --- LÓGICA DE FILTRADO Y ORDENAMIENTO ---
   const tiposDeBeneficio = useMemo(() => ['Todas', ...new Set(fondos.map(f => f.TipoDeBeneficio).filter(Boolean))], [fondos]);
   
   const filteredFondos = useMemo(() => {
@@ -336,27 +407,17 @@ const FondosconPorcentaje: React.FC = () => {
     });
     return fondosFiltrados;
   }, [searchTerm, tipoBeneficioFilter, sortBy, fondos]);
-  
-  const paginatedFondos = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredFondos.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [currentPage, filteredFondos]);
-
-  const totalPages = Math.ceil(filteredFondos.length / ITEMS_PER_PAGE);
-
-  // --- MANEJADORES DE EVENTOS ---
-  const handleCardRightClick = (event: React.MouseEvent, scores: ScoreData) => {
-    setContextMenu({ x: event.clientX, y: event.clientY, scores });
-  };
 
   // --- RENDERIZADO ---
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#f1f5f9] flex flex-col">
         <NavBar />
-        <div className="flex flex-col items-center justify-center flex-1 space-y-6">
+        <div className="flex flex-col items-center justify-center flex-1 space-y-6 px-4">
           <LoopAnimation />
-          <p className="text-xl sm:text-2xl font-semibold text-gray-700 animate-pulse">Analizando tu proyecto y buscando los mejores fondos...</p>
+          <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700 animate-pulse text-center max-w-md sm:max-w-lg">
+            Analizando tu proyecto y buscando los mejores fondos...
+          </p>
         </div>
       </div>
     );
@@ -380,7 +441,7 @@ const FondosconPorcentaje: React.FC = () => {
     <div className="min-h-screen bg-[#f1f5f9]">
       <NavBar />
       {showDisclaimer && <DisclaimerModal onClose={() => setShowDisclaimer(false)} />}
-      <main className="flex-grow p-6 md:p-10 max-w-screen-2xl mx-auto mt-[5%]">
+      <main className="flex-grow p-6 md:p-10 max-w-screen-2xl mx-auto mt-24 sm:mt-32">
         <div className="text-center mb-10">
           {selectedProject ? (
             <>
@@ -421,43 +482,18 @@ const FondosconPorcentaje: React.FC = () => {
           </div>
         )}
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {paginatedFondos.length > 0 ? (
-            paginatedFondos.map(fondo => (<FondoCard key={fondo.ID} {...fondo} onRightClick={handleCardRightClick} />))
+        <div className="flex justify-center gap-4 sm:gap-6 flex-wrap" style={{ maxWidth: 'fit-content' }}>
+          {filteredFondos.length > 0 ? (
+            filteredFondos.map(fondo => (<FondoCard key={fondo.ID} {...fondo} />))
           ) : (
-            <div className="col-span-full text-center py-12">
+            <div className="w-full text-center py-12">
               <p className="text-xl text-gray-500">
                 {selectedProject ? "No se encontraron fondos recomendados para este proyecto." : "Por favor, selecciona un proyecto para ver fondos recomendados."}
               </p>
             </div>
           )}
         </div>
-        
-        <footer className="flex flex-col sm:flex-row justify-between items-center mt-10 text-slate-600">
-          <p>Mostrando {paginatedFondos.length > 0 ? ((currentPage - 1) * ITEMS_PER_PAGE) + 1 : 0} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredFondos.length)} de {filteredFondos.length} fondos</p>
-          {totalPages > 1 && (
-            <div className="flex items-center gap-2 mt-4 sm:mt-0">
-              <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="px-3 py-1 border rounded-lg hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed">&lt;</button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNumber => (
-                <button key={pageNumber} onClick={() => setCurrentPage(pageNumber)} className={`px-3 py-1 border rounded-lg ${currentPage === pageNumber ? 'bg-[#44624a] text-white border-[#44624a]' : 'hover:bg-slate-200'}`}>
-                  {pageNumber}
-                </button>
-              ))}
-              <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} className="px-3 py-1 border rounded-lg hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed">&gt;</button>
-            </div>
-          )}
-        </footer>
       </main>
-      
-      {/* Renderiza el menú contextual si el estado no es null */}
-      {contextMenu && (
-        <ScoreContextMenu 
-          x={contextMenu.x} 
-          y={contextMenu.y} 
-          scores={contextMenu.scores} 
-          onClose={() => setContextMenu(null)}
-        />
-      )}
     </div>
   );
 };

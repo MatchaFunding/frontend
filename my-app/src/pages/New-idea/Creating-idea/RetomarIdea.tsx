@@ -6,7 +6,7 @@ import { Card, CardContent } from "../../../components/UI/cards";
 import { Textarea } from "../../../components/UI/textarea";
 import { StepIndicator } from "../../../components/Shared/StepIndicator";
 import { CambiarIdea } from "../../../api/CambiarIdea";
-import { CrearIdeaIAAsync } from "../../../api/CrearIdeaIa";
+import { CrearIdeaIA } from "../../../api/CrearIdeaIA";
 import Idea from "../../../models/Idea";
 
 interface IdeaForm {
@@ -148,7 +148,7 @@ const RetomarIdea: React.FC = () => {
       console.log('Generando resumen LLM completamente nuevo con IA...', ideaParaIA);
       
       // Llamar a la API de IA para generar el resumen LLM
-      const aiResponse = await CrearIdeaIAAsync(ideaParaIA);
+      const aiResponse = await CrearIdeaIA(ideaParaIA);
       console.log('Resumen LLM generado:', aiResponse);
       
       // Ahora actualizar la idea existente con el nuevo resumen LLM

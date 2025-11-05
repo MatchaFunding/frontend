@@ -1,4 +1,4 @@
-export async function VerProyectosHistoricosIAAsync() {
+export async function VerProyectosHistoricosIA() {
   try {
     const response = await fetch(`https://ai.matchafunding.com/api/v1/projects/all`, {
       method: 'GET',

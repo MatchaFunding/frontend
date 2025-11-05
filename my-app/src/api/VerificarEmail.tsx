@@ -2,7 +2,7 @@ export async function VerificarEmailExiste(email: string) {
   try {
     console.log('Verificando email:', email);
     
-    const url = `http://127.0.0.1:8000/correo-sin-usar`;
+    const url = `https://backend.matchafunding.com/correo-sin-usar`;
     console.log('URL completa:', url);
     
     const payload = {

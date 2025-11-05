@@ -2,7 +2,7 @@ import Proyecto from "../models/Proyecto";
 
 export const CrearProyecto = async (data: Proyecto): Promise<Proyecto> => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/proyectos", {
+    const response = await fetch("https://backend.matchafunding.com/proyectos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

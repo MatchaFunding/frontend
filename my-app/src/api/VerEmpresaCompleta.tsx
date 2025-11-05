@@ -1,6 +1,6 @@
 export async function VerEmpresaCompletaAsync(id: number) {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/verempresacompleta/${id}/`, {
+    const response = await fetch(`https://backend.matchafunding.com/verempresacompleta/${id}/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

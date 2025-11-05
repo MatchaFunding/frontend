@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export async function VerTodosLosInstrumentosAsync(): Promise<Instrumento[]> {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/instrumentos`, {
+    const response = await fetch(`https://backend.matchafunding.com/instrumentos`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

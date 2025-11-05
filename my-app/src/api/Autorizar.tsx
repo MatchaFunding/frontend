@@ -1,6 +1,6 @@
 export async function Autorizar(correo: string, contrasena: string) {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/autorizar`, {
+    const response = await fetch(`https://backend.matchafunding.com/autorizar`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

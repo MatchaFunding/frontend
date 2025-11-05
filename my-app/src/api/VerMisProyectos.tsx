@@ -1,6 +1,6 @@
 export async function VerMisProyectos(id: number) {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/usuarios/${id}/proyectos`, {
+    const response = await fetch(`https://backend.matchafunding.com/usuarios/${id}/proyectos`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

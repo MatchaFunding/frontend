@@ -2,7 +2,7 @@ import Colaborador from '../models/Colaborador.tsx'
 
 export async function CrearColaborador(data: Colaborador) {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/colaboradores`, {
+    const response = await fetch(`https://backend.matchafunding.com/colaboradores`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

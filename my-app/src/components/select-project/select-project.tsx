@@ -47,7 +47,7 @@ const SelectProjectModal: React.FC<SelectProjectModalProps> = ({
           const postulacion = await ObtenerPostulacionAsync(empresaId, instrumentoId);
           setPostulacionActual(postulacion);
         }
-        const response = await fetch(`http://127.0.0.1:8000/usuarios/${empresaId}/proyectos`);
+        const response = await fetch(`https://backend.matchafunding.com/usuarios/${empresaId}/proyectos`);
         if (!response.ok)
           throw new Error(`Error ${response.status}`);
         const data = await response.json();

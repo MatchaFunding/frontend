@@ -2,7 +2,7 @@ import Idea from '../models/Idea.tsx'
 
 export async function CambiarIdea(id: number, data: Idea): Promise<Idea | null> {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/ideas/${id}/`, {
+    const response = await fetch(`https://backend.matchafunding.com/ideas/${id}/`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

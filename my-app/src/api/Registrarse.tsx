@@ -1,6 +1,6 @@
 export async function Registrarse(formulario: any, nombre: string, contrasena: string, correo: string) {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/registrarse`, {
+    const response = await fetch(`https://backend.matchafunding.com/registrarse`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

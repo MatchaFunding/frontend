@@ -151,7 +151,7 @@ const handleSaveMember = async () => {
     const id: number = JSON.parse(storedUser).Usuario?.ID;
 
     try {
-        const personaResponse = await fetch(`http://127.0.0.1:8000/personas`, {
+        const personaResponse = await fetch(`https://backend.matchafunding.com/personas`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -176,7 +176,7 @@ const handleSaveMember = async () => {
         const personaId = newPersona[0].ID;
 
         if (personaId) {
-            const miembroResponse = await fetch(`http://127.0.0.1:8000/miembros`, {
+            const miembroResponse = await fetch(`https://backend.matchafunding.com/miembros`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -221,7 +221,7 @@ const handleSaveMember = async () => {
         if (!window.confirm("¿Estás seguro de que quieres eliminar a este miembro?"))
             return;
         try {
-            const response = await fetch(`http://127.0.0.1:8000/miembros/${memberIdToRemove}`, {
+            const response = await fetch(`https://backend.matchafunding.com/miembros/${memberIdToRemove}`, {
                 method: 'DELETE',
             });
             if (!response.ok) {

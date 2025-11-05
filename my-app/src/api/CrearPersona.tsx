@@ -2,7 +2,7 @@ import Persona from '../models/Persona.tsx'
 
 export async function CrearPersona(data: Persona) {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/personas/`, {
+    const response = await fetch(`https://backend.matchafunding.com/personas/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

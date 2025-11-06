@@ -35,9 +35,24 @@ const EditProfile: React.FC = () => {
     if (storedUser) {
       const data = JSON.parse(storedUser);
       const beneficiario = data.Beneficiario;
-      if (beneficiario) {
-        setCompanyFormData(data.Beneficiario);
-        setOriginalCompanyData(data.Beneficiario);
+      const id = data.Usuario?.ID;
+
+      if (beneficiario && id) {
+        const payload = new Beneficiario({
+          ID: beneficiario.ID,
+          Nombre: beneficiario.Nombre,
+          FechaDeCreacion: beneficiario.FechaDeCreacion,
+          RegionDeCreacion: beneficiario.RegionDeCreacion,
+          Direccion: beneficiario.Direccion,
+          TipoDePersona: beneficiario.TipoDePersona,
+          TipoDeEmpresa: beneficiario.TipoDeEmpresa,
+          Perfil: beneficiario.Perfil,
+          RUTdeEmpresa: beneficiario.RUTdeEmpresa,
+          RUTdeRepresentante: beneficiario.RUTdeRepresentante,
+          Usuario: id
+        });
+        setOriginalCompanyData(payload);
+        setCompanyFormData(payload);
       }
       else {
         setError('No se encontraron datos del beneficiario en la sesión.');
@@ -60,6 +75,7 @@ const EditProfile: React.FC = () => {
     const payload = { ...originalCompanyData, ...companyFormData };
 
     try {
+      console.log(`Datos a enviar: ${JSON.stringify(payload)}`);
       const beneficiario = await CambiarBeneficiario(originalCompanyData.ID, payload);
       console.log(`Beneficiario modificado: ${JSON.stringify(beneficiario)}`);
       const storedUser = localStorage.getItem('usuario');

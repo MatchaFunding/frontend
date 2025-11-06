@@ -150,13 +150,12 @@ const NuevoProyecto: React.FC = () => {
         }));
         
         setIsFromConvertedIdea(true);
-        
         // Limpiar el localStorage después de cargar
         localStorage.removeItem('convertirAProyecto');
         sessionStorage.removeItem('convertirAProyecto');
-        
         console.log('CONVERSIÓN DE IDEA A PROYECTO COMPLETADA');
-      } catch (e) {
+      }
+      catch (e) {
         console.error('Error al parsear idea para convertir:', e);
         setIsFromConvertedIdea(false);
       }
@@ -249,7 +248,7 @@ const NuevoProyecto: React.FC = () => {
                 Persona: personas[i].ID,
                 Proyecto: creado.ID,
                 Usuario: id
-              })
+              });
               const colaborador = await CrearColaborador(payload);
               console.log(`Se creo un Colaborador: ${colaborador}`);
             }

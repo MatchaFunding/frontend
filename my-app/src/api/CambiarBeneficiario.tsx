@@ -19,6 +19,7 @@ export async function CambiarBeneficiario(id: number, data: Beneficiario) {
         'Perfil':data.Perfil,
         'RUTdeEmpresa':data.RUTdeEmpresa,
         'RUTdeRepresentante':data.RUTdeRepresentante,
+        'Usuario':data.Usuario
       }),
     });
     if (!response.ok) {

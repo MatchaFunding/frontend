@@ -1,6 +1,13 @@
-import type Beneficiario from '../../models/Beneficiario.tsx';
+import { CambiarBeneficiario } from  '../../api/CambiarBeneficiario';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { VerMiUsuario } from '../../api/VerMiUsuario';
+import { VerMiBeneficiario } from '../../api/VerMiBeneficiario';
+import { VerMisProyectos } from '../../api/VerMisProyectos';
+import { VerMisPostulaciones } from '../../api/VerMisPostulaciones';
+import { VerMisMiembros } from '../../api/VerMisMiembros';
+import { VerMisIdeas } from '../../api/VerMisIdeas';
+import Beneficiario from '../../models/Beneficiario';
 import Members from './members/members.tsx';
 import Company from './company/company.tsx';
 import NavBar from '../../components/NavBar/navbar';
@@ -26,14 +33,32 @@ const EditProfile: React.FC = () => {
   useEffect(() => {
     const storedUser = localStorage.getItem('usuario');
     if (storedUser) {
-      const sessionData = JSON.parse(storedUser);
-      if (sessionData.Beneficiario) {
-        setCompanyFormData(sessionData.Beneficiario);
-        setOriginalCompanyData(sessionData.Beneficiario);
-      } else {
+      const data = JSON.parse(storedUser);
+      const beneficiario = data.Beneficiario;
+      const id = data.Usuario?.ID;
+
+      if (beneficiario && id) {
+        const payload = new Beneficiario({
+          ID: beneficiario.ID,
+          Nombre: beneficiario.Nombre,
+          FechaDeCreacion: beneficiario.FechaDeCreacion,
+          RegionDeCreacion: beneficiario.RegionDeCreacion,
+          Direccion: beneficiario.Direccion,
+          TipoDePersona: beneficiario.TipoDePersona,
+          TipoDeEmpresa: beneficiario.TipoDeEmpresa,
+          Perfil: beneficiario.Perfil,
+          RUTdeEmpresa: beneficiario.RUTdeEmpresa,
+          RUTdeRepresentante: beneficiario.RUTdeRepresentante,
+          Usuario: id
+        });
+        setOriginalCompanyData(payload);
+        setCompanyFormData(payload);
+      }
+      else {
         setError('No se encontraron datos del beneficiario en la sesión.');
       }
-    } else {
+    }
+    else {
       setError('No se encontró información de usuario en la sesión.');
     }
   }, []);
@@ -50,27 +75,35 @@ const EditProfile: React.FC = () => {
     const payload = { ...originalCompanyData, ...companyFormData };
 
     try {
-      const response = await fetch(
-        `https://backend.matchafunding.com/usuarios/${originalCompanyData.ID}/beneficiarios`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        }
-      );
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(JSON.stringify(errorData) || 'Error al guardar los cambios en la empresa.');
-      }
-      const updatedBeneficiario = await response.json();
+      console.log(`Datos a enviar: ${JSON.stringify(payload)}`);
+      const beneficiario = await CambiarBeneficiario(originalCompanyData.ID, payload);
+      console.log(`Beneficiario modificado: ${JSON.stringify(beneficiario)}`);
       const storedUser = localStorage.getItem('usuario');
+      
       if (storedUser) {
-        const sessionData = JSON.parse(storedUser);
-        sessionData.Beneficiario = updatedBeneficiario;
-        localStorage.setItem('usuario', JSON.stringify(sessionData));
+        const datos = JSON.parse(storedUser);
+        const id = datos.Usuario?.ID;
+        if (id) {
+          const usuario = await VerMiUsuario(id);
+          const beneficiario = await VerMiBeneficiario(id);
+          const proyectos = await VerMisProyectos(id);
+          const postulaciones = await VerMisPostulaciones(id);
+          const miembros = await VerMisMiembros(id);
+          const ideas = await VerMisIdeas(id);
+          
+          const datos = {
+            "Usuario":usuario,
+            "Beneficiario":beneficiario,
+            "Proyectos":proyectos,
+            "Postulaciones":postulaciones,
+            "Miembros":miembros,
+            "Ideas":ideas
+          }
+          localStorage.setItem('usuario', JSON.stringify(datos));
+          alert('¡Cambios en la empresa guardados con éxito!');
+          navigate('/Perfil');
+        }
       }
-      alert('¡Cambios en la empresa guardados con éxito!');
-      navigate('/Perfil');
     }
     catch (err: any) {
       setError(err.message);

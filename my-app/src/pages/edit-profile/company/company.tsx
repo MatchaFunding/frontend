@@ -32,28 +32,21 @@ const Company: React.FC<CompanyProps> = ({ formData, setFormData, originalData }
             </div>
             
 			<form className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-				{/* Nombre (Razón Social) */}
                 <div>
                     <label htmlFor="Nombre" className="block text-sm font-medium text-slate-600 mb-1">Razón Social</label>
                     <input type="text" id="Nombre" name="Nombre" value={formData.Nombre} onChange={handleChange}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md"/>
                 </div>
-
-				{/* RUT de Empresa */}
                 <div>
 					<label htmlFor="RUTdeEmpresa" className="block text-sm font-medium text-slate-600 mb-1">RUT de Empresa</label>
 					<input type="text" id="RUTdeEmpresa" name="RUTdeEmpresa" value={formData.RUTdeEmpresa} onChange={handleChange}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md"/>
 				</div>
-
-				{/* RUT de Representante */}
                 <div>
 					<label htmlFor="RUTdeRepresentante" className="block text-sm font-medium text-slate-600 mb-1">RUT del Representante</label>
 					<input type="text" id="RUTdeRepresentante" name="RUTdeRepresentante" value={formData.RUTdeRepresentante} onChange={handleChange}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md"/>
 				</div>
-                
-				{/* Fecha de Creación (No editable) */}
                 <div>
 					<label htmlFor="FechaDeCreacion" className="block text-sm font-medium text-slate-600 mb-1">Fecha de creación</label>
 					<input type="date" id="FechaDeCreacion" name="FechaDeCreacion" value={formData.FechaDeCreacion}
@@ -62,27 +55,38 @@ const Company: React.FC<CompanyProps> = ({ formData, setFormData, originalData }
                         disabled
                     />
 				</div>
-
-                {/* Tipo de Empresa */}
                 <div>
                     <label htmlFor="TipoDeEmpresa" className="block text-sm font-medium text-slate-600 mb-1">Tipo de Empresa</label>
                     <select id="TipoDeEmpresa" name="TipoDeEmpresa" value={formData.TipoDeEmpresa} onChange={handleChange}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md">
-                        <option value="SPA">SPA</option>
-                        <option value="EIRL">EIRL</option>
-                        <option value="SA">SA</option>
-                        {/* Agrega más tipos de empresa según sea necesario */}
+                        <option value="Sociedad Anonima">Sociedad Anonima</option>
+                        <option value="Sociedad de Responsabilidad Limitada">Sociedad de Responsabilidad Limitada</option>
+                        <option value="Sociedad por Acciones">Sociedad por Acciones</option>
+                        <option value="Empresa Individual de Responsabilidad Limitada">Empresa Individual de Responsabilidad Limitada</option>
                     </select>
                 </div>
-
-                {/* Región */}
                 <div>
                     <label htmlFor="RegionDeCreacion" className="block text-sm font-medium text-slate-600 mb-1">Región</label>
-                    <input type="text" id="RegionDeCreacion" name="RegionDeCreacion" value={formData.RegionDeCreacion} onChange={handleChange}
-                        className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md"/>
+                    <select id="RegionDeCreacion" name="RegionDeCreacion" value={formData.RegionDeCreacion} onChange={handleChange}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md">
+                        <option value="Arica y Parinacota">Arica y Parinacota</option>
+                        <option value="Tarapaca">Tarapaca</option>
+                        <option value="Antofagasta">Antofagasta</option>
+                        <option value="Atacama">Atacama</option>
+                        <option value="Coquimbo">Coquimbo</option>
+                        <option value="Valparaiso">Valparaiso</option>
+                        <option value="Santiago">Santiago</option>
+                        <option value="O'Higgins">O'Higgins</option>
+                        <option value="Maule">Maule</option>
+                        <option value="Nuble">Nuble</option>
+                        <option value="Biobio">Biobio</option>
+                        <option value="La Araucania">La Araucania</option>
+                        <option value="Los Rios">Los Rios</option>
+                        <option value="Los Lagos">Los Lagos</option>
+                        <option value="Aysen">Aysen</option>
+                        <option value="Magallanes">Magallanes</option>
+                    </select>
                 </div>
-
-				{/* Dirección */}
                 <div className="md:col-span-2">
 					<label htmlFor="Direccion" className="block text-sm font-medium text-slate-600 mb-1">Dirección</label>
 					<textarea id="Direccion" name="Direccion" value={formData.Direccion} onChange={handleChange} rows={3}

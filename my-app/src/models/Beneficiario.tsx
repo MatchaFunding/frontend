@@ -9,6 +9,7 @@ class Beneficiario {
     Perfil: string;
     RUTdeEmpresa: string;
     RUTdeRepresentante: string;
+    Usuario?: number;
     constructor(json: any) {
         this.ID = json.ID;
         this.Nombre = json.Nombre;
@@ -20,6 +21,7 @@ class Beneficiario {
         this.Perfil = json.Perfil;
         this.RUTdeEmpresa = json.RUTdeEmpresa;
         this.RUTdeRepresentante = json.RUTdeRepresentante;
+        this.Usuario = json.Usuario;
     }
 }
 export default Beneficiario;

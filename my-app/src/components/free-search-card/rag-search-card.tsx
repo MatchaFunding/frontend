@@ -43,6 +43,7 @@ const formatDate = (dateString: string): string => {
 };
 
 const RagSearchCard: React.FC<RagSearchCardProps> = ({ 
+  id,
   title, 
   description, 
   topic, 
@@ -54,9 +55,12 @@ const RagSearchCard: React.FC<RagSearchCardProps> = ({
   const navigate = useNavigate();
 
   const handleChatClick = () => {
-    // Navegar al chat con el nombre del fondo
-    const fondoSlug = encodeURIComponent(title || 'fondo');
-    navigate(`/premium/rag/${fondoSlug}`);
+    // Navegar al chat con el ID del fondo
+    if (id) {
+      navigate(`/premium/rag/${id}`);
+    } else {
+      console.error('No se puede navegar al chat: falta el ID del fondo');
+    }
   };
 
   const renderBenefit = (benefit: string) => {

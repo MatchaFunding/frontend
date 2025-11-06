@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import Chatbot from 'react-chatbot-kit';
 import 'react-chatbot-kit/build/main.css';
@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComments } from '@fortawesome/free-solid-svg-icons';
 import NavBar from '../../components/NavBar/navbar';
 import SuggestedQuestions from '../../components/chatbot/SuggestedQuestions';
+import VerTodosLosInstrumentos from '../../api/VerTodosLosInstrumentos.tsx';
 // @ts-ignore
 import config from '../../components/chatbot/config.jsx';
 // @ts-ignore
@@ -17,7 +18,18 @@ import { getActionProviderInstance } from '../../components/chatbot/ActionProvid
 import './RagChat.css';
 
 const RagChat: React.FC = () => {
-  const { nombreFondo } = useParams<{ nombreFondo: string }>();
+  const { idFondo } = useParams<{ idFondo: string }>();
+  const instrumentos = VerTodosLosInstrumentos();
+
+  // Buscar el nombre del fondo por ID
+  const nombreFondo = useMemo(() => {
+    if (!idFondo || !instrumentos || instrumentos.length === 0) {
+      return null;
+    }
+    const fondoId = parseInt(idFondo, 10);
+    const fondo = instrumentos.find((inst) => inst.ID === fondoId);
+    return fondo ? fondo.Titulo : null;
+  }, [idFondo, instrumentos]);
 
   // Efecto para controlar el botón de envío
   React.useEffect(() => {
@@ -78,7 +90,9 @@ const RagChat: React.FC = () => {
               </h1>
               <p>
                 {nombreFondo 
-                  ? `Consultando sobre: ${decodeURIComponent(nombreFondo)}`
+                  ? `Consultando sobre: ${nombreFondo}`
+                  : idFondo
+                  ? `Cargando información del fondo...`
                   : 'Pregunta sobre los fondos de financiamiento'
                 }
               </p>

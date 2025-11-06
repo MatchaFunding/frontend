@@ -99,14 +99,26 @@ class ActionProvider {
     }));
 
     try {
-      // Obtener el nombre del fondo desde la URL (si está disponible)
+      // Obtener el ID del fondo desde la URL
       const pathParts = window.location.pathname.split('/');
-      const fondoNombre = pathParts[pathParts.length - 1] !== 'rag' 
-        ? decodeURIComponent(pathParts[pathParts.length - 1]) 
-        : undefined;
+      const fondoIdStr = pathParts[pathParts.length - 1];
+      const fondoId = parseInt(fondoIdStr, 10);
 
-      // Llamar a la API RAG
-      const response = await sendRagQuestion(userMessage, fondoNombre);
+      console.log('🔍 Extrayendo ID del fondo:', {
+        url: window.location.pathname,
+        pathParts,
+        fondoIdStr,
+        fondoId,
+        isValid: !isNaN(fondoId)
+      });
+
+      // Validar que tenemos un ID válido
+      if (!fondoId || isNaN(fondoId)) {
+        throw new Error('No se pudo obtener el ID del fondo desde la URL');
+      }
+
+      // Llamar a la API RAG con el ID del fondo
+      const response = await sendRagQuestion(userMessage, fondoId);
 
       // Extraer la respuesta de la API
       const botResponse = response.answer || 'No pude obtener una respuesta.';
@@ -127,11 +139,13 @@ class ActionProvider {
 
       // Mensajes de error más específicos
       if (error.message?.includes('NetworkError') || error.message?.includes('Failed to fetch')) {
-        errorMessage = '🔌 No se pudo conectar con el servidor de IA (ai.matchafunding.com). Verifica que esté activo.';
+        errorMessage = '🔌 No se pudo conectar con el servidor RAG (rag.matchafunding.com). Verifica que esté activo.';
       } else if (error.message?.includes('timeout')) {
         errorMessage = '⏱️ La consulta tardó demasiado tiempo. Por favor, intenta de nuevo.';
       } else if (error.message?.includes('CORS')) {
         errorMessage = '🚫 Error de CORS. Contacta al administrador del sistema.';
+      } else if (error.message?.includes('ID del fondo')) {
+        errorMessage = '❌ Error: No se pudo identificar el fondo. Por favor, regresa y selecciona un fondo válido.';
       }
 
       const message = this.createChatBotMessage(errorMessage);

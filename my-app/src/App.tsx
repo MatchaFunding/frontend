@@ -44,7 +44,7 @@ function App() {
         <Route path="/Perfil" element={<ProfileI />} />
         <Route path="/premium" element={<PremiumOptions />} />
         <Route path="/premium/rag" element={<PremiumRag />} />
-        <Route path="/premium/rag/:nombreFondo" element={<RagChat />} />
+        <Route path="/premium/rag/:idFondo" element={<RagChat />} />
         <Route path="/Matcha/Select-Idea" element={<SelectIdea />} />
         <Route path="/Matcha/Select-Project" element={<MisProyectos />} />
         <Route path="/Matcha/Select-Project/fondos" element={<FondosconPorcentaje />} />

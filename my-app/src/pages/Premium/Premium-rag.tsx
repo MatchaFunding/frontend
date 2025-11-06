@@ -5,6 +5,7 @@ import NavBar from '../../components/NavBar/navbar';
 import type { FiltersValues, OrderOption, CardsPerPageOption } from '../../components/filters-component/filters-component.ts';
 import { initialFilters, filterCards, sortCards, mapInstrumentsToCards, getPaginatedCards, calculatePagination, searchCardsByText, createHandlePageChange } from '../free-search/free-search';
 import VerTodosLosInstrumentos from '../../api/VerTodosLosInstrumentos.tsx';
+import { getRagFondos } from '../../api/RagChat.tsx';
 
 function PremiumRag() {
 	const [order, setOrder] = useState<OrderOption>('none');
@@ -13,7 +14,27 @@ function PremiumRag() {
 	const [filters, setFilters] = useState<FiltersValues>(initialFilters);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [containerWidth, setContainerWidth] = useState<number>(0);
+	const [ragFondosIds, setRagFondosIds] = useState<number[]>([]);
+	const [isLoadingRagFondos, setIsLoadingRagFondos] = useState(true);
 	const instrumentos = VerTodosLosInstrumentos();
+	
+	// Cargar los fondos disponibles para RAG
+	useEffect(() => {
+		const fetchRagFondos = async () => {
+			setIsLoadingRagFondos(true);
+			try {
+				const fondosIds = await getRagFondos();
+				setRagFondosIds(fondosIds);
+			} catch (error) {
+				console.error('Error al cargar fondos RAG:', error);
+				setRagFondosIds([]);
+			} finally {
+				setIsLoadingRagFondos(false);
+			}
+		};
+		
+		fetchRagFondos();
+	}, []);
 	
 	// Calcular el ancho del contenedor basado en el tamaño de la ventana
 	useEffect(() => {
@@ -44,8 +65,25 @@ function PremiumRag() {
 	}, []);
 	
 	const availableCards = useMemo(() => {
-		return mapInstrumentsToCards(instrumentos);
-	}, [instrumentos]);
+		const allCards = mapInstrumentsToCards(instrumentos);
+		
+		// Si aún está cargando, no mostrar nada (esperar)
+		if (isLoadingRagFondos) {
+			return [];
+		}
+		
+		// Si no hay fondos RAG disponibles, no mostrar nada
+		if (ragFondosIds.length === 0) {
+			return [];
+		}
+		
+		// Filtrar solo las cards que tienen ID en la lista de fondos RAG
+		const filteredCards = allCards.filter(card => {
+			return card.id && ragFondosIds.includes(card.id);
+		});
+		
+		return filteredCards;
+	}, [instrumentos, ragFondosIds, isLoadingRagFondos]);
 
 	const cards = useMemo(() => {
 		let processedCards = searchCardsByText(availableCards, searchTerm);
@@ -153,9 +191,13 @@ function PremiumRag() {
 							) : (
 								<div className="text-center py-12 sm:py-20 px-4">
 									<p className="text-gray-500 text-base sm:text-lg">
-										{instrumentos.length === 0 ? 
-											'Cargando fondos...' : 
-											'No se encontraron fondos que coincidan con tu búsqueda'
+										{isLoadingRagFondos ? 
+											'Cargando fondos disponibles para RAG...' : 
+											instrumentos.length === 0 ? 
+												'Cargando fondos...' : 
+												ragFondosIds.length === 0 ?
+													'No hay fondos disponibles para RAG en este momento.' :
+													'No se encontraron fondos que coincidan con tu búsqueda'
 										}
 									</p>
 								</div>

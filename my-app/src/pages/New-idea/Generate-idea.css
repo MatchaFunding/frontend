@@ -84,6 +84,16 @@
   }
 }
 
+.idea-card__icon--large {
+  width: 13rem;
+}
+
+@media (min-width: 768px) {
+  .idea-card__icon--large {
+    width: 15rem;
+  }
+}
+
 .idea-card__title {
   font-size: 1.5rem;
   font-weight: 700;

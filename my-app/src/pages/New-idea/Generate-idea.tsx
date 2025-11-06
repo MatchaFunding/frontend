@@ -34,7 +34,7 @@ const SelectIdea: React.FC = () => {
 
           <div className="idea-card">
             <div className="idea-card__content">
-              <img src="/Tevolador.png" alt="Ilustración de taza de té" className="idea-card__icon" />
+              <img src="/Tevolador.png" alt="Ilustración de taza de té" className="idea-card__icon idea-card__icon--large" />
               <h2 className="idea-card__title">
                 Construye tu proyecto
               </h2>

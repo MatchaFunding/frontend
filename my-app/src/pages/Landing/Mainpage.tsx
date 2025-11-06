@@ -125,17 +125,22 @@ const MatchaHomePage: React.FC = () => {
     </div>
   )}
 
-  {/* Cuadrado con gradiente - OCULTO EN MÓVIL */}
+  {/* Banner con imagen - OCULTO EN MÓVIL */}
   <div 
     className="hidden md:flex w-full max-w-none px-4 mb-12 flex-1"
   >
     <div
-      className="rounded-2xl shadow-lg w-full"
+      className="rounded-2xl shadow-lg w-full overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #44624A 0%, #8BC897 100%)',
         minHeight: '100px',
       }}
-    />
+    >
+      <img 
+        src="/banner-matcha.jpg" 
+        alt="Banner MatchaFunding" 
+        className="w-full h-full object-cover"
+      />
+    </div>
   </div>
 
   {/* Botones principales - ALTURA AUTOMÁTICA */}

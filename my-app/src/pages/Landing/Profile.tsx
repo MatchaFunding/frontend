@@ -146,18 +146,33 @@ const ProfileI: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: colorPalette.lightGray }}>
       <NavBar />
-      <main className="flex-grow p-6 md:p-10 mt-[5%]">
+      <main className="flex-grow p-6 md:p-10 mt-20 sm:mt-24">
         <div className="max-w-6xl mx-auto">
         
+          {/* Header con botón de regresar y editar */}
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-slate-800">Perfil General</h1>
+            {/* Botón de regresar - visible en responsive */}
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-xl shadow-md transition-transform hover:scale-105 sm:hidden"
+              style={{ backgroundColor: colorPalette.softGreen, color: 'white' }}
+            >
+              <ChevronLeft className="w-5 h-5" />
+              Volver
+            </button>
+            
+            <h1 className="text-3xl font-bold text-slate-800 hidden sm:block">Perfil General</h1>
+            
+            {/* Título centrado en mobile */}
+            <h1 className="text-2xl font-bold text-slate-800 sm:hidden flex-1 text-center">Perfil</h1>
+            
             <button 
               className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow-md transition-transform hover:scale-105" 
               style={{ backgroundColor: colorPalette.darkGreen }} 
               onClick={() => navigate("/edit")} 
             >
               <Edit className="w-5 h-5" />
-              Editar
+              <span className="hidden sm:inline">Editar</span>
             </button>
           </div>
 

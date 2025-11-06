@@ -14,8 +14,21 @@ const MatchaHomePage: React.FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [userName, setUserName] = useState<string>("");
   const [userSexo, setUserSexo] = useState<string>("");
+  const [isMobile, setIsMobile] = useState(false);
   const instrumentos = VerTodosLosInstrumentos();
   const initialized = false;
+  
+  // Detectar si es móvil/tablet
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1400);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   // Seleccionar 10 fondos aleatorios
   const randomFondos = useMemo(() => {
@@ -68,14 +81,18 @@ const MatchaHomePage: React.FC = () => {
     if (isAnimating || randomFondos.length === 0)
       return;
     setIsAnimating(true);
-    setCurrentIndex((prevIndex) => prevIndex + 2);
+    // En responsive avanza de 1, en desktop de 2
+    const step = isMobile ? 1 : 2;
+    setCurrentIndex((prevIndex) => prevIndex + step);
   };
 
   const handlePrev = () => {
     if (isAnimating || randomFondos.length === 0)
       return;
     setIsAnimating(true);
-    setCurrentIndex((prevIndex) => prevIndex - 2);
+    // En responsive retrocede de 1, en desktop de 2
+    const step = isMobile ? 1 : 2;
+    setCurrentIndex((prevIndex) => prevIndex - step);
   };
 
   // Manejar el fin de la transición
@@ -97,23 +114,23 @@ const MatchaHomePage: React.FC = () => {
   return (
   <div className="bg-slate-50 flex flex-col">
     <NavBar />
-   <main className="h-screen p-2 md:p-4 lg:p-8 w-full pt-32 sm:pt-36 md:pt-32 lg:pt-32 xl:pt-36 flex flex-col items-center justify-end overflow-hidden pb-8">
+   <main className="min-h-screen p-2 md:p-4 lg:p-8 w-full pt-20 sm:pt-24 md:pt-32 lg:pt-32 xl:pt-36 flex flex-col items-center md:justify-end overflow-hidden pb-8">
   
   {/* Saludo personalizado */}
   {userName && (
     <div className="w-full max-w-none px-4 mb-8 flex-shrink-0">
       <h2 className="text-2xl lg:text-3xl font-semibold text-black text-center">
-        {userSexo === "VAR" ? "Bienvenido" : userSexo === "MUJ" ? "Bienvenida" : "Bienvenide"} a MatchaFunding, {userName}
+        {userSexo === "Hombre" ? "Bienvenido" : userSexo === "Mujer" ? "Bienvenida" : "Bienvenide"} a MatchaFunding, {userName}
       </h2>
     </div>
   )}
 
-  {/* Cuadrado con gradiente - TAMAÑO DINÁMICO */}
+  {/* Cuadrado con gradiente - OCULTO EN MÓVIL */}
   <div 
-    className="w-full max-w-none px-4 mb-12 flex-1"
+    className="hidden md:flex w-full max-w-none px-4 mb-12 flex-1"
   >
     <div
-      className="rounded-2xl shadow-lg h-full"
+      className="rounded-2xl shadow-lg w-full"
       style={{
         background: 'linear-gradient(135deg, #44624A 0%, #8BC897 100%)',
         minHeight: '100px',
@@ -187,9 +204,9 @@ const MatchaHomePage: React.FC = () => {
   </div>
 </main>
 
-  {/* Carrusel de fondos aleatorios */}
+  {/* Carrusel de fondos aleatorios - OCULTO EN RESPONSIVE */}
   {randomFondos.length > 0 && (
-    <div className="w-full bg-slate-50 py-8 px-4">
+    <div className="hidden xl:block w-full bg-slate-50 py-8 px-4">
       <div className="mx-auto" style={{ maxWidth: '1600px' }}>
         <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-center text-black">
           Fondos destacados
@@ -205,12 +222,21 @@ const MatchaHomePage: React.FC = () => {
           </button>
 
           {/* Contenedor de tarjetas */}
-          <div className="overflow-hidden relative" style={{ width: 'calc(304px * 4 + 24px * 3)' }}>
+          <div 
+            className="overflow-hidden relative" 
+            style={{ 
+              width: isMobile 
+                ? 'calc(100vw - 100px)' 
+                : 'calc(304px * 4 + 24px * 3)' 
+            }}
+          >
             <div 
               className="flex gap-6"
               onTransitionEnd={handleTransitionEnd}
               style={{ 
-                transform: `translateX(calc(-${currentIndex} * (304px + 24px)))`,
+                transform: isMobile 
+                  ? `translateX(calc(-${currentIndex} * (100vw - 160px + 24px)))`
+                  : `translateX(calc(-${currentIndex} * (304px + 24px)))`,
                 transition: isAnimating ? 'transform 0.5s ease-in-out' : 'none'
               }}
             >
@@ -219,7 +245,7 @@ const MatchaHomePage: React.FC = () => {
                   key={`carousel-${card.id}-${idx}`} 
                   className="flex-shrink-0"
                   style={{ 
-                    width: '304px',
+                    width: isMobile ? 'calc(100vw - 160px)' : '304px',
                     boxShadow: 'none'
                   }}
                 >
@@ -251,10 +277,11 @@ const MatchaHomePage: React.FC = () => {
 
         {/* Indicadores de posición */}
         <div className="flex justify-center gap-2 mt-6">
-          {Array.from({ length: Math.ceil(randomFondos.length / 2) }).map((_, idx) => {
+          {Array.from({ length: isMobile ? randomFondos.length : Math.ceil(randomFondos.length / 2) }).map((_, idx) => {
             // Normalizar el currentIndex al rango del array original
             const normalizedIndex = ((currentIndex % randomFondos.length) + randomFondos.length) % randomFondos.length;
-            const activeIndex = Math.floor(normalizedIndex / 2);
+            const step = isMobile ? 1 : 2;
+            const activeIndex = Math.floor(normalizedIndex / step);
             
             return (
               <div

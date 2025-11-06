@@ -169,7 +169,7 @@ const EditProfile: React.FC = () => {
     return (
         <div className="min-h-screen flex flex-col" style={{ backgroundColor: colorPalette.lightGray }}>
             <NavBar />
-            <main className="flex-grow p-6 md:p-10 mt-[8%]">
+            <main className="flex-grow p-6 md:p-10 mt-20 sm:mt-24 md:mt-[8%]">
                 <div className="max-w-2xl mx-auto space-y-6">
                     {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md text-center">{error}</div>}
                     

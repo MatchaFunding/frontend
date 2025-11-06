@@ -69,6 +69,7 @@ const NuevoProyecto: React.FC = () => {
   });
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFromConvertedIdea, setIsFromConvertedIdea] = useState(false);
   const [nuevaPersonaData, setNuevaPersonaData] = useState<Persona>({
     ID: 0,
     Nombre: "",
@@ -117,6 +118,48 @@ const NuevoProyecto: React.FC = () => {
       const usuario = JSON.parse(storedUser);
       setFormData((prev) => ({ ...prev, Beneficiario: usuario.Beneficiario.ID }));
       setPersonas(usuario.Miembros.map((m: any) => new Persona(m)));
+    }
+
+    // Verificar si hay una idea para convertir a proyecto
+    const ideaAConvertir = localStorage.getItem('convertirAProyecto') || 
+                          sessionStorage.getItem('convertirAProyecto');
+    
+    if (ideaAConvertir) {
+      try {
+        const ideaParsed = JSON.parse(ideaAConvertir);
+        console.log('IDEA PARSEADA PARA CONVERSIÓN:', ideaParsed);
+        
+        // Obtener la propuesta refinada de la idea
+        const propuestaRefinada = ideaParsed.Propuesta || 
+                                 ideaParsed.ResumenLLM || 
+                                 ideaParsed.propuesta || 
+                                 ideaParsed.resumenLLM ||
+                                 "";
+        
+        const descripcionDeIdea = propuestaRefinada || 
+          `Proyecto basado en la idea que resuelve: ${ideaParsed.Problema || 'problema no especificado'}`;
+        
+        console.log('DESCRIPCIÓN PRECARGADA:', descripcionDeIdea);
+        
+        // Precargar el formulario con los datos de la idea
+        setFormData((prev) => ({
+          ...prev,
+          Titulo: "",
+          Descripcion: descripcionDeIdea,
+          Area: ideaParsed.Campo || "",
+        }));
+        
+        setIsFromConvertedIdea(true);
+        
+        // Limpiar el localStorage después de cargar
+        localStorage.removeItem('convertirAProyecto');
+        sessionStorage.removeItem('convertirAProyecto');
+        
+        console.log('CONVERSIÓN DE IDEA A PROYECTO COMPLETADA');
+      } catch (e) {
+        console.error('Error al parsear idea para convertir:', e);
+        setIsFromConvertedIdea(false);
+      }
     }
   }, [storedUser]);
 
@@ -252,6 +295,37 @@ const NuevoProyecto: React.FC = () => {
         <div className="w-full max-w-3xl mb-4 md:mb-6">
           <StepIndicator currentStep={step} totalSteps={4} />
         </div>
+        
+        {/* Mensaje informativo cuando viene de conversión de idea */}
+        {isFromConvertedIdea && (
+          <div className="w-full max-w-3xl mb-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+              <svg
+                className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <div>
+                <h4 className="text-blue-800 font-semibold">
+                  Proyecto creado desde tu idea
+                </h4>
+                <p className="text-blue-700 text-sm">
+                  La descripción se ha pre-cargado con tu propuesta refinada.
+                  Completa los demás campos según necesites.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <Card className="w-full max-w-3xl px-4 md:px-9 py-6 md:py-8">
           <form onSubmit={(e) => { e.preventDefault(); if (step < 4) nextStep(); else EnviarProyecto(); }}>
             {step === 1 && (

@@ -168,6 +168,7 @@
 .react-chatbot-kit-chat-message-container {
   padding: 0.75rem;
   background: #f8fafc;
+  min-height: 500px;
   /* Scroll automático al final */
 }
 
@@ -401,12 +402,17 @@
 
   .chat-column {
     padding: 1.5rem;
-    height: 500px;
-    max-height: 500px;
+    height: 800px;
+    max-height: 800px;
   }
 
   .suggestions-card {
+    margin-top: 2rem;
     padding: 1.5rem;
+  }
+
+  .suggestions-card.info-card {
+    margin-top: 0.2rem; 
   }
 
   .chat-header h1 {
@@ -414,8 +420,8 @@
   }
 
   .react-chatbot-kit-chat-message-container {
-    min-height: 350px;
-    max-height: 350px;
+    min-height: 500px;
+    max-height: 500px;
   }
 }
 

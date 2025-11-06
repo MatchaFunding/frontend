@@ -7,7 +7,7 @@
 
 .generate-idea-main {
   flex-grow: 1;
-  padding: 1.5rem 2.5rem;
+  padding: 1.5rem 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -43,12 +43,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
+  padding: 1.5rem;
   max-width: 22rem;
+  width: 100%;
   text-align: center;
   transition: all 0.3s ease-in-out;
   border: 1px solid rgba(226, 232, 240, 0.8);
-  min-height: 28rem;
+  min-height: 24rem;
+}
+
+@media (min-width: 768px) {
+  .idea-card {
+    padding: 2rem;
+    min-height: 28rem;
+  }
 }
 
 .idea-card:hover {
@@ -64,15 +72,15 @@
 }
 
 .idea-card__icon {
-  width: 12rem;
+  width: 10rem;
   height: auto;
-  margin-bottom: 2rem;
+  margin-bottom: 0.75rem;
   display: block;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .idea-card__icon {
-    display: none;
+    margin-bottom: 1rem;
   }
 }
 
@@ -80,22 +88,39 @@
   font-size: 1.5rem;
   font-weight: 700;
   color: #505143;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   line-height: 1.2;
-  min-height: 3.6rem;
+  min-height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+@media (min-width: 768px) {
+  .idea-card__title {
+    margin-bottom: 1rem;
+    min-height: 3.6rem;
+  }
+}
+
 .idea-card__description {
   color: #64748b;
-  font-size: 1rem;
-  line-height: 1.5;
-  margin-top: 1.25rem;
-  margin-bottom: 2rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-top: 0.5rem;
+  margin-bottom: 1.25rem;
   font-weight: 400;
-  min-height: 7.2rem;
+  min-height: auto;
+}
+
+@media (min-width: 768px) {
+  .idea-card__description {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-top: 1.25rem;
+    margin-bottom: 2rem;
+    min-height: 7.2rem;
+  }
 }
 
 .idea-card__button {

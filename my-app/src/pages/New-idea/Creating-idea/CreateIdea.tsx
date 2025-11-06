@@ -83,7 +83,14 @@ const CreateIdea: React.FC = () => {
   // Scroll automático cuando se muestra la idea refinada
   useEffect(() => {
     if (showRefinedIdea && refinedIdeaRef.current) {
-      refinedIdeaRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Delay más largo para asegurar que el contenido esté completamente renderizado
+      setTimeout(() => {
+        refinedIdeaRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'end',
+          inline: 'nearest'
+        });
+      }, 300);
     }
   }, [showRefinedIdea]);
 
@@ -505,7 +512,7 @@ const CreateIdea: React.FC = () => {
                 disabled={isProcessing}
               >
                 {isProcessing ? (
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center justify-center space-x-2">
                     <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
                     <span>Procesando...</span>
                   </div>

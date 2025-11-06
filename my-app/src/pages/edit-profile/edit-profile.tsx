@@ -87,7 +87,7 @@ const EditProfile: React.FC = () => {
       style={{ backgroundColor: colorPalette.lightGray }}
     >
       <NavBar />
-      <main className="flex-grow flex items-center justify-center p-4 md:p-8">
+      <main className="flex-grow flex items-center justify-center p-4 md:p-8 mt-20 sm:mt-24 md:mt-8">
         <div className="w-full max-w-6xl space-y-6">
           {error && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md">

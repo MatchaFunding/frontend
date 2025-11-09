@@ -11,6 +11,7 @@ import { getMatchFondosAsync } from '../../api/MatchFondos';
 import { VerTodasLasPostulacionesAsync } from "../../api/VerTodasLasPostulaciones";
 import { VerTodosLosInstrumentosAsync } from "../../api/VerTodosLosInstrumentos"; 
 import { BorrarIdea } from '../../api/BorrarIdea';
+import { BorrarProyectoAsync } from '../../api/BorrarProyecto';
 import { useEffect, useState, useRef } from 'react';
 import IdeaRefinadaModal from '../../components/IdeaRefinadaModal/IdeaRefinadaModal';
 import FiltersIdea from '../../components/filters-ideas/filters-idea.tsx';
@@ -75,6 +76,7 @@ const MisPostulaciones: React.FC = () => {
   const [loadingProyectos, setLoadingProyectos] = useState<boolean>(false);
   const [errorProyectos, setErrorProyectos] = useState<string | null>(null);
   const [deletingIdeaId, setDeletingIdeaId] = useState<number | null>(null);
+  const [deletingProyectoId, setDeletingProyectoId] = useState<number | null>(null);
   const [matchingIdeaId, setMatchingIdeaId] = useState<number | null>(null);
   const isProcessingMatch = useRef(false);
 
@@ -546,8 +548,80 @@ const colorPalette = {
     setSelectedIdea(idea);
     setShowIdeaModal(true);
   };
-  const handleEditProyecto = (proyecto: Proyecto) => { alert(`Funcionalidad para editar el proyecto "${proyecto.Titulo}" no implementada.`); };
-  const handleDeleteProyecto = (proyectoId: number) => { if (window.confirm("¿Seguro que quieres eliminar este proyecto?")) { alert(`Funcionalidad para eliminar el proyecto con ID ${proyectoId} no implementada.`); } };
+  
+  const handleEditProyecto = async (proyecto: Proyecto) => {
+    try {
+      // Obtener los datos completos del proyecto desde el usuario en localStorage
+      const storedUser = localStorage.getItem("usuario");
+      if (!storedUser) {
+        alert('Error: No se encontraron datos del usuario.');
+        return;
+      }
+
+      const userData = JSON.parse(storedUser);
+      const proyectos = userData.Proyectos || [];
+      
+      // Buscar el proyecto completo en los datos del usuario
+      const proyectoCompleto = proyectos.find((p: any) => p.ID === proyecto.ID);
+      
+      if (!proyectoCompleto) {
+        alert('Error: No se encontraron los datos completos del proyecto.');
+        return;
+      }
+
+      // Guardar el proyecto completo en localStorage para editarlo
+      localStorage.setItem('retomarProyecto', JSON.stringify({
+        ID: proyectoCompleto.ID,
+        Beneficiario: proyectoCompleto.Beneficiario,
+        Titulo: proyectoCompleto.Titulo,
+        Descripcion: proyectoCompleto.Descripcion,
+        DuracionEnMesesMinimo: proyectoCompleto.DuracionEnMesesMinimo || 6,
+        DuracionEnMesesMaximo: proyectoCompleto.DuracionEnMesesMaximo || 12,
+        Alcance: proyectoCompleto.Alcance || "",
+        Area: proyectoCompleto.Area || ""
+      }));
+      
+      // Navegar a la página de editar proyecto
+      navigate('/Matcha/retomar-proyecto');
+    } catch (error) {
+      console.error('Error al preparar edición de proyecto:', error);
+      alert('Error al cargar los datos del proyecto para editar.');
+    }
+  };
+  
+  const handleDeleteProyecto = async (proyectoId: number) => {
+    const proyectoToDelete = proyectos.find(p => p.ID === proyectoId);
+    const proyectoTitulo = proyectoToDelete ? proyectoToDelete.Titulo : `Proyecto #${proyectoId}`;
+
+    const confirmacion = window.confirm(
+      `¿Estás seguro de que quieres eliminar el proyecto "${proyectoTitulo}"?\n\nEsta acción no se puede deshacer.`
+    );
+
+    if (!confirmacion) {
+      return;
+    }
+
+    setDeletingProyectoId(proyectoId);
+
+    try {
+      console.log('Intentando eliminar proyecto con ID:', proyectoId);
+      await BorrarProyectoAsync(proyectoId);
+      console.log('Proyecto eliminado exitosamente');
+      
+      // Actualizar la lista de proyectos
+      const updatedProyectos = proyectos.filter(p => p.ID !== proyectoId);
+      setProyectos(updatedProyectos);
+      
+      alert(`¡Proyecto eliminado exitosamente!\n\n"${proyectoTitulo}" ha sido eliminado de tu lista de proyectos.`);
+    }
+    catch (error: any) {
+      console.error('Error al eliminar proyecto:', error);
+      alert(`Error al eliminar el proyecto: ${error.message || 'Error desconocido'}`);
+    }
+    finally {
+      setDeletingProyectoId(null);
+    }
+  };
  
   return (
     <div style={{ backgroundColor: colorPalette.background }} className="min-h-screen">
@@ -1037,8 +1111,29 @@ const colorPalette = {
                                             <div key={proyecto.ID} className="relative py-4 border-b border-slate-200 last:border-b-0 hover:bg-slate-50 transition-colors">
                                                 {/* Botones de acciones en la esquina superior derecha */}
                                                 <div className="absolute top-1 right-6 flex space-x-1">
-                                                    <button onClick={() => handleEditProyecto(proyecto)} title="Editar Proyecto" className="p-1 rounded-full hover:bg-slate-200 transition-colors"><PencilIcon className="h-4 w-4 text-[#505143]" /></button>
-                                                    <button onClick={() => handleDeleteProyecto(proyecto.ID)} title="Eliminar Proyecto" className="p-1 rounded-full hover:bg-red-100 transition-colors"><TrashIcon className="h-4 w-4 text-red-500" /></button>
+                                                    <button 
+                                                      onClick={() => handleEditProyecto(proyecto)} 
+                                                      title="Editar Proyecto" 
+                                                      className="p-1 rounded-full hover:bg-slate-200 transition-colors"
+                                                      disabled={deletingProyectoId === proyecto.ID}
+                                                    >
+                                                      <PencilIcon className="h-4 w-4 text-[#505143]" />
+                                                    </button>
+                                                    <button 
+                                                      onClick={() => handleDeleteProyecto(proyecto.ID)} 
+                                                      title="Eliminar Proyecto" 
+                                                      className="p-1 rounded-full hover:bg-red-100 transition-colors"
+                                                      disabled={deletingProyectoId === proyecto.ID}
+                                                    >
+                                                      {deletingProyectoId === proyecto.ID ? (
+                                                        <svg className="animate-spin h-4 w-4 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                        </svg>
+                                                      ) : (
+                                                        <TrashIcon className="h-4 w-4 text-red-500" />
+                                                      )}
+                                                    </button>
                                                 </div>
                                                 
                                                 {/* Tabla */}
@@ -1096,11 +1191,26 @@ const colorPalette = {
                                           <div key={proyecto.ID} className="relative p-4 rounded-lg border-2 border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm transition-all">
                                             {/* Action buttons */}
                                             <div className="absolute top-2 right-2 flex space-x-1">
-                                              <button onClick={() => handleEditProyecto(proyecto)} className="p-2 rounded-full hover:bg-slate-200 transition-colors">
+                                              <button 
+                                                onClick={() => handleEditProyecto(proyecto)} 
+                                                className="p-2 rounded-full hover:bg-slate-200 transition-colors"
+                                                disabled={deletingProyectoId === proyecto.ID}
+                                              >
                                                 <PencilIcon className="h-4 w-4 text-[#505143]" />
                                               </button>
-                                              <button onClick={() => handleDeleteProyecto(proyecto.ID)} className="p-2 rounded-full hover:bg-red-100 transition-colors">
-                                                <TrashIcon className="h-4 w-4 text-red-500" />
+                                              <button 
+                                                onClick={() => handleDeleteProyecto(proyecto.ID)} 
+                                                className="p-2 rounded-full hover:bg-red-100 transition-colors"
+                                                disabled={deletingProyectoId === proyecto.ID}
+                                              >
+                                                {deletingProyectoId === proyecto.ID ? (
+                                                  <svg className="animate-spin h-4 w-4 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                  </svg>
+                                                ) : (
+                                                  <TrashIcon className="h-4 w-4 text-red-500" />
+                                                )}
                                               </button>
                                             </div>
 

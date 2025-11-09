@@ -15,6 +15,7 @@ import DetalleFondo from './pages/New-idea/JustMatch/FondoDetalle.tsx';
 import LandingPageTailwind from './pages/Landing/Landing.tsx';
 import CreateIdea from './pages/New-idea/Creating-idea/CreateIdea.tsx';
 import NuevoProyecto from './pages/New-idea/New-project/Create-project.tsx';
+import RetomarProyecto from './pages/New-idea/New-project/RetomarProyecto.tsx';
 import FondosIdea from './pages/New-idea/Creating-idea/FondoIdea.tsx';
 import CrearProyectoMatch from './pages/New-idea/Creating-idea/Proyecto-idea.tsx';
 import RetomarIdea from './pages/New-idea/Creating-idea/RetomarIdea.tsx';
@@ -52,6 +53,7 @@ function App() {
         <Route path="/Matcha/New-Match" element={<Newmatch />} />
         <Route path="/Matcha/New-idea" element={<CreateIdea />} />
         <Route path="/Matcha/retomar-idea" element={<RetomarIdea />} />
+        <Route path="/Matcha/retomar-proyecto" element={<RetomarProyecto />} />
         <Route path="/Matcha/Nuevo-proyecto" element={<CrearProyectoMatch />} />
         <Route path="/Matcha/New-idea/Creating-idea/FondoIdea" element={<FondosIdea />} />
         <Route path="/Matcha/New-idea/Fondo-idea" element={<FondosIdea />} />

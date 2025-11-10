@@ -123,8 +123,32 @@ class ActionProvider {
       // Extraer la respuesta de la API
       const botResponse = response.answer || 'No pude obtener una respuesta.';
 
-      // Crear mensaje del bot con la respuesta
-      const message = this.createChatBotMessage(botResponse);
+      // Extraer fuentes únicas de los PDFs
+      let sourcesText = '';
+      if (response.sources && Array.isArray(response.sources) && response.sources.length > 0) {
+        // Extraer nombres únicos de archivos PDF
+        const uniqueSources = [...new Set(
+          response.sources
+            .map(source => {
+              if (source.source) {
+                // Extraer el nombre del archivo desde la ruta
+                const pathParts = source.source.split('/');
+                const fileName = pathParts[pathParts.length - 1];
+                return fileName;
+              }
+              return null;
+            })
+            .filter(Boolean) // Eliminar valores nulos
+        )];
+
+        if (uniqueSources.length > 0) {
+          sourcesText = '\n\nFuentes: ' + uniqueSources.join(', ');
+        }
+      }
+
+      // Crear mensaje del bot con la respuesta y las fuentes
+      const fullResponse = botResponse + sourcesText;
+      const message = this.createChatBotMessage(fullResponse);
 
       // Actualizar el estado eliminando el mensaje de "pensando..." y agregando la respuesta real
       this.setState((prev) => ({

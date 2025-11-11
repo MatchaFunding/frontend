@@ -124,7 +124,7 @@ class ActionProvider {
       const botResponse = response.answer || 'No pude obtener una respuesta.';
 
       // Extraer fuentes únicas de los PDFs
-      let sourcesText = '';
+      let sourcesComponent = null;
       if (response.sources && Array.isArray(response.sources) && response.sources.length > 0) {
         // Extraer nombres únicos de archivos PDF
         const uniqueSources = [...new Set(
@@ -142,13 +142,39 @@ class ActionProvider {
         )];
 
         if (uniqueSources.length > 0) {
-          sourcesText = '\n\nFuentes: ' + uniqueSources.join(', ');
+          sourcesComponent = (
+            <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: '#e5e7eb' }}>Fuentes:</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {uniqueSources.map((source, index) => (
+                  <div key={index} style={{ 
+                    fontSize: '13px', 
+                    color: '#505143',
+                    padding: '4px 8px',
+                    backgroundColor: '#e5e7eb',
+                    borderRadius: '4px',
+                    display: 'inline-block',
+                    maxWidth: 'fit-content'
+                  }}>
+                    {source}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
         }
       }
 
       // Crear mensaje del bot con la respuesta y las fuentes
-      const fullResponse = botResponse + sourcesText;
-      const message = this.createChatBotMessage(fullResponse);
+      const messageContent = (
+        <div>
+          <div>{botResponse}</div>
+          {sourcesComponent}
+        </div>
+      );
+      const message = this.createChatBotMessage(messageContent);
 
       // Actualizar el estado eliminando el mensaje de "pensando..." y agregando la respuesta real
       this.setState((prev) => ({

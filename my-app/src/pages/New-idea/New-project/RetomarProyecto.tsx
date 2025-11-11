@@ -184,13 +184,21 @@ const RetomarProyecto: React.FC = () => {
         DuracionEnMesesMaximo: formData.DuracionEnMesesMaximo,
         Alcance: formData.Alcance,
         Area: formData.Area,
+        Innovacion: "",
+        ObjetivoEspecifico: "",
+        ObjetivoGeneral: "",
+        Proposito: "",
+        ResultadoEsperado: "",
         Usuario: usuarioId
       });
 
       console.log('Actualizando proyecto:', proyectoToUpdate);
+      console.log('ID del proyecto a actualizar:', formData.ID);
 
       // Usar la API de cambiar proyecto para actualizar
       const proyectoActualizado = await CambiarProyectoAsync(formData.ID, proyectoToUpdate);
+      
+      console.log('Respuesta de la API:', proyectoActualizado);
       
       if (!proyectoActualizado) {
         throw new Error('Error al actualizar el proyecto');

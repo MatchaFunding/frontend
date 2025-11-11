@@ -112,9 +112,9 @@ const MatchaHomePage: React.FC = () => {
   };
 
   return (
-  <div className="bg-slate-50 flex flex-col h-screen">
+  <div className="bg-slate-50 flex flex-col min-h-screen">
     <NavBar />
-   <main className="flex-1 p-2 md:p-4 lg:p-8 w-full pt-20 sm:pt-24 md:pt-32 lg:pt-32 xl:pt-36 flex flex-col items-center justify-end overflow-hidden pb-8 gap-4 md:gap-6">
+   <main className="flex-1 p-2 md:p-4 lg:p-8 w-full pt-20 sm:pt-24 md:pt-32 lg:pt-32 xl:pt-36 flex flex-col items-center overflow-y-auto pb-8 gap-4 md:gap-6">
   
   {/* Saludo personalizado */}
   {userName && (
@@ -127,7 +127,8 @@ const MatchaHomePage: React.FC = () => {
 
   {/* Cuadrado blanco con SVG */}
   <div 
-    className="hidden md:flex w-full max-w-none px-4 flex-1 min-h-0"
+    className="hidden md:flex w-full max-w-none px-4 flex-shrink-0"
+    style={{ height: '250px' }}
   >
     <div
       className="rounded-2xl shadow-lg w-full h-full bg-white flex items-center justify-center overflow-hidden"
@@ -204,11 +205,10 @@ const MatchaHomePage: React.FC = () => {
       </div>
     </div>
   </div>
-</main>
 
-  {/* Carrusel de fondos aleatorios - OCULTO EN RESPONSIVE */}
+  {/* Carrusel de fondos aleatorios */}
   {randomFondos.length > 0 && (
-    <div className="hidden xl:block w-full bg-slate-50 py-8 px-4">
+    <div className="w-full max-w-none px-4 py-8 flex-shrink-0">
       <div className="mx-auto" style={{ maxWidth: '1600px' }}>
         <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-center text-black">
           Fondos destacados
@@ -300,6 +300,7 @@ const MatchaHomePage: React.FC = () => {
       </div>
     </div>
   )}
+  </main>
     </div>
   );
 };

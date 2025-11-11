@@ -145,15 +145,14 @@ class ActionProvider {
           sourcesComponent = (
             <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: '#e5e7eb' }}>Fuentes:</span>
+                <span style={{ fontSize: '14px', fontWeight: '400', color: '#e5e7eb' }}>Fuentes:</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {uniqueSources.map((source, index) => (
                   <div key={index} style={{ 
                     fontSize: '13px', 
-                    color: '#505143',
-                    padding: '4px 8px',
-                    backgroundColor: '#e5e7eb',
+                    color: '#e5e7eb',
+                    fontWeight: '800',
                     borderRadius: '4px',
                     display: 'inline-block',
                     maxWidth: 'fit-content'

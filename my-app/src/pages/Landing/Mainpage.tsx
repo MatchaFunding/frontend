@@ -114,52 +114,54 @@ const MatchaHomePage: React.FC = () => {
   return (
   <div className="bg-slate-50 flex flex-col min-h-screen">
     <NavBar />
-   <main className="flex-1 p-2 md:p-4 lg:p-8 w-full pt-20 sm:pt-24 md:pt-32 lg:pt-32 xl:pt-36 flex flex-col items-center overflow-y-auto pb-8 gap-4 md:gap-6">
+   <main className="flex-1 flex flex-col w-full pt-20 sm:pt-24 md:pt-32 lg:pt-32 xl:pt-36 overflow-y-auto">
   
-  {/* Saludo personalizado */}
-  {userName && (
-    <div className="w-full max-w-none px-4 flex-shrink-0">
-      <h2 className="text-2xl lg:text-3xl font-semibold text-black text-center">
-        {userSexo === "Hombre" ? "Bienvenido" : userSexo === "Mujer" ? "Bienvenida" : "Bienvenide"} a MatchaFunding, {userName}
-      </h2>
-    </div>
-  )}
+  {/* Contenedor principal con flex-col y justify-between - Altura exacta de viewport */}
+  <div className="flex flex-col justify-between p-2 md:p-4 lg:p-8 h-[calc(100vh-5rem)] sm:h-[calc(100vh-6rem)] md:h-[calc(100vh-8rem)] lg:h-[calc(100vh-8rem)] xl:h-[calc(100vh-9rem)] flex-shrink-0">
+    
+    {/* Sección superior: Saludo + Banner (ocupa el espacio restante) */}
+    <div className="flex-1 flex flex-col gap-4 md:gap-6 min-h-0">
+      
+      {/* Saludo personalizado */}
+      {userName && (
+        <div className="w-full max-w-none px-4 flex-shrink-0">
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold text-black text-center">
+            {userSexo === "Hombre" ? "Bienvenido" : userSexo === "Mujer" ? "Bienvenida" : "Bienvenide"} a MatchaFunding, {userName}
+          </h2>
+        </div>
+      )}
 
-  {/* Cuadrado blanco con SVG */}
-  <div 
-    className="hidden md:flex w-full max-w-none px-4 flex-shrink-0"
-    style={{ height: '250px' }}
-  >
-    <div
-      className="rounded-2xl shadow-lg w-full h-full bg-white flex items-center justify-center overflow-hidden"
-    >
-      <img 
-        src="/svgs/banner.svg" 
-        alt="Banner MatchaFunding" 
-        className="w-full h-full object-contain p-4"
-      />
+      {/* Banner que ocupa el espacio restante */}
+      <div className="w-full max-w-none px-4 flex-1 min-h-0 flex">
+        <div className="rounded-2xl shadow-lg w-full h-full bg-white flex items-center justify-center overflow-hidden">
+          <img 
+            src="/svgs/banner.svg" 
+            alt="Banner MatchaFunding" 
+            className="w-full h-full object-contain p-2 md:p-4"
+          />
+        </div>
+      </div>
     </div>
-  </div>
 
-  {/* Botones principales - ALTURA AUTOMÁTICA */}
-  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 w-full max-w-none px-4 py-2 flex-shrink-0">
+    {/* Botones principales - En la parte inferior sin scroll */}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 w-full max-w-none px-4 py-2 flex-shrink-0">
    <div
       onClick={() => navigate("/Matcha/Select-Idea")}
-      className="bg-white rounded-2xl shadow-lg flex flex-col cursor-pointer hover:shadow-2xl transition-shadow w-full overflow-hidden h-auto"
-      style={{ display: 'grid', gridTemplateRows: '1fr 2fr' }}
+      className="bg-white rounded-2xl shadow-lg flex flex-col cursor-pointer hover:shadow-2xl transition-shadow w-full overflow-hidden"
+      style={{ display: 'grid', gridTemplateRows: '80px 1fr' }}
     >
       <div className="bg-[#f9f2de] flex items-center justify-center">
         <img
           src="./buscando.png"
           alt="Taza de matcha colgando"
-          className="w-20 h-20 lg:w-24 lg:h-24 object-contain rounded-full"
+          className="w-16 h-16 lg:w-20 lg:h-20 object-contain rounded-full"
         />
       </div>
-      <div className="px-6 pt-6 pb-6 flex flex-col">
-        <h1 className="text-3xl lg:text-4xl font-semibold text-black tracking-tighter text-center mb-3">
+      <div className="px-4 py-3 flex flex-col">
+        <h1 className="text-xl lg:text-2xl font-semibold text-black tracking-tighter text-center mb-2">
           Crea y busca un Match
         </h1>
-        <p className="text-gray-600 text-xs lg:text-sm leading-relaxed">
+        <p className="text-gray-600 text-xs leading-relaxed line-clamp-4">
           Transforma tu idea en un proyecto sólido y estructurado. Nuestra inteligencia artificial convertirá tu idea en un plan de acción detallado. Además, podrás comparar tu proyecto con otros similares para identificar tus fortalezas y, finalmente, conectar con el fondo de financiamiento ideal que mejor se adapta a tus necesidades.
         </p>
       </div>
@@ -167,48 +169,49 @@ const MatchaHomePage: React.FC = () => {
 
     <div 
       onClick={() => navigate("/free-search")}
-      className="bg-white rounded-2xl shadow-lg flex flex-col cursor-pointer hover:shadow-2xl transition-shadow w-full overflow-hidden h-auto"
-      style={{ display: 'grid', gridTemplateRows: '1fr 2fr' }}
+      className="bg-white rounded-2xl shadow-lg flex flex-col cursor-pointer hover:shadow-2xl transition-shadow w-full overflow-hidden"
+      style={{ display: 'grid', gridTemplateRows: '80px 1fr' }}
     >
       <div className="bg-[#f8e9cf] flex items-center justify-center">
         <img 
           src="./fondito.png"
           alt="Buscar fondos"
-          className="w-20 h-20 lg:w-24 lg:h-24 object-cover rounded-full" 
+          className="w-16 h-16 lg:w-20 lg:h-20 object-cover rounded-full" 
         />
       </div>
-      <div className="px-6 pt-6 pb-6 flex flex-col">
-        <h2 className="text-3xl lg:text-4xl font-semibold text-black text-center mb-3">Busca fondos y proyectos</h2>
-        <p className="text-gray-600 text-xs lg:text-sm leading-relaxed">
+      <div className="px-4 py-3 flex flex-col">
+        <h2 className="text-xl lg:text-2xl font-semibold text-black text-center mb-2">Busca fondos y proyectos</h2>
+        <p className="text-gray-600 text-xs leading-relaxed line-clamp-4">
           Explora manualmente, todo en un solo lugar, tanto la totalidad de fondos públicos y privados disponibles en Chile como los proyectos que ya han resultado ganadores. Mantenemos toda esta valiosa información siempre actualizada por ti, para que puedas filtrar con precisión y encontrar exactamente lo que necesitas sin perder tiempo recorriendo y comparando múltiples plataformas.
         </p>
       </div>
     </div>
 
     <div 
-      className="bg-white rounded-2xl shadow-lg flex flex-col cursor-pointer hover:shadow-2xl transition-shadow w-full overflow-hidden h-auto"
+      className="bg-white rounded-2xl shadow-lg flex flex-col cursor-pointer hover:shadow-2xl transition-shadow w-full overflow-hidden"
       onClick={() => navigate("/premium")}
-      style={{ display: 'grid', gridTemplateRows: '1fr 2fr' }}
+      style={{ display: 'grid', gridTemplateRows: '80px 1fr' }}
     >
       <div className="bg-[#f5efdf] flex items-center justify-center">
         <img 
           src="./premium-icon.jpg"
           alt="Servicios Premium"
-          className="w-20 h-20 lg:w-24 lg:h-24 object-cover rounded-full" 
+          className="w-16 h-16 lg:w-20 lg:h-20 object-cover rounded-full" 
         />
       </div>
-      <div className="px-6 pt-6 pb-6 flex flex-col">
-        <h2 className="text-3xl lg:text-4xl font-semibold text-black text-center mb-3">Accede a Premium</h2>
-        <p className="text-gray-600 text-xs lg:text-sm leading-relaxed">
+      <div className="px-4 py-3 flex flex-col">
+        <h2 className="text-xl lg:text-2xl font-semibold text-black text-center mb-2">Accede a Premium</h2>
+        <p className="text-gray-600 text-xs leading-relaxed line-clamp-4">
           ¡Estás a un paso de acceder a nuestras herramientas más poderosas! Con el plan Premium, tu asistente de IA evoluciona: se vuelve proactivo, más inteligente y profundamente personalizado. Aprenderá de los detalles de tu proyecto para entregarte alertas a medida, recomendaciones de optimización y oportunidades que ni siquiera sabías que existían.
         </p>
       </div>
     </div>
   </div>
+  </div>
 
-  {/* Carrusel de fondos aleatorios */}
+  {/* Carrusel de fondos aleatorios - Accesible con scroll */}
   {randomFondos.length > 0 && (
-    <div className="w-full max-w-none px-4 py-8 flex-shrink-0">
+    <div className="w-full max-w-none px-4 py-8">
       <div className="mx-auto" style={{ maxWidth: '1600px' }}>
         <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-center text-black">
           Fondos destacados

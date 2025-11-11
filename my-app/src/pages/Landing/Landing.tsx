@@ -39,15 +39,13 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <div className="flex-shrink-0 rounded-full bg-white ">
-        
-         
-            </div>
-            <div className="ml-3">
-              <a href="/" className="text-xl sm:text-2xl font-bold tracking-tight">
-                MatchaFunding
-              </a>
-            </div>
+            <a href="/" className="flex items-center">
+              <img 
+                src="/svgs/boton-home.svg" 
+                alt="MatchaFunding"
+                className="h-16 w-auto"
+              />
+            </a>
           </div>
 
           {/*

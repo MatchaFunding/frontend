@@ -166,12 +166,10 @@ const Login: React.FC = () => {
                     )}
                   </button>
                 </div>
-                {fieldErrors.password && (
-                  <p className="email-error">{fieldErrors.password}</p>
-                )}
-                <a href="#" className="forgot-password-link">
+                <p className="email-error">{fieldErrors.password || '\u00A0'}</p>
+                {/* <a href="#" className="forgot-password-link">
                   ¿Olvidaste tu contraseña?
-                </a>
+                </a> */}
               </div>
               <div className="form-group">
                 <button 

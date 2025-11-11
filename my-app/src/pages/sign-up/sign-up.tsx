@@ -425,7 +425,7 @@ const SignUp: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="step-form-main form-wrapper">
+          <div className={`step-form-main form-wrapper ${currentStep === 1 ? 'step-1' : currentStep === 3 ? 'step-3' : ''}`}>
             <div className="form-panel">
               {currentStep === 1 && (
                 <div>
@@ -440,36 +440,28 @@ const SignUp: React.FC = () => {
                       </label>
                       <input
                         id="Nombre" name="Nombre" type="text" value={formData.Nombre} onChange={(e) => handleInputChange('Nombre', e.target.value)} onBlur={(e) => validateField('Nombre', e.target.value)} className="form-input" placeholder="Ej: Juan" />
-                      {fieldErrors.Nombre && (
-                        <p className="email-error">{fieldErrors.Nombre}</p>
-                      )}
+                      <p className="email-error">{fieldErrors.Nombre || '\u00A0'}</p>
                     </div>
                     <div className="form-group">
                       <label htmlFor="Apellido" className="form-label">
                         Apellido
                       </label>
                       <input id="Apellido" name="Apellido" type="text" value={formData.Apellido} onChange={(e) => handleInputChange('Apellido', e.target.value)} onBlur={(e) => validateField('Apellido', e.target.value)} className="form-input" placeholder="Ej: Pérez" />
-                      {fieldErrors.Apellido && (
-                        <p className="email-error">{fieldErrors.Apellido}</p>
-                      )}
+                      <p className="email-error">{fieldErrors.Apellido || '\u00A0'}</p>
                     </div>
                     <div className="form-group">
                       <label htmlFor="FechaDeNacimiento" className="form-label">
                         Fecha de nacimiento
                       </label>
                       <input id="FechaDeNacimiento" name="FechaDeNacimiento" type="date" value={formData.FechaDeNacimiento} onChange={(e) => handleInputChange('FechaDeNacimiento', e.target.value)} onBlur={(e) => validateField('FechaDeNacimiento', e.target.value)} className="form-input" />
-                      {fieldErrors.FechaDeNacimiento && (
-                        <p className="email-error">{fieldErrors.FechaDeNacimiento}</p>
-                      )}
+                      <p className="email-error">{fieldErrors.FechaDeNacimiento || '\u00A0'}</p>
                     </div>
                     <div className="form-group">
                       <label htmlFor="RUT" className="form-label">
                         RUT
                       </label>
                       <input id="RUT" name="RUT" type="text" value={formData.RUT} onChange={(e) => handleInputChange('RUT', e.target.value)} onBlur={(e) => validateField('RUT', e.target.value)} placeholder="12.345.678-9" className="form-input" />
-                      {fieldErrors.RUT && (
-                        <p className="email-error">{fieldErrors.RUT}</p>
-                      )}
+                      <p className="email-error">{fieldErrors.RUT || '\u00A0'}</p>
                     </div>
                     <CustomDropdown field="Sexo" label="Sexo" options={dropdownOptions.Sexo} value={formData.Sexo} />
                   </form>
@@ -487,18 +479,14 @@ const SignUp: React.FC = () => {
                         Nombre de la empresa/organización
                       </label>
                       <input id="NombreCompania" name="NombreCompania" type="text" value={formData.NombreCompania} onChange={(e) => handleInputChange('NombreCompania', e.target.value)} onBlur={(e) => validateField('NombreCompania', e.target.value)} className="form-input" placeholder="Ingresa el nombre de tu organización" />
-                      {fieldErrors.NombreCompania && (
-                        <p className="email-error">{fieldErrors.NombreCompania}</p>
-                      )}
+                      <p className="email-error">{fieldErrors.NombreCompania || '\u00A0'}</p>
                     </div>
                     <div className="form-group">
                       <label htmlFor="CreacionCompania" className="form-label">
                         Fecha de creación
                       </label>
                       <input id="CreacionCompania" name="CreacionCompania" type="date" value={formData.CreacionCompania} onChange={(e) => handleInputChange('CreacionCompania', e.target.value)} onBlur={(e) => validateField('CreacionCompania', e.target.value)} className="form-input" />
-                      {fieldErrors.CreacionCompania && (
-                        <p className="email-error">{fieldErrors.CreacionCompania}</p>
-                      )}
+                      <p className="email-error">{fieldErrors.CreacionCompania || '\u00A0'}</p>
                     </div>
                     <CustomDropdown field="RegionCompania" label="Región de creación" options={dropdownOptions.regions} value={formData.RegionCompania} />
                     <div className="form-group">
@@ -515,18 +503,14 @@ const SignUp: React.FC = () => {
                         RUT de la empresa
                       </label>
                       <input id="RUTCompania" name="RUTCompania" type="text" value={formData.RUTCompania} onChange={(e) => handleInputChange('RUTCompania', e.target.value)} onBlur={(e) => validateField('RUTCompania', e.target.value)} placeholder="Ej: 76.123.456-7" className="form-input" />
-                      {fieldErrors.RUTCompania && (
-                        <p className="email-error">{fieldErrors.RUTCompania}</p>
-                      )}
+                      <p className="email-error">{fieldErrors.RUTCompania || '\u00A0'}</p>
                     </div>
                     <div className="form-group">
                       <label htmlFor="RUTRepresentanteCompania" className="form-label">
                         RUT del representante legal
                       </label>
                       <input id="RUTRepresentanteCompania" name="RUTRepresentanteCompania" type="text" value={formData.RUTRepresentanteCompania} onChange={(e) => handleInputChange('RUTRepresentanteCompania', e.target.value)} onBlur={(e) => validateField('RUTRepresentanteCompania', e.target.value)} placeholder="Ej: 12.345.678-9" className="form-input" />
-                      {fieldErrors.RUTRepresentanteCompania && (
-                        <p className="email-error">{fieldErrors.RUTRepresentanteCompania}</p>
-                      )}
+                      <p className="email-error">{fieldErrors.RUTRepresentanteCompania || '\u00A0'}</p>
                     </div>
                   </form>
                 </div>

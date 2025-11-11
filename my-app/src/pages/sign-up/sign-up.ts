@@ -131,46 +131,66 @@ export const getPrevStep = (currentStep: number): number => {
   return Math.max(currentStep - 1, 1);
 };
 
+// Función para formatear RUT con puntos y guión
+export const formatRut = (rut: string): string => {
+  let clean = rut.replace(/[^0-9kK]/g, '');
+  
+  if (clean.length === 0) return '';
+  
+  const dv = clean.slice(-1).toUpperCase();
+  const body = clean.slice(0, -1);
+  
+  if (body.length === 0) return dv;
+  
+  let formatted = '';
+  let count = 0;
+  
+  for (let i = body.length - 1; i >= 0; i--) {
+    if (count > 0 && count % 3 === 0) {
+      formatted = '.' + formatted;
+    }
+    formatted = body[i] + formatted;
+    count++;
+  }
+  
+  return formatted + '-' + dv;
+};
+
 // Funciones para validación de formulario
 export const isValidRut = (RUT: string): boolean => {
   if (!RUT)
     return false;
-  // Verificar que el RUT tenga el formato correcto con puntos
-  // Formato esperado: XX.XXX.XXX-X o X.XXX.XXX-X
-  const RUTFormatRegex = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
-  if (!RUTFormatRegex.test(RUT))
-    return false;
-  // Limpiar el RUT: eliminar puntos y guiones para validación
-  let cleanRut = RUT.replace(/[.-]/g, '');
-  // Debe tener entre 8 y 9 caracteres
+  let cleanRut = RUT.replace(/[.\-\s]/g, '');
+  
   if (cleanRut.length < 8 || cleanRut.length > 9) return false;
-  // Separar cuerpo y dígito verificador
+  
   const body = cleanRut.slice(0, -1);
   const dv = cleanRut.slice(-1).toUpperCase();
-  // El cuerpo debe ser solo números
+  
   if (!/^\d+$/.test(body))
     return false;
-  // El dígito verificador debe ser número o K
+  
   if (!/^[0-9K]$/.test(dv))
     return false;
-  // Calcular dígito verificador usando el algoritmo estándar chileno
+  
   let sum = 0;
   let multiplier = 2;
-  // Recorrer de derecha a izquierda
+  
   for (let i = body.length - 1; i >= 0; i--) {
     sum += parseInt(body[i]) * multiplier;
     multiplier = multiplier === 7 ? 2 : multiplier + 1;
   }
+  
   const remainder = sum % 11;
+  const expectedDv = 11 - remainder;
   let calculatedDv: string;
   
-  if (remainder < 2) {
-    calculatedDv = remainder.toString();
+  if (expectedDv === 11) {
+    calculatedDv = '0';
+  } else if (expectedDv === 10) {
+    calculatedDv = 'K';
   } else {
-    calculatedDv = (11 - remainder).toString();
-    if (calculatedDv === '10') {
-      calculatedDv = 'K';
-    }
+    calculatedDv = expectedDv.toString();
   }
 
   return dv === calculatedDv;
@@ -302,9 +322,10 @@ switch (field) {
     if (!value)
       return '';
     if (!isValidRut(value)) {
-      const RUTFormatRegex = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
-      if (!RUTFormatRegex.test(value)) {
-        return 'RUT debe tener formato XX.XXX.XXX-X (ej: 12.345.678-9)';
+      // Verificar si tiene la longitud mínima (sin contar formato)
+      const cleanValue = value.replace(/[.\-\s]/g, '');
+      if (cleanValue.length < 8) {
+        return 'RUT debe tener al menos 8 caracteres (ej: 12345678-9 o 12.345.678-9)';
       }
       return 'RUT inválido. El dígito verificador no coincide. Verifica tu RUT';
     }
@@ -428,14 +449,14 @@ export const validarCamposStep2 = (formData: FormData): { valid: boolean; errors
   if (!formData.RUTCompania?.trim()) {
     errors.push('El RUT de la empresa es requerido');
   }
-  else if (formData.RUTCompania.length < 8) {
-    errors.push('El RUT de la empresa debe tener formato XX.XXX.XXX-X (ej: 12.345.678-9)');
+  else if (formData.RUTCompania.replace(/[.\-\s]/g, '').length < 8) {
+    errors.push('El RUT de la empresa debe tener al menos 8 caracteres (ej: 12.345.678-9 o 12345678-9)');
   }
   if (!formData.RUTRepresentanteCompania?.trim()) {
     errors.push('El RUT del representante legal es requerido');
   }
-  else if (formData.RUTRepresentanteCompania.length < 8) {
-    errors.push('El RUT del representante debe tener formato XX.XXX.XXX-X (ej: 12.345.678-9)');
+  else if (formData.RUTRepresentanteCompania.replace(/[.\-\s]/g, '').length < 8) {
+    errors.push('El RUT del representante debe tener al menos 8 caracteres (ej: 12.345.678-9 o 12345678-9)');
   }
   return { valid: errors.length === 0, errors };
 };
@@ -496,6 +517,11 @@ export const validateFieldPure = (field: string, value: string): string => {
 
 // Función para manejar cambios en inputs (versión pura)
 export const handleInputChangePure = (formData: FormData, field: string, value: string): FormData => {
+  // Si el campo es un RUT, formatearlo automáticamente
+  if (field === 'RUT' || field === 'RUTCompania' || field === 'RUTRepresentanteCompania') {
+    const formattedValue = formatRut(value);
+    return { ...formData, [field]: formattedValue };
+  }
   return { ...formData, [field]: value };
 };
 

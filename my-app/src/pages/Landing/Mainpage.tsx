@@ -112,33 +112,30 @@ const MatchaHomePage: React.FC = () => {
   };
 
   return (
-  <div className="bg-slate-50 flex flex-col">
+  <div className="bg-slate-50 flex flex-col h-screen">
     <NavBar />
-   <main className="min-h-screen p-2 md:p-4 lg:p-8 w-full pt-20 sm:pt-24 md:pt-32 lg:pt-32 xl:pt-36 flex flex-col items-center md:justify-end overflow-hidden pb-8">
+   <main className="flex-1 p-2 md:p-4 lg:p-8 w-full pt-20 sm:pt-24 md:pt-32 lg:pt-32 xl:pt-36 flex flex-col items-center justify-end overflow-hidden pb-8 gap-4 md:gap-6">
   
   {/* Saludo personalizado */}
   {userName && (
-    <div className="w-full max-w-none px-4 mb-8 flex-shrink-0">
+    <div className="w-full max-w-none px-4 flex-shrink-0">
       <h2 className="text-2xl lg:text-3xl font-semibold text-black text-center">
         {userSexo === "Hombre" ? "Bienvenido" : userSexo === "Mujer" ? "Bienvenida" : "Bienvenide"} a MatchaFunding, {userName}
       </h2>
     </div>
   )}
 
-  {/* Banner con imagen - OCULTO EN MÓVIL */}
+  {/* Cuadrado blanco con SVG */}
   <div 
-    className="hidden md:flex w-full max-w-none px-4 mb-12 flex-1"
+    className="hidden md:flex w-full max-w-none px-4 flex-1 min-h-0"
   >
     <div
-      className="rounded-2xl shadow-lg w-full overflow-hidden"
-      style={{
-        minHeight: '100px',
-      }}
+      className="rounded-2xl shadow-lg w-full h-full bg-white flex items-center justify-center overflow-hidden"
     >
       <img 
-        src="/banner-matcha.jpg" 
+        src="/svgs/banner.svg" 
         alt="Banner MatchaFunding" 
-        className="w-full h-full object-cover"
+        className="w-full h-full object-contain p-4"
       />
     </div>
   </div>

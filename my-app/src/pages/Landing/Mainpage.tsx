@@ -117,7 +117,7 @@ const MatchaHomePage: React.FC = () => {
    <main className="flex-1 flex flex-col w-full pt-20 sm:pt-24 md:pt-32 lg:pt-32 xl:pt-36 overflow-y-auto">
   
   {/* Contenedor principal con flex-col y justify-between - Altura exacta de viewport */}
-  <div className="flex flex-col justify-between p-2 md:p-4 lg:p-8 h-[calc(100vh-5rem)] sm:h-[calc(100vh-6rem)] md:h-[calc(100vh-8rem)] lg:h-[calc(100vh-8rem)] xl:h-[calc(100vh-9rem)] flex-shrink-0">
+  <div className="flex flex-col justify-between p-2 md:p-4 lg:p-8 h-[calc(100vh-5rem)] sm:h-[calc(100vh-6rem)] md:h-[calc(100vh-8rem)] lg:h-[calc(100vh-8rem)] xl:h-[calc(100vh-9rem)] flex-shrink-0 gap-4 md:gap-6 lg:gap-8">
     
     {/* Sección superior: Saludo + Banner (ocupa el espacio restante) */}
     <div className="flex-1 flex flex-col gap-4 md:gap-6 min-h-0">
@@ -144,7 +144,7 @@ const MatchaHomePage: React.FC = () => {
     </div>
 
     {/* Botones principales - En la parte inferior sin scroll */}
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 w-full max-w-none px-4 py-2 flex-shrink-0">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 w-full max-w-none px-4 py-2 flex-shrink-0">
    <div
       onClick={() => navigate("/Matcha/Select-Idea")}
       className="bg-white rounded-2xl shadow-lg flex flex-col cursor-pointer hover:shadow-2xl transition-shadow w-full overflow-hidden"

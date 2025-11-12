@@ -114,7 +114,7 @@ const MatchaHomePage: React.FC = () => {
   return (
   <div className="bg-slate-50 flex flex-col min-h-screen">
     <NavBar />
-   <main className="flex-1 flex flex-col w-full pt-20 sm:pt-24 md:pt-32 lg:pt-32 xl:pt-36 overflow-y-auto">
+  <main className={`flex-1 flex flex-col w-full ${isMobile ? 'pt-0' : 'pt-20 sm:pt-24 md:pt-32 lg:pt-32 xl:pt-36'} overflow-y-auto`}>
   
   {/* Contenedor principal con flex-col y justify-between - Altura exacta de viewport */}
   <div className="flex flex-col justify-between p-2 md:p-4 lg:p-8 h-[calc(100vh-5rem)] sm:h-[calc(100vh-6rem)] md:h-[calc(100vh-8rem)] lg:h-[calc(100vh-8rem)] xl:h-[calc(100vh-9rem)] flex-shrink-0 gap-4 md:gap-6 lg:gap-8">
@@ -131,16 +131,18 @@ const MatchaHomePage: React.FC = () => {
         </div>
       )}
 
-      {/* Banner que ocupa el espacio restante */}
-      <div className="w-full max-w-none px-4 flex-1 min-h-0 flex">
-        <div className="rounded-2xl shadow-lg w-full h-full bg-white flex items-center justify-center overflow-hidden">
-          <img 
-            src="/svgs/banner.svg" 
-            alt="Banner MatchaFunding" 
-            className="w-full h-full object-contain p-2 md:p-4"
-          />
+      {/* Banner que ocupa el espacio restante (oculto en mobile) */}
+      {!isMobile && (
+        <div className="w-full max-w-none px-4 flex-1 min-h-0 flex">
+          <div className="rounded-2xl shadow-lg w-full h-full bg-white flex items-center justify-center overflow-hidden">
+            <img 
+              src="/svgs/banner.svg" 
+              alt="Banner MatchaFunding" 
+              className="w-full h-full object-contain p-2 md:p-4"
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
 
     {/* Botones principales - En la parte inferior sin scroll */}
@@ -209,8 +211,8 @@ const MatchaHomePage: React.FC = () => {
   </div>
   </div>
 
-  {/* Carrusel de fondos aleatorios - Accesible con scroll */}
-  {randomFondos.length > 0 && (
+  {/* Carrusel de fondos aleatorios - Accesible con scroll (oculto en mobile) */}
+  {!isMobile && randomFondos.length > 0 && (
     <div className="w-full max-w-none px-4 py-8">
       <div className="mx-auto" style={{ maxWidth: '1600px' }}>
         <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-center text-black">
